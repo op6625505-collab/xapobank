@@ -541,11 +541,7 @@
             body: JSON.stringify(userData),
           });
 
-          // Send API base to the worker when active
-        const sendApiBase = (worker) => {
-                try { worker.postMessage({ type: 'setApiBase', value: window.API_BASE || window.API_URL || 'https://xapoloan-1.onrender.com' }); } catch (e) {}
-        };
-
+        
           const result = await response.json();
 
           if (result.success) {
@@ -615,3 +611,4 @@
  </body>
 
 </html>
+
