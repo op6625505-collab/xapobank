@@ -1,6 +1,5 @@
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,30 +11,17 @@ app.get('/config.js', (req, res) => {
   res.send(`window.API_BASE = '${backendUrl}';`);
 });
 
-// Root path - serve dashboard.html
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dashboard.html'));
-});
-
 // Serve static files (HTML, CSS, JS, images, etc.)
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname)));
 
-// Fallback for any other routes - serve dashboard.html (SPA-like behavior)
-app.get('*', (req, res) => {
-  const filePath = path.join(__dirname, req.path);
-  // Check if the requested path is a file that exists
-  if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
-    res.sendFile(filePath);
-  } else {
-    // If not a file, serve dashboard.html
-    res.sendFile(path.join(__dirname, 'dashboard.html'));
-  }
-});
-
-// Error handling
-app.use((err, req, res, next) => {
-  console.error('Server error:', err);
-  res.status(500).send('Server error');
+// Fallback - serve dashboard.html for any not-found routes (SPA behavior)
+app.use((req, res) => {
+  res.sendFile(path.join(__dirname, 'dashboard.html'), (err) => {
+    if (err) {
+      console.error('Error sending file:', err);
+      res.status(404).send('File not found');
+    }
+  });
 });
 
 app.listen(PORT, '0.0.0.0', () => {
