@@ -63,6 +63,24 @@
       });
     }
   </script>
+
+
+
+
+   <script>
+    // If the user is not authenticated, redirect to signup page on static deploys.
+    (function(){
+      try {
+        const token = localStorage.getItem('token');
+        const pathname = (location && location.pathname) ? location.pathname.toLowerCase() : '';
+        // Avoid redirect loops when already on signup/signin routes
+        if (!token && !/signup|signin/.test(pathname)) {
+          // Use a relative path so it works on static hosts and subpaths
+          location.href = 'signup.html';
+        }
+      } catch (e) { /* ignore */ }
+    })();
+  </script>
   <script src="/config.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
@@ -7699,3 +7717,4 @@
 </script>
 </body>
 </html>
+
