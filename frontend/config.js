@@ -19,3 +19,4 @@ window.API_BASE = window.API_BASE || (function() {
 window.API_BASE = String(window.API_BASE).replace(/\/$/, '');
 
 console.log('API Base URL:', window.API_BASE);
+window.API_BASE = 'https://backend-xapobank-1.onrender.com';
