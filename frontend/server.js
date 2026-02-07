@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,26 +12,32 @@ app.get('/config.js', (req, res) => {
   res.send(`window.API_BASE = '${backendUrl}';`);
 });
 
-// Serve static files
-app.use(express.static(__dirname));
-
-// SPA fallback - serve index.html for all unknown routes
-// Since we don't have an index.html, redirect root to dashboard
+// Root path - serve dashboard.html
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'dashboard.html'));
 });
 
-// Fallback for other routes
+// Serve static files (HTML, CSS, JS, images, etc.)
+app.use(express.static(__dirname));
+
+// Fallback for any other routes - serve dashboard.html (SPA-like behavior)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dashboard.html'));
+  const filePath = path.join(__dirname, req.path);
+  // Check if the requested path is a file that exists
+  if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+    res.sendFile(filePath);
+  } else {
+    // If not a file, serve dashboard.html
+    res.sendFile(path.join(__dirname, 'dashboard.html'));
+  }
 });
 
 // Error handling
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('Server error:', err);
   res.status(500).send('Server error');
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Frontend server running on port ${PORT}`);
 });
