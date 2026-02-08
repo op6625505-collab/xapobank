@@ -2563,15 +2563,6 @@
             <div class="space-y-3">
               <button id="modal-deposit-funds" class="w-full p-4 rounded-lg text-left transition-all hover-lift flex items-start gap-3" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
                 <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center" style="background: rgba(255, 107, 53, 0.1);">
-
-        // Safe opener for Add Funds (always open)
-        function safeOpenAddFunds() {
-          try {
-            const btn = document.getElementById('add-funds-btn');
-            if (!btn) return;
-            btn.click();
-          } catch (e) { console.debug('safeOpenAddFunds failed', e); }
-        }
                   <svg width="24" height="24" fill="none" stroke="#ff6b35" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                   </svg>
@@ -3024,6 +3015,15 @@
 
         
       });
+    }
+
+    // Safe opener for Add Funds (always open)
+    function safeOpenAddFunds() {
+      try {
+        const btn = document.getElementById('add-funds-btn');
+        if (!btn) return;
+        btn.click();
+      } catch (e) { console.debug('safeOpenAddFunds failed', e); }
     }
 
     // Exchange button handler - Navigate to exchange page
