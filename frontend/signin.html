@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0a0a0a">
-  <title>XapoBank - Sign Up</title>
+  <title>XapoBank - Sign In</title>
   <script src="/config.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
@@ -57,26 +57,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: env(safe-area-inset-top, 16px) env(safe-area-inset-right, 8px) env(safe-area-inset-bottom, 16px) env(safe-area-inset-left, 8px);
+      padding: 2rem 1rem;
       box-sizing: border-box;
-    }
-
-    /* Make auth card fit the viewport and scroll internally on small screens */
-    .auth-card {
-      max-height: calc(100vh - 3rem);
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    /* Hide scrollbar on signup page while preserving scroll */
-    .auth-card {
-      scrollbar-width: none; /* Firefox */
-      -ms-overflow-style: none; /* IE 10+ */
-    }
-    .auth-card::-webkit-scrollbar {
-      width: 0px;
-      height: 0px;
-      background: transparent;
     }
 
     @media (max-width: 640px) {
@@ -91,11 +73,9 @@
     @media (max-width: 480px) {
       .auth-card {
         padding: 1rem;
-        max-height: calc(100vh - 1.5rem);
       }
       .logo-container { width: 80px; height: 80px; }
       .auth-card p { font-size: 0.75rem; }
-      .grid-cols-2 { grid-template-columns: 1fr !important; }
     }
 
     @media (min-width: 768px) and (max-width: 1024px) {
@@ -114,264 +94,17 @@
      <p class="text-gray-400 text-xs sm:text-sm whitespace-nowrap">Secure Bitcoin Banking</p>
     </div>
 
-    <!-- Sign Up Form -->
-    <form id="signup-form" class="space-y-3 sm:space-y-4">
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-     <div>
-       <label class="text-gray-400 text-xs sm:text-sm mb-1 sm:mb-2 block">First Name</label>
-       <input type="text" name="firstName" placeholder="First name" required class="form-input w-full px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">
-      </div>
-      <div>
-       <label class="text-gray-400 text-xs sm:text-sm mb-1 sm:mb-2 block">Last Name</label>
-       <input type="text" name="lastName" placeholder="Last name" required class="form-input w-full px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">
-      </div>
-     </div>
+    <!-- Sign In Form -->
+    <form id="signin-form" class="space-y-3 sm:space-y-4">
      <div>
       <label class="text-gray-400 text-xs sm:text-sm mb-1 sm:mb-2 block">Email Address</label>
       <input type="email" name="email" placeholder="Enter your email" required class="form-input w-full px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">
      </div>
-     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-      <div>
-       <label class="text-gray-400 text-xs sm:text-sm mb-1 sm:mb-2 block">Country</label>
-       <select name="country" required class="form-input w-full px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">
-        <option value="">Select your country</option>
-        <option value="AF">Afghanistan</option>
-        <option value="AL">Albania</option>
-        <option value="DZ">Algeria</option>
-        <option value="AS">American Samoa</option>
-        <option value="AD">Andorra</option>
-        <option value="AO">Angola</option>
-        <option value="AI">Anguilla</option>
-        <option value="AQ">Antarctica</option>
-        <option value="AG">Antigua and Barbuda</option>
-        <option value="AR">Argentina</option>
-        <option value="AM">Armenia</option>
-        <option value="AW">Aruba</option>
-        <option value="AU">Australia</option>
-        <option value="AT">Austria</option>
-        <option value="AZ">Azerbaijan</option>
-        <option value="BS">Bahamas</option>
-        <option value="BH">Bahrain</option>
-        <option value="BD">Bangladesh</option>
-        <option value="BB">Barbados</option>
-        <option value="BY">Belarus</option>
-        <option value="BE">Belgium</option>
-        <option value="BZ">Belize</option>
-        <option value="BJ">Benin</option>
-        <option value="BM">Bermuda</option>
-        <option value="BT">Bhutan</option>
-        <option value="BO">Bolivia</option>
-        <option value="BA">Bosnia and Herzegovina</option>
-        <option value="BW">Botswana</option>
-        <option value="BR">Brazil</option>
-        <option value="BN">Brunei</option>
-        <option value="BG">Bulgaria</option>
-        <option value="BF">Burkina Faso</option>
-        <option value="BI">Burundi</option>
-        <option value="KH">Cambodia</option>
-        <option value="CM">Cameroon</option>
-        <option value="CA">Canada</option>
-        <option value="CV">Cape Verde</option>
-        <option value="KY">Cayman Islands</option>
-        <option value="CF">Central African Republic</option>
-        <option value="TD">Chad</option>
-        <option value="CL">Chile</option>
-        <option value="CN">China</option>
-        <option value="CO">Colombia</option>
-        <option value="KM">Comoros</option>
-        <option value="CG">Congo</option>
-        <option value="CD">Congo, Democratic Republic</option>
-        <option value="CK">Cook Islands</option>
-        <option value="CR">Costa Rica</option>
-        <option value="CI">Côte d'Ivoire</option>
-        <option value="HR">Croatia</option>
-        <option value="CU">Cuba</option>
-        <option value="CW">Curaçao</option>
-        <option value="CY">Cyprus</option>
-        <option value="CZ">Czech Republic</option>
-        <option value="DK">Denmark</option>
-        <option value="DJ">Djibouti</option>
-        <option value="DM">Dominica</option>
-        <option value="DO">Dominican Republic</option>
-        <option value="EC">Ecuador</option>
-        <option value="EG">Egypt</option>
-        <option value="SV">El Salvador</option>
-        <option value="GQ">Equatorial Guinea</option>
-        <option value="ER">Eritrea</option>
-        <option value="EE">Estonia</option>
-        <option value="ET">Ethiopia</option>
-        <option value="FK">Falkland Islands</option>
-        <option value="FO">Faroe Islands</option>
-        <option value="FJ">Fiji</option>
-        <option value="FI">Finland</option>
-        <option value="FR">France</option>
-        <option value="GA">Gabon</option>
-        <option value="GM">Gambia</option>
-        <option value="GE">Georgia</option>
-        <option value="DE">Germany</option>
-        <option value="GH">Ghana</option>
-        <option value="GI">Gibraltar</option>
-        <option value="GR">Greece</option>
-        <option value="GL">Greenland</option>
-        <option value="GD">Grenada</option>
-        <option value="GU">Guam</option>
-        <option value="GT">Guatemala</option>
-        <option value="GG">Guernsey</option>
-        <option value="GN">Guinea</option>
-        <option value="GW">Guinea-Bissau</option>
-        <option value="GY">Guyana</option>
-        <option value="HT">Haiti</option>
-        <option value="HN">Honduras</option>
-        <option value="HK">Hong Kong</option>
-        <option value="HU">Hungary</option>
-        <option value="IS">Iceland</option>
-        <option value="IN">India</option>
-        <option value="ID">Indonesia</option>
-        <option value="IR">Iran</option>
-        <option value="IQ">Iraq</option>
-        <option value="IE">Ireland</option>
-        <option value="IM">Isle of Man</option>
-        <option value="IL">Israel</option>
-        <option value="IT">Italy</option>
-        <option value="JM">Jamaica</option>
-        <option value="JP">Japan</option>
-        <option value="JE">Jersey</option>
-        <option value="JO">Jordan</option>
-        <option value="KZ">Kazakhstan</option>
-        <option value="KE">Kenya</option>
-        <option value="KI">Kiribati</option>
-        <option value="KP">Korea, North</option>
-        <option value="KR">Korea, South</option>
-        <option value="KW">Kuwait</option>
-        <option value="KG">Kyrgyzstan</option>
-        <option value="LA">Laos</option>
-        <option value="LV">Latvia</option>
-        <option value="LB">Lebanon</option>
-        <option value="LS">Lesotho</option>
-        <option value="LR">Liberia</option>
-        <option value="LY">Libya</option>
-        <option value="LI">Liechtenstein</option>
-        <option value="LT">Lithuania</option>
-        <option value="LU">Luxembourg</option>
-        <option value="MO">Macau</option>
-        <option value="MK">Macedonia</option>
-        <option value="MG">Madagascar</option>
-        <option value="MW">Malawi</option>
-        <option value="MY">Malaysia</option>
-        <option value="MV">Maldives</option>
-        <option value="ML">Mali</option>
-        <option value="MT">Malta</option>
-        <option value="MH">Marshall Islands</option>
-        <option value="MR">Mauritania</option>
-        <option value="MU">Mauritius</option>
-        <option value="MX">Mexico</option>
-        <option value="FM">Micronesia</option>
-        <option value="MD">Moldova</option>
-        <option value="MC">Monaco</option>
-        <option value="MN">Mongolia</option>
-        <option value="ME">Montenegro</option>
-        <option value="MS">Montserrat</option>
-        <option value="MA">Morocco</option>
-        <option value="MZ">Mozambique</option>
-        <option value="MM">Myanmar</option>
-        <option value="NA">Namibia</option>
-        <option value="NR">Nauru</option>
-        <option value="NP">Nepal</option>
-        <option value="NL">Netherlands</option>
-        <option value="NC">New Caledonia</option>
-        <option value="NZ">New Zealand</option>
-        <option value="NI">Nicaragua</option>
-        <option value="NE">Niger</option>
-        <option value="NG">Nigeria</option>
-        <option value="NU">Niue</option>
-        <option value="NF">Norfolk Island</option>
-        <option value="MP">Northern Mariana Islands</option>
-        <option value="NO">Norway</option>
-        <option value="OM">Oman</option>
-        <option value="PK">Pakistan</option>
-        <option value="PW">Palau</option>
-        <option value="PS">Palestine</option>
-        <option value="PA">Panama</option>
-        <option value="PG">Papua New Guinea</option>
-        <option value="PY">Paraguay</option>
-        <option value="PE">Peru</option>
-        <option value="PH">Philippines</option>
-        <option value="PN">Pitcairn</option>
-        <option value="PL">Poland</option>
-        <option value="PT">Portugal</option>
-        <option value="PR">Puerto Rico</option>
-        <option value="QA">Qatar</option>
-        <option value="RO">Romania</option>
-        <option value="RU">Russia</option>
-        <option value="RW">Rwanda</option>
-        <option value="WS">Samoa</option>
-        <option value="SM">San Marino</option>
-        <option value="ST">São Tomé and Príncipe</option>
-        <option value="SA">Saudi Arabia</option>
-        <option value="SN">Senegal</option>
-        <option value="RS">Serbia</option>
-        <option value="SC">Seychelles</option>
-        <option value="SL">Sierra Leone</option>
-        <option value="SG">Singapore</option>
-        <option value="SX">Sint Maarten</option>
-        <option value="SK">Slovakia</option>
-        <option value="SI">Slovenia</option>
-        <option value="SB">Solomon Islands</option>
-        <option value="SO">Somalia</option>
-        <option value="ZA">South Africa</option>
-        <option value="SS">South Sudan</option>
-        <option value="ES">Spain</option>
-        <option value="LK">Sri Lanka</option>
-        <option value="SD">Sudan</option>
-        <option value="SR">Suriname</option>
-        <option value="SZ">Swaziland</option>
-        <option value="SE">Sweden</option>
-        <option value="CH">Switzerland</option>
-        <option value="SY">Syria</option>
-        <option value="TW">Taiwan</option>
-        <option value="TJ">Tajikistan</option>
-        <option value="TZ">Tanzania</option>
-        <option value="TH">Thailand</option>
-        <option value="TL">Timor-Leste</option>
-        <option value="TG">Togo</option>
-        <option value="TK">Tokelau</option>
-        <option value="TO">Tonga</option>
-        <option value="TT">Trinidad and Tobago</option>
-        <option value="TN">Tunisia</option>
-        <option value="TR">Turkey</option>
-        <option value="TM">Turkmenistan</option>
-        <option value="TC">Turks and Caicos Islands</option>
-        <option value="TV">Tuvalu</option>
-        <option value="UG">Uganda</option>
-        <option value="UA">Ukraine</option>
-        <option value="AE">United Arab Emirates</option>
-        <option value="GB">United Kingdom</option>
-        <option value="US">United States</option>
-        <option value="UY">Uruguay</option>
-        <option value="UZ">Uzbekistan</option>
-        <option value="VU">Vanuatu</option>
-        <option value="VA">Vatican City</option>
-        <option value="VE">Venezuela</option>
-        <option value="VN">Vietnam</option>
-        <option value="VG">Virgin Islands, British</option>
-        <option value="VI">Virgin Islands, U.S.</option>
-        <option value="WF">Wallis and Futuna</option>
-        <option value="EH">Western Sahara</option>
-        <option value="YE">Yemen</option>
-        <option value="ZM">Zambia</option>
-        <option value="ZW">Zimbabwe</option>
-       </select>
-      </div>
-      <div class="mt-2 sm:mt-0">
-       <label class="text-gray-400 text-sm mb-2 block">Phone Number</label>
-       <input type="tel" name="phone" placeholder="+1 (555) 123-4567" required class="form-input w-full px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">
-      </div>
-     </div>
      <div>
       <label class="text-gray-400 text-xs sm:text-sm mb-1 sm:mb-2 block">Password</label>
       <div class="relative">
-       <input type="password" name="password" placeholder="Create a password" required class="form-input w-full px-3 sm:px-4 py-2 sm:py-3 pr-10 text-xs sm:text-sm" id="signup-password">
-       <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-orange-500 transition-colors toggle-password" data-target="signup-password">
+       <input type="password" name="password" placeholder="Enter your password" required class="form-input w-full px-3 sm:px-4 py-2 sm:py-3 pr-10 text-xs sm:text-sm" id="signin-password">
+       <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-orange-500 transition-colors toggle-password" data-target="signin-password">
         <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="eye-open">
          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
@@ -382,29 +115,6 @@
        </button>
       </div>
      </div>
-     <div>
-      <label class="text-gray-400 text-xs sm:text-sm mb-1 sm:mb-2 block">Confirm Password</label>
-      <div class="relative">
-       <input type="password" name="confirmPassword" placeholder="Confirm your password" required class="form-input w-full px-3 sm:px-4 py-2 sm:py-3 pr-10 text-xs sm:text-sm" id="signup-confirm-password">
-       <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-orange-500 transition-colors toggle-password" data-target="signup-confirm-password">
-        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="eye-open">
-         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-        </svg>
-        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="eye-closed hidden">
-         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-        </svg>
-       </button>
-      </div>
-     </div>
-     <div class="flex items-start">
-      <input type="checkbox" class="mr-2 mt-1 accent-orange-500" required>
-      <span class="text-gray-400 text-xs sm:text-xs">I agree to the <a href="#" class="text-orange-500 hover:text-orange-400">Terms of Service</a> and <a href="#" class="text-orange-500 hover:text-orange-400">Privacy Policy</a></span>
-     </div>
-    <div>
-     <label class="text-gray-400 text-xs sm:text-sm mb-1 sm:mb-2 block">Promo Code (optional)</label>
-     <input type="text" name="promoCode" placeholder="Enter promo code" class="form-input w-full px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">
-    </div>
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
      <label class="flex items-center w-full sm:w-auto">
       <input type="checkbox" class="mr-2 accent-orange-500">
@@ -415,24 +125,24 @@
      </div>
     </div>
      <button type="submit" class="w-full py-2.5 sm:py-3 text-white font-bold text-xs sm:text-sm transition-all hover-lift rounded-full" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">
-      Create Account
+      Sign In
      </button>
     </form>
 
     <div class="text-center mt-4 sm:mt-6">
-     <p class="text-gray-400 text-xs sm:text-sm">Already have an account? <a href="signin.html" class="text-orange-500 hover:text-orange-400 transition-colors">Sign in</a></p>
+     <p class="text-gray-400 text-xs sm:text-sm">Don't have an account? <a href="signup.html" class="text-orange-500 hover:text-orange-400 transition-colors">Sign up</a></p>
     </div>
    </div>
   </div>
 
-  <!-- Sign Up Modal -->
-  <div id="signup-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+  <!-- Sign In Modal -->
+  <div id="signin-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
    <div class="bg-gray-800 rounded-lg p-6 max-w-sm w-full mx-4 text-center">
     <div id="modal-content">
      <!-- Loading state -->
      <div id="loading-state" class="hidden">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
-      <p class="text-white text-lg">Creating your account...</p>
+      <p class="text-white text-lg">Signing you in...</p>
      </div>
      <!-- Success state -->
      <div id="success-state" class="hidden">
@@ -441,9 +151,8 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
        </svg>
       </div>
-      <p class="text-white text-lg mb-2">Account created successfully!</p>
-      <p id="welcome-promo" class="text-gray-300 text-sm mb-2"></p>
-      <p class="text-gray-400 text-xs">You'll receive a 100% bonus on your first deposit when using this promo.</p>
+      <p class="text-white text-lg mb-4">Sign in successful!</p>
+      <p class="text-gray-300 text-sm">Redirecting to dashboard...</p>
      </div>
      <!-- Error state -->
      <div id="error-state" class="hidden">
@@ -452,7 +161,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
        </svg>
       </div>
-      <p class="text-white text-lg mb-2">Registration failed</p>
+      <p class="text-white text-lg mb-2">Sign in failed</p>
       <p id="error-message" class="text-gray-300 text-sm mb-4"></p>
       <button id="close-modal" class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors">Try Again</button>
      </div>
@@ -461,8 +170,8 @@
   </div>
 
   <script>
-    function initializeSignUp() {
-      const modal = document.getElementById('signup-modal');
+    function initializeSignIn() {
+      const modal = document.getElementById('signin-modal');
       const loadingState = document.getElementById('loading-state');
       const successState = document.getElementById('success-state');
       const errorState = document.getElementById('error-state');
@@ -492,13 +201,6 @@
         errorState.classList.add('hidden');
       }
 
-      function generatePromoCode() {
-        const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-        let s = 'XAPO-';
-        for (let i = 0; i < 8; i++) s += chars.charAt(Math.floor(Math.random() * chars.length));
-        return s;
-      }
-
       function showError(message) {
         loadingState.classList.add('hidden');
         successState.classList.add('hidden');
@@ -508,71 +210,46 @@
 
       closeModal.addEventListener('click', hideModal);
 
-      document.getElementById('signup-form').addEventListener('submit', async (e) => {
+      document.getElementById('signin-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
-
-        // Validate password confirmation
-        const password = formData.get('password');
-        const confirmPassword = formData.get('confirmPassword');
-
-        if (password !== confirmPassword) {
-          showModal();
-          showError('Passwords do not match');
-          return;
-        }
-
-        // Sign up API call
-        const promoInput = (formData.get('promoCode') || '').trim();
-        const promoToSend = promoInput || generatePromoCode();
-        const userData = {
-          name: `${formData.get('firstName')} ${formData.get('lastName')}`,
-          email: formData.get('email'),
-          password: password,
-          phone: formData.get('phone'),
-          country: formData.get('country'),
-          promoCode: promoToSend
-        };
+        const data = Object.fromEntries(formData);
 
         showModal();
         showLoading();
 
         try {
+          // Check if API_BASE is available
           if (typeof window.API_BASE === 'undefined') {
             throw new Error('API configuration not loaded');
           }
-
-          const response = await fetch(window.API_BASE + '/api/auth/register', {
+          
+          console.log('API_BASE:', window.API_BASE);
+          console.log('Login endpoint:', window.API_BASE + '/api/auth/login');
+          const response = await fetch(window.API_BASE + '/api/auth/login', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(userData),
+            body: JSON.stringify(data),
           });
 
           const result = await response.json();
 
           if (result.success) {
             localStorage.setItem('token', result.token);
-            // Ensure the user object contains our promoCode
-            const userObj = Object.assign({}, result.data || {}, { promoCode: userData.promoCode });
-            localStorage.setItem('user', JSON.stringify(userObj));
-            // Show success and promo in modal
-            try {
-              const promoEl = document.getElementById('welcome-promo');
-              if (promoEl) promoEl.textContent = `Promo code: ${userData.promoCode} — Welcome! Make a deposit to receive a 100% bonus.`;
-            } catch (e) {}
+            localStorage.setItem('user', JSON.stringify(result.data));
             showSuccess();
-            // After signup, redirect to dashboard
             setTimeout(() => {
               window.location.href = 'dashboard.html';
-            }, 1600);
+            }, 1500);
           } else {
-            showError(result.message || 'Registration failed');
+            showError(result.message || 'Login failed');
           }
         } catch (error) {
-          console.error('Error:', error);
-          showError('An error occurred. Please try again.');
+          console.error('Network error details:', error);
+          console.error('Error message:', error.message);
+          showError('Network error. Please try again.');
         }
       });
     }
@@ -603,7 +280,7 @@
     // Wait for config.js to load
     function waitForConfig() {
       if (typeof window.API_BASE !== 'undefined') {
-        initializeSignUp();
+        initializeSignIn();
         setupPasswordToggle();
       } else {
         setTimeout(waitForConfig, 100);
