@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0a0a0a">
   <title>XapoBank - Sign Up</title>
-  <script src="/frontend/config.js"></script>
+  <script src="/config.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
@@ -533,7 +533,7 @@
             throw new Error('API configuration not loaded');
           }
 
-          const response = await fetch(window.API_BASE + '/api/auth/register', {
+            const response = await fetch(window.API_BASE + '/api/auth/register', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -608,4 +608,5 @@
     }
   </script>
  </body>
+
 </html>
