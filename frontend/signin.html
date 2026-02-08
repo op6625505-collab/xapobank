@@ -78,13 +78,28 @@
       .auth-card p { font-size: 0.75rem; }
     }
 
+    .auth-card {
+      min-height: calc(100vh - 2rem);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* On small viewports, let wrapper align to top and let the card fill available height */
+    @media (max-width: 640px) {
+      .auth-card { min-height: calc(100vh - 1.5rem); }
+      .auth-wrapper { align-items: flex-start; padding-top: 0.5rem; padding-bottom: 0.5rem; }
+    }
+
     @media (min-width: 768px) and (max-width: 1024px) {
       .auth-card { max-width: 28rem; }
     }
   </style>
  </head>
  <body class="h-full w-full" style="background: #0a0a0a;">
-  <div class="min-h-screen flex items-center justify-center px-2 sm:px-4 py-4 sm:py-8">
+  <div class="min-h-screen flex items-center justify-center px-2 sm:px-4 py-4 sm:py-8 auth-wrapper">
    <div class="auth-card rounded-lg sm:rounded-xl md:rounded-2xl p-4 sm:p-6 md:p-8 w-full max-w-sm hover-lift" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
     <!-- Logo/Brand -->
     <div class="text-center mb-6 sm:mb-8">
@@ -95,7 +110,7 @@
     </div>
 
     <!-- Sign In Form -->
-    <form id="signin-form" class="space-y-3 sm:space-y-4">
+    <form id="signin-form" class="space-y-3 sm:space-y-4" style="display:flex; flex-direction:column; flex:1;">
      <div>
       <label class="text-gray-400 text-xs sm:text-sm mb-1 sm:mb-2 block">Email Address</label>
       <input type="email" name="email" placeholder="Enter your email" required class="form-input w-full px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">
@@ -122,7 +137,7 @@
       </label>
       <a href="reset-password.html" class="text-orange-500 hover:text-orange-400 text-xs sm:text-sm transition-colors">Forgot password?</a>
      </div>
-     <button type="submit" class="w-full py-2.5 sm:py-3 text-white font-bold text-xs sm:text-sm transition-all hover-lift rounded-full" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">
+    <button type="submit" class="w-full py-2.5 sm:py-3 text-white font-bold text-xs sm:text-sm transition-all hover-lift rounded-full mt-3" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">
       Sign In
      </button>
     </form>
