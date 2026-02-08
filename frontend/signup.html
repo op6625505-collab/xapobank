@@ -61,17 +61,14 @@
       box-sizing: border-box;
     }
 
-    /* Make auth card fill the viewport on mobile and scroll internally when needed */
+    /* Make auth card fit the viewport and scroll internally on small screens */
     .auth-card {
-      min-height: calc(100vh - 3rem);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
+      max-height: calc(100vh - 3rem);
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
     }
 
-    /* Hide scrollbar while preserving scroll */
+    /* Hide scrollbar on signup page while preserving scroll */
     .auth-card {
       scrollbar-width: none; /* Firefox */
       -ms-overflow-style: none; /* IE 10+ */
@@ -107,7 +104,7 @@
   </style>
  </head>
  <body class="h-full w-full" style="background: #0a0a0a;">
-  <div class="min-h-screen flex items-center justify-center px-2 sm:px-4 py-4 sm:py-8 auth-wrapper">
+  <div class="min-h-screen flex items-center justify-center px-2 sm:px-4 py-4 sm:py-8">
    <div class="auth-card rounded-lg sm:rounded-xl md:rounded-2xl p-4 sm:p-6 md:p-8 w-full max-w-sm hover-lift" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
     <!-- Logo/Brand -->
     <div class="text-center mb-6 sm:mb-8">
@@ -118,9 +115,9 @@
     </div>
 
     <!-- Sign Up Form -->
-    <form id="signup-form" class="space-y-3 sm:space-y-4" style="display:flex; flex-direction:column; flex:1;">
-     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-      <div>
+    <form id="signup-form" class="space-y-3 sm:space-y-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+     <div>
        <label class="text-gray-400 text-xs sm:text-sm mb-1 sm:mb-2 block">First Name</label>
        <input type="text" name="firstName" placeholder="First name" required class="form-input w-full px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">
       </div>
