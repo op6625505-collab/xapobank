@@ -4200,6 +4200,49 @@
     const applyMembershipPageBtn = document.getElementById('apply-membership-page-btn');
     if (applyMembershipPageBtn) {
       applyMembershipPageBtn.addEventListener('click', () => {
+        // Check if user already has active membership
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (user.isMember && user.membershipExpiresAt && new Date(user.membershipExpiresAt) > new Date()) {
+          const expiry = new Date(user.membershipExpiresAt);
+          const now = new Date();
+          const diffMs = expiry.getTime() - now.getTime();
+          const days = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+          
+          const modal = document.createElement('div');
+          modal.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4';
+          modal.style.background = 'rgba(0, 0, 0, 0.85)';
+          modal.innerHTML = `
+            <div class="rounded-2xl p-8 max-w-lg w-full mx-4" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
+              <div class="flex items-center justify-between mb-6">
+                <h3 class="text-white font-bold text-2xl">Membership Active</h3>
+                <button onclick="this.closest('.fixed').remove()" class="text-gray-400 hover:text-white">
+                  <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </button>
+              </div>
+              <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-4" style="background: rgba(34, 197, 94, 0.1);">
+                  <svg width="40" height="40" fill="none" stroke="#22c55e" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <h4 class="text-white font-bold text-2xl mb-2">Premium Member</h4>
+                <p class="text-gray-400 text-sm">Your membership is active and valid for ${days} more days.</p>
+              </div>
+              <div class="mb-6">
+                <div class="rounded-lg p-4" style="background: rgba(34, 197, 94, 0.05); border: 1px solid rgba(34, 197, 94, 0.1);">
+                  <p class="text-gray-300 text-sm"><strong>Expires on:</strong> ${expiry.toLocaleDateString()}</p>
+                  <p class="text-gray-300 text-sm mt-2">You can renew your membership after it expires.</p>
+                </div>
+              </div>
+              <button onclick="this.closest('.fixed').remove()" class="w-full py-3 text-white font-bold text-sm rounded-xl transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Close</button>
+            </div>
+          `;
+          document.body.appendChild(modal);
+          return;
+        }
+        
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4';
         modal.style.background = 'rgba(0, 0, 0, 0.85)';
@@ -5035,6 +5078,35 @@
             // Scroll to membership
             try { document.getElementById('membership-page')?.scrollIntoView({ behavior: 'smooth' }); } catch(e){}
           });
+          return;
+        }
+
+        // Check if user has an active unpaid loan
+        if (user.activeLoanId && user.activeLoanAmount && Number(user.activeLoanAmount) > 0) {
+          const dueDate = user.activeLoanDueDate ? new Date(user.activeLoanDueDate) : null;
+          const loanAmount = Number(user.activeLoanAmount || 0);
+          
+          const m = document.createElement('div');
+          m.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4';
+          m.style.background = 'rgba(0, 0, 0, 0.85)';
+          m.innerHTML = `
+            <div class="rounded-2xl p-6 max-w-md w-full mx-4 text-center" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
+              <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style="background: rgba(255, 107, 53, 0.1);">
+                <svg width="40" height="40" fill="none" stroke="#ff6b35" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <h3 class="text-white font-bold text-xl mb-3">Active Loan</h3>
+              <p class="text-gray-300 text-sm mb-4">You have an active loan with an outstanding balance of <strong>$${loanAmount.toFixed(2)}</strong>.</p>
+              <div class="rounded-lg p-3 mb-4" style="background: rgba(255, 107, 53, 0.05); border: 1px solid rgba(255, 107, 53, 0.1);">
+                <p class="text-gray-300 text-sm"><strong>Outstanding Amount:</strong> $${loanAmount.toFixed(2)}</p>
+                ${dueDate ? `<p class="text-gray-300 text-sm mt-2"><strong>Due Date:</strong> ${dueDate.toLocaleDateString()}</p>` : ''}
+                <p class="text-gray-400 text-xs mt-2">Please repay your current loan before borrowing again.</p>
+              </div>
+              <button onclick="this.closest('.fixed').remove();" class="w-full py-3 text-white font-bold text-sm rounded-lg transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">OK</button>
+            </div>
+          `;
+          document.body.appendChild(m);
           return;
         }
 
@@ -6832,6 +6904,26 @@
             listEl.appendChild(div);
           });
         }
+
+        // Disable membership button if user has active membership
+        try {
+          const membershipBtn = document.getElementById('apply-membership-page-btn');
+          if (membershipBtn) {
+            if (user.isMember && user.membershipExpiresAt && new Date(user.membershipExpiresAt) > new Date()) {
+              membershipBtn.disabled = true;
+              membershipBtn.textContent = 'Membership Active';
+              membershipBtn.style.opacity = '0.6';
+              membershipBtn.style.cursor = 'default';
+              membershipBtn.title = 'You already have an active membership';
+            } else {
+              membershipBtn.disabled = false;
+              membershipBtn.textContent = 'Apply Now';
+              membershipBtn.style.opacity = '1';
+              membershipBtn.style.cursor = 'pointer';
+              membershipBtn.title = '';
+            }
+          }
+        } catch (e) { console.debug('membership button state update failed', e); }
 
         // Render transactions
         renderTransactions();
