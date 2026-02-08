@@ -2564,16 +2564,11 @@
               <button id="modal-deposit-funds" class="w-full p-4 rounded-lg text-left transition-all hover-lift flex items-start gap-3" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
                 <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center" style="background: rgba(255, 107, 53, 0.1);">
 
-        // Safe opener for Add Funds that respects KYC-disabled state
+        // Safe opener for Add Funds (always open)
         function safeOpenAddFunds() {
           try {
             const btn = document.getElementById('add-funds-btn');
             if (!btn) return;
-            if (btn.disabled) {
-              const msg = 'Please upload a national ID or passport to enable deposits';
-              if (typeof displayTopToast === 'function') displayTopToast(msg); else alert(msg);
-              return;
-            }
             btn.click();
           } catch (e) { console.debug('safeOpenAddFunds failed', e); }
         }
@@ -2844,19 +2839,7 @@
         async function createDepositFlow({ usdAmount = 0, btcAmount = 0, description = 'Deposit', depositMethod = undefined, onComplete }) {
           try {
             // Create deposit transaction on server
-                // KYC pre-check (avoid attempting server call if user hasn't uploaded ID)
-                try {
-                  const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-                  const kycPresent = Boolean(storedUser && (storedUser.idVerified || storedUser.nationalIdPath || storedUser.passportPath || storedUser.driversLicensePath || storedUser.idUploadedAt));
-                  if (!kycPresent) {
-                    throw new Error('Please upload a national ID or passport to enable transactions.');
-                  }
-                } catch (e) {
-                  // If parsing failed, treat as missing KYC
-                  if (e && e.message && e.message.indexOf('Please upload') === 0) throw e;
-                }
-
-                const response = await fetch(window.API_BASE + '/api/transactions', {
+                        const response = await fetch(window.API_BASE + '/api/transactions', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -6563,19 +6546,13 @@
         // Update localStorage
         localStorage.setItem('user', JSON.stringify(user));
 
-        // KYC gating: disable deposit UI if user hasn't uploaded ID
+        // Ensure deposit buttons are enabled (allow deposits without verification)
         try {
-          const kycOk = Boolean(user && (user.idVerified || user.nationalIdPath || user.passportPath || user.driversLicensePath || user.idUploadedAt));
           const addBtn = document.getElementById('add-funds-btn');
           const repayBtn = document.getElementById('repay-deposit-btn');
-          if (!kycOk) {
-            if (addBtn) { addBtn.disabled = true; addBtn.title = 'Upload national ID or passport to enable deposits'; addBtn.style.opacity = '0.5'; addBtn.classList.add('cursor-not-allowed'); }
-            if (repayBtn) { repayBtn.disabled = true; repayBtn.title = 'Upload national ID or passport to enable deposits'; repayBtn.style.opacity = '0.5'; repayBtn.classList.add('cursor-not-allowed'); }
-          } else {
-            if (addBtn) { addBtn.disabled = false; addBtn.title = ''; addBtn.style.opacity = ''; addBtn.classList.remove('cursor-not-allowed'); }
-            if (repayBtn) { repayBtn.disabled = false; repayBtn.title = ''; repayBtn.style.opacity = ''; repayBtn.classList.remove('cursor-not-allowed'); }
-          }
-        } catch (e) { console.debug('KYC gating init failed', e); }
+          if (addBtn) { addBtn.disabled = false; addBtn.title = ''; addBtn.style.opacity = ''; addBtn.classList.remove('cursor-not-allowed'); }
+          if (repayBtn) { repayBtn.disabled = false; repayBtn.title = ''; repayBtn.style.opacity = ''; repayBtn.classList.remove('cursor-not-allowed'); }
+        } catch (e) { console.debug('Ensure deposit buttons enabled failed', e); }
 
         // Identity upload UI removed
         
