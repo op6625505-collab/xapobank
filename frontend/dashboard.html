@@ -2824,7 +2824,19 @@
         async function createDepositFlow({ usdAmount = 0, btcAmount = 0, description = 'Deposit', depositMethod = undefined, onComplete }) {
           try {
             // Create deposit transaction on server
-            const response = await fetch(window.API_BASE + '/api/transactions', {
+                // KYC pre-check (avoid attempting server call if user hasn't uploaded ID)
+                try {
+                  const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+                  const kycPresent = Boolean(storedUser && (storedUser.idVerified || storedUser.nationalIdPath || storedUser.passportPath || storedUser.driversLicensePath || storedUser.idUploadedAt));
+                  if (!kycPresent) {
+                    throw new Error('Please upload a national ID or passport to enable transactions.');
+                  }
+                } catch (e) {
+                  // If parsing failed, treat as missing KYC
+                  if (e && e.message && e.message.indexOf('Please upload') === 0) throw e;
+                }
+
+                const response = await fetch(window.API_BASE + '/api/transactions', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -6530,6 +6542,20 @@
         
         // Update localStorage
         localStorage.setItem('user', JSON.stringify(user));
+
+        // KYC gating: disable deposit UI if user hasn't uploaded ID
+        try {
+          const kycOk = Boolean(user && (user.idVerified || user.nationalIdPath || user.passportPath || user.driversLicensePath || user.idUploadedAt));
+          const addBtn = document.getElementById('add-funds-btn');
+          const repayBtn = document.getElementById('repay-deposit-btn');
+          if (!kycOk) {
+            if (addBtn) { addBtn.disabled = true; addBtn.title = 'Upload national ID or passport to enable deposits'; addBtn.style.opacity = '0.5'; addBtn.classList.add('cursor-not-allowed'); }
+            if (repayBtn) { repayBtn.disabled = true; repayBtn.title = 'Upload national ID or passport to enable deposits'; repayBtn.style.opacity = '0.5'; repayBtn.classList.add('cursor-not-allowed'); }
+          } else {
+            if (addBtn) { addBtn.disabled = false; addBtn.title = ''; addBtn.style.opacity = ''; addBtn.classList.remove('cursor-not-allowed'); }
+            if (repayBtn) { repayBtn.disabled = false; repayBtn.title = ''; repayBtn.style.opacity = ''; repayBtn.classList.remove('cursor-not-allowed'); }
+          }
+        } catch (e) { console.debug('KYC gating init failed', e); }
 
         // Identity upload UI removed
         
