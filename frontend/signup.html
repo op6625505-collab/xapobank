@@ -116,8 +116,8 @@
 
     <!-- Sign Up Form -->
     <form id="signup-form" class="space-y-3 sm:space-y-4">
-     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
-      <div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+     <div>
        <label class="text-gray-400 text-xs sm:text-sm mb-1 sm:mb-2 block">First Name</label>
        <input type="text" name="firstName" placeholder="First name" required class="form-input w-full px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">
       </div>
@@ -362,7 +362,7 @@
         <option value="ZW">Zimbabwe</option>
        </select>
       </div>
-      <div>
+      <div class="mt-2 sm:mt-0">
        <label class="text-gray-400 text-sm mb-2 block">Phone Number</label>
        <input type="tel" name="phone" placeholder="+1 (555) 123-4567" required class="form-input w-full px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">
       </div>
@@ -533,7 +533,7 @@
             throw new Error('API configuration not loaded');
           }
 
-            const response = await fetch(window.API_BASE + '/api/auth/register', {
+          const response = await fetch(window.API_BASE + '/api/auth/register', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -608,5 +608,4 @@
     }
   </script>
  </body>
-
 </html>
