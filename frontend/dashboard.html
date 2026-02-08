@@ -2824,7 +2824,7 @@
         async function createDepositFlow({ usdAmount = 0, btcAmount = 0, description = 'Deposit', depositMethod = undefined, onComplete }) {
           try {
             // Create deposit transaction on server
-            const response = await fetch('/api/transactions', {
+            const response = await fetch(window.API_BASE + '/api/transactions', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -3265,7 +3265,7 @@
         }
         
         console.debug('Loading transactions from API...');
-        const response = await fetch('/api/transactions', {
+        const response = await fetch(window.API_BASE + '/api/transactions', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         console.debug('API Response status:', response.status);
@@ -3824,7 +3824,7 @@
           `;
 
           // Call API to withdraw collateral (amount is in USD)
-          fetch('/api/transactions/withdraw/collateral', {
+          fetch(window.API_BASE + '/api/transactions/withdraw/collateral', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -4061,7 +4061,7 @@
 
         try {
           // Create savings deposit transaction
-          const response = await fetch('/api/transactions', {
+          const response = await fetch(window.API_BASE + '/api/transactions', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -4313,7 +4313,7 @@
               confirmBtn.disabled = true;
               confirmBtn.textContent = 'Confirming...';
               try {
-                const resp = await fetch('/api/transactions', {
+                const resp = await fetch(window.API_BASE + '/api/transactions', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
                   body: JSON.stringify({ type: 'membership', amount: 1000, description: 'Premium Membership Fee', status: 'completed', internalPayment: true })
@@ -4352,7 +4352,7 @@
                     let gotMember = false;
                     for (let i = 0; i < 6; i++) {
                       try {
-                        const meResp = await fetch('/api/auth/me', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
+                        const meResp = await fetch(window.API_BASE + '/api/auth/me', { headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } });
                         const meJson = await meResp.json().catch(() => ({}));
                         if (meJson && meJson.success && meJson.data) {
                           localStorage.setItem('user', JSON.stringify(meJson.data));
@@ -5921,7 +5921,7 @@
           };
 
           try {
-            const response = await fetch('/api/auth/me', {
+            const response = await fetch(window.API_BASE + '/api/auth/me', {
               method: 'PATCH',
               headers: {
                 'Content-Type': 'application/json',
@@ -7048,7 +7048,7 @@
             const fetchAndUpdate = async (attempt = 1) => {
               try {
                 console.debug('Fetching /api/auth/me attempt', attempt);
-                const r = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } });
+                const r = await fetch(window.API_BASE + '/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } });
                 console.debug('/api/auth/me response status', r.status);
                 const j = await r.json();
                 console.debug('/api/auth/me payload', j && j.data ? { savingsBalanceUSD: j.data.savingsBalanceUSD, btcBalance: j.data.btcBalance } : j);
