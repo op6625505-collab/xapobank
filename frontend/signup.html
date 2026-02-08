@@ -2,7 +2,7 @@
 <html lang="en" class="h-full">
  <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0, user-scalable=yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0a0a0a">
@@ -111,7 +111,7 @@
      <div class="logo-container w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-3 sm:mb-4 flex items-center justify-center">
       <img src="xapo_logo.svg" alt="Xapo Logo" class="w-full h-full object-contain">
      </div>
-     <p class="text-gray-400 text-xs sm:text-sm">Secure Bitcoin Banking</p>
+     <p class="text-gray-400 text-xs sm:text-sm whitespace-nowrap">Secure Bitcoin Banking</p>
     </div>
 
     <!-- Sign Up Form -->
@@ -404,6 +404,15 @@
     <div>
      <label class="text-gray-400 text-xs sm:text-sm mb-1 sm:mb-2 block">Promo Code (optional)</label>
      <input type="text" name="promoCode" placeholder="Enter promo code" class="form-input w-full px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">
+    </div>
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0">
+     <label class="flex items-center w-full sm:w-auto">
+      <input type="checkbox" class="mr-2 accent-orange-500">
+      <span class="text-gray-400 text-xs sm:text-sm">Remember me</span>
+     </label>
+     <div class="w-full sm:w-auto text-left sm:text-right mt-2 sm:mt-0">
+      <a href="reset-password.html" class="text-orange-500 hover:text-orange-400 text-xs sm:text-sm transition-colors">Forgot password?</a>
+     </div>
     </div>
      <button type="submit" class="w-full py-2.5 sm:py-3 text-white font-bold text-xs sm:text-sm transition-all hover-lift rounded-full" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">
       Create Account
