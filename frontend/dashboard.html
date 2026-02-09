@@ -2576,6 +2576,21 @@
                 </svg>
               </button>
 
+              <button id="modal-transfer-to-collateral" class="w-full p-4 rounded-lg text-left transition-all hover-lift flex items-start gap-3" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
+                <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center" style="background: rgba(255, 107, 53, 0.06);">
+                  <svg width="24" height="24" fill="none" stroke="#ff6b35" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12h10M12 7v10"></path>
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <p class="text-white font-semibold text-base mb-1">Transfer to Collateral</p>
+                  <p class="text-gray-400 text-xs leading-relaxed">Move funds from your main savings balance into collateral</p>
+                </div>
+                <svg width="20" height="20" fill="none" stroke="#666666" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+              </button>
+
               <button id="modal-add-collateral" class="w-full p-4 rounded-lg text-left transition-all hover-lift flex items-start gap-3" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
                 <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center" style="background: rgba(255, 107, 53, 0.1);">
                   <svg width="24" height="24" fill="none" stroke="#ff6b35" viewBox="0 0 24 24">
@@ -3029,6 +3044,89 @@
         btn.click();
       } catch (e) { console.debug('safeOpenAddFunds failed', e); }
     }
+
+    // Transfer from main savings to collateral (UI + optimistic update)
+    document.body.addEventListener('click', async (evt) => {
+      const btn = evt.target.closest('#modal-transfer-to-collateral');
+      if (!btn) return;
+      try {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const savingsUSD = Number(user.savingsBalanceUSD || 0);
+        const collateralUSD = Number(user.collateralBalanceUSD || 0);
+        const btcPrice = (typeof cryptoPrices !== 'undefined' && cryptoPrices.BTC) ? cryptoPrices.BTC : 42000;
+
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto';
+        modal.style.background = 'rgba(0,0,0,0.85)';
+        modal.innerHTML = `
+          <div class="rounded-2xl p-6 max-w-md w-full mx-4 my-8" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
+            <h3 class="text-white font-bold text-xl mb-3">Transfer to Collateral</h3>
+            <p class="text-gray-400 text-sm mb-3">Move funds from your main balance into collateral for your active loan.</p>
+            <div class="rounded-lg p-4 mb-3" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
+              <p class="text-gray-400 text-xs">Available in Savings</p>
+              <p class="text-white font-bold text-lg">${formatUsd(savingsUSD)}</p>
+            </div>
+            <div class="mb-3">
+              <label class="text-gray-400 text-xs mb-2 block">Amount (USD)</label>
+              <input id="transfer-collateral-usd" type="number" min="0" step="0.01" max="${savingsUSD}" placeholder="0.00" class="w-full px-4 py-3 rounded-lg text-white text-base outline-none transition-all" style="background: #0f0f0f; border: 1px solid #2a2a2a;" />
+              <p id="transfer-collateral-btc" class="text-gray-400 text-xs mt-2">≈ 0.00000000 BTC</p>
+            </div>
+            <div class="flex gap-3">
+              <button id="transfer-cancel-btn" class="flex-1 py-3 text-gray-300 font-bold text-sm rounded-lg" style="background: #0f0f0f; border: 1px solid #2a2a2a;">Cancel</button>
+              <button id="transfer-confirm-btn" class="flex-1 py-3 text-white font-bold text-sm rounded-lg" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Transfer</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+
+        const usdInput = modal.querySelector('#transfer-collateral-usd');
+        const btcDisplay = modal.querySelector('#transfer-collateral-btc');
+        const cancelBtn = modal.querySelector('#transfer-cancel-btn');
+        const confirmBtn = modal.querySelector('#transfer-confirm-btn');
+
+        function updateBtcDisplay() {
+          const usd = Number(usdInput.value || 0);
+          const btc = usd > 0 ? (usd / btcPrice) : 0;
+          btcDisplay.textContent = `≈ ${isFinite(btc) ? btc.toFixed(8) : '0.00000000'} BTC`;
+        }
+
+        usdInput.addEventListener('input', updateBtcDisplay);
+
+        cancelBtn.addEventListener('click', () => modal.remove());
+
+        confirmBtn.addEventListener('click', async () => {
+          const usd = Number(usdInput.value || 0);
+          if (!usd || usd <= 0) { alert('Enter a valid amount'); return; }
+          if (usd > savingsUSD) { alert('Amount exceeds available savings'); return; }
+
+          // Optimistic local update
+          try {
+            const stored = JSON.parse(localStorage.getItem('user') || '{}');
+            stored.savingsBalanceUSD = Number((Number(stored.savingsBalanceUSD || 0) - usd).toFixed(2));
+            const btcAmount = usd / btcPrice;
+            stored.collateralBalanceUSD = Number((Number(stored.collateralBalanceUSD || 0) + usd).toFixed(2));
+            stored.collateralBalanceBTC = Number((Number(stored.collateralBalanceBTC || 0) + btcAmount).toFixed(8));
+            localStorage.setItem('user', JSON.stringify(stored));
+            populateUserInfo();
+            // Attempt server-side record (best-effort)
+            try {
+              await fetch(window.API_BASE + '/api/transactions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                body: JSON.stringify({ type: 'internal', action: 'transfer_to_collateral', amount: Number(usd), btcAmount, description: 'Internal transfer to collateral', status: 'completed' })
+              });
+            } catch (e) { console.debug('Server transfer-to-collateral failed', e); }
+
+            // Close modal and notify
+            modal.remove();
+            if (typeof displayTopToast === 'function') displayTopToast('Transferred to collateral (pending server confirmation)');
+          } catch (e) {
+            console.error('Transfer to collateral failed', e);
+            alert('Transfer failed, please try again');
+          }
+        });
+      } catch (e) { console.debug('transfer-to-collateral handler error', e); }
+    });
 
     // Exchange button handler - Navigate to exchange page
     const exchangeBtn = document.getElementById('exchange-btn');
@@ -6648,6 +6746,25 @@
         
         // Update membership status
         updateMembershipStatus(user.isMember);
+
+        // Enable/disable Transfer to Collateral button based on available savings
+        try {
+          const transferBtn = document.getElementById('modal-transfer-to-collateral');
+          const available = Number(user.savingsBalanceUSD || 0);
+          if (transferBtn) {
+            if (available <= 0) {
+              transferBtn.disabled = true;
+              transferBtn.classList.add('cursor-not-allowed');
+              transferBtn.style.opacity = '0.5';
+              transferBtn.title = 'No available funds in savings to transfer';
+            } else {
+              transferBtn.disabled = false;
+              transferBtn.classList.remove('cursor-not-allowed');
+              transferBtn.style.opacity = '';
+              transferBtn.title = '';
+            }
+          }
+        } catch (e) { console.debug('Update transfer-to-collateral button failed', e); }
 
         // Update profile membership display and countdown
         try {
