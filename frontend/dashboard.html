@@ -3113,30 +3113,48 @@
           if (!usd || usd <= 0) { alert('Enter a valid amount'); return; }
           if (usd > maxUSD) { alert('Amount exceeds available BTC balance'); return; }
 
-          // Optimistic local update
-            try {
+          try {
+            // Disable button to prevent double-click
+            confirmBtn.disabled = true;
+            confirmBtn.style.opacity = '0.5';
+
+            // Optimistic local update
             const stored = JSON.parse(localStorage.getItem('user') || '{}');
             const btcAmount = usd / btcPrice;
-            // Update the unified `btcBalance` field (used throughout the UI)
             stored.btcBalance = Number((Number(stored.btcBalance || 0) - btcAmount).toFixed(8));
             stored.collateralBalanceUSD = Number((Number(stored.collateralBalanceUSD || 0) + usd).toFixed(2));
             stored.collateralBalanceBTC = Number((Number(stored.collateralBalanceBTC || 0) + btcAmount).toFixed(8));
             localStorage.setItem('user', JSON.stringify(stored));
-            populateUserInfo();
-            // Attempt server-side record (best-effort)
+            
+            // Close modal immediately
+            modal.remove();
+            if (typeof displayTopToast === 'function') displayTopToast('Transferring to collateral...');
+
+            // Send to server with await
             try {
-              await fetch(window.API_BASE + '/api/transactions', {
+              const response = await fetch(window.API_BASE + '/api/transactions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
                 body: JSON.stringify({ type: 'internal', action: 'transfer_to_collateral', amount: Number(usd), btcAmount, description: 'Internal transfer to collateral', status: 'completed' })
               });
-            } catch (e) { console.debug('Server transfer-to-collateral failed', e); }
-
-            // Close modal and notify
-            modal.remove();
-            if (typeof displayTopToast === 'function') displayTopToast('Transferred to collateral (pending server confirmation)');
+              const result = await response.json();
+              if (result.isOk) {
+                // Server processed successfully, now fetch authoritative data to refresh UI
+                await populateUserInfo();
+                if (typeof displayTopToast === 'function') displayTopToast('Transfer to collateral completed!');
+              } else {
+                console.error('Transfer failed on server:', result.error);
+                if (typeof displayTopToast === 'function') displayTopToast('Transfer failed, please try again');
+              }
+            } catch (e) {
+              console.error('Server transfer-to-collateral request failed', e);
+              if (typeof displayTopToast === 'function') displayTopToast('Transfer pending server confirmation');
+              // Still refresh UI in case server processed it asynchronously
+              setTimeout(() => populateUserInfo(), 2000);
+            }
           } catch (e) {
             console.error('Transfer to collateral failed', e);
+            if (typeof displayTopToast === 'function') displayTopToast('Transfer failed, please try again');
             alert('Transfer failed, please try again');
           }
         });
@@ -6822,16 +6840,18 @@
         // Update membership status
         updateMembershipStatus(user.isMember);
 
-        // Enable/disable Transfer to Collateral button based on available savings
+        // Enable/disable Transfer to Collateral button based on available BTC balance
         try {
           const transferBtn = document.getElementById('modal-transfer-to-collateral');
-          const available = Number(user.savingsBalanceUSD || 0);
+          // Check if user has available balance (same logic as the modal: prefer btcBalance, else derive from savingsBalanceUSD)
+          const btcFromServer = (typeof user.btcBalance !== 'undefined' && user.btcBalance !== null) ? Number(user.btcBalance) : null;
+          const availableBTC = (btcFromServer !== null) ? btcFromServer : (Number(user.savingsBalanceUSD || 0) / (cryptoPrices.BTC || 42000));
           if (transferBtn) {
-            if (available <= 0) {
+            if (availableBTC <= 0 || !isFinite(availableBTC)) {
               transferBtn.disabled = true;
               transferBtn.classList.add('cursor-not-allowed');
               transferBtn.style.opacity = '0.5';
-              transferBtn.title = 'No available funds in savings to transfer';
+              transferBtn.title = 'No available BTC balance to transfer';
             } else {
               transferBtn.disabled = false;
               transferBtn.classList.remove('cursor-not-allowed');
