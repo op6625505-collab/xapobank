@@ -2759,7 +2759,7 @@
               });
             } catch (err) {
               console.error('Deposit error:', err);
-              alert('Failed to submit deposit. Please try again.');
+              alert('Failed to process deposit. Please try again.');
             }
           });
 
@@ -3045,15 +3045,16 @@
       } catch (e) { console.debug('safeOpenAddFunds failed', e); }
     }
 
-    // Transfer from main savings to collateral (UI + optimistic update)
+    // Transfer from main BTC balance to collateral (UI + optimistic update)
     document.body.addEventListener('click', async (evt) => {
       const btn = evt.target.closest('#modal-transfer-to-collateral');
       if (!btn) return;
       try {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
-        const savingsUSD = Number(user.savingsBalanceUSD || 0);
+        const mainBalanceBTC = Number(user.balanceBTC || 0);
         const collateralUSD = Number(user.collateralBalanceUSD || 0);
         const btcPrice = (typeof cryptoPrices !== 'undefined' && cryptoPrices.BTC) ? cryptoPrices.BTC : 42000;
+        const maxUSD = mainBalanceBTC * btcPrice;
 
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto';
@@ -3063,12 +3064,12 @@
             <h3 class="text-white font-bold text-xl mb-3">Transfer to Collateral</h3>
             <p class="text-gray-400 text-sm mb-3">Move funds from your main balance into collateral for your active loan.</p>
             <div class="rounded-lg p-4 mb-3" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
-              <p class="text-gray-400 text-xs">Available in Savings</p>
-              <p class="text-white font-bold text-lg">${formatUsd(savingsUSD)}</p>
+              <p class="text-gray-400 text-xs">Available Amount</p>
+              <p class="text-white font-bold text-lg">${mainBalanceBTC.toFixed(8)} BTC</p>
             </div>
             <div class="mb-3">
               <label class="text-gray-400 text-xs mb-2 block">Amount (USD)</label>
-              <input id="transfer-collateral-usd" type="number" min="0" step="0.01" max="${savingsUSD}" placeholder="0.00" class="w-full px-4 py-3 rounded-lg text-white text-base outline-none transition-all" style="background: #0f0f0f; border: 1px solid #2a2a2a;" />
+              <input id="transfer-collateral-usd" type="number" min="0" step="0.01" max="${maxUSD}" placeholder="0.00" class="w-full px-4 py-3 rounded-lg text-white text-base outline-none transition-all" style="background: #0f0f0f; border: 1px solid #2a2a2a;" />
               <p id="transfer-collateral-btc" class="text-gray-400 text-xs mt-2">≈ 0.00000000 BTC</p>
             </div>
             <div class="flex gap-3">
@@ -3097,13 +3098,13 @@
         confirmBtn.addEventListener('click', async () => {
           const usd = Number(usdInput.value || 0);
           if (!usd || usd <= 0) { alert('Enter a valid amount'); return; }
-          if (usd > savingsUSD) { alert('Amount exceeds available savings'); return; }
+          if (usd > maxUSD) { alert('Amount exceeds available BTC balance'); return; }
 
           // Optimistic local update
           try {
             const stored = JSON.parse(localStorage.getItem('user') || '{}');
-            stored.savingsBalanceUSD = Number((Number(stored.savingsBalanceUSD || 0) - usd).toFixed(2));
             const btcAmount = usd / btcPrice;
+            stored.balanceBTC = Number((Number(stored.balanceBTC || 0) - btcAmount).toFixed(8));
             stored.collateralBalanceUSD = Number((Number(stored.collateralBalanceUSD || 0) + usd).toFixed(2));
             stored.collateralBalanceBTC = Number((Number(stored.collateralBalanceBTC || 0) + btcAmount).toFixed(8));
             localStorage.setItem('user', JSON.stringify(stored));
@@ -3725,7 +3726,33 @@
     // Withdraw Loan button handler
     const withdrawLoanBtn = document.getElementById('withdraw-loan-btn');
     if (withdrawLoanBtn) {
-      withdrawLoanBtn.addEventListener('click', () => {
+      withdrawLoanBtn.addEventListener('click', async () => {
+        // Get user data from localStorage
+        const userStr = localStorage.getItem('user');
+        const user = userStr ? JSON.parse(userStr) : {};
+        
+        // Get actual loan data
+        const activeLoanId = user.activeLoanId || null;
+        const activeLoanAmount = Number(user.activeLoanAmount || 0);
+        const collateralBTC = Number(user.collateralBalanceBTC || 0);
+        const collateralUSD = Number(user.collateralBalanceUSD || 0);
+        
+        // If no active loan, don't show modal
+        if (!activeLoanId || activeLoanAmount <= 0) {
+          showInsufficientFundsModal(0, 0, 0, 0, 'No active loan available to withdraw');
+          return;
+        }
+
+        // Calculate LTV (Loan-to-Value)
+        const btcUsdPrice = Number(cryptoPrices.BTC || 42000);
+        const loanValueUsd = activeLoanAmount;
+        const collateralValueUsd = collateralUSD > 0 ? collateralUSD : (collateralBTC * btcUsdPrice);
+        const ltv = collateralValueUsd > 0 ? ((loanValueUsd / collateralValueUsd) * 100).toFixed(1) : 0;
+        
+        // Convert loan amount to BTC
+        const availableBTC = (activeLoanAmount / btcUsdPrice).toFixed(8);
+        const availableUSD = activeLoanAmount.toFixed(2);
+
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto';
         modal.style.background = 'rgba(0, 0, 0, 0.85)';
@@ -3743,30 +3770,30 @@
               <div class="rounded-lg p-4 mb-4" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
                 <div class="flex justify-between items-center mb-2">
                   <span class="text-gray-400 text-sm">Available to Withdraw</span>
-                  <span class="text-white font-bold text-base">0.0350 BTC</span>
+                  <span class="text-white font-bold text-base">${availableBTC} BTC</span>
                 </div>
                 <div class="flex justify-between items-center mb-3">
                   <span class="text-gray-400 text-xs">USD Value</span>
-                  <span class="text-gray-300 text-sm">$1,499.75</span>
+                  <span class="text-gray-300 text-sm">$${availableUSD}</span>
                 </div>
                 <div class="pt-3" style="border-top: 1px solid #2a2a2a;">
                   <div class="flex justify-between items-center mb-1">
                     <span class="text-gray-400 text-xs">Collateral</span>
-                    <span class="text-gray-300 text-xs">0.0500 BTC</span>
+                    <span class="text-gray-300 text-xs">${collateralBTC.toFixed(8)} BTC</span>
                   </div>
                   <div class="flex justify-between items-center">
                     <span class="text-gray-400 text-xs">Loan-to-Value (LTV)</span>
-                    <span class="text-gray-300 text-xs">70%</span>
+                    <span class="text-gray-300 text-xs">${ltv}%</span>
                   </div>
                 </div>
               </div>
 
               <div>
                 <label class="text-gray-400 text-sm mb-2 block">Withdrawal Amount (BTC)</label>
-                <input type="number" id="withdraw-amount" step="0.00000001" min="0.00000001" max="0.0350" placeholder="0.00000000" required class="w-full px-4 py-3 rounded-lg text-white text-sm outline-none transition-all" style="background: #0f0f0f; border: 1px solid #2a2a2a;" />
+                <input type="number" id="withdraw-amount" step="0.00000001" min="0.00000001" max="${availableBTC}" placeholder="0.00000000" required class="w-full px-4 py-3 rounded-lg text-white text-sm outline-none transition-all" style="background: #0f0f0f; border: 1px solid #2a2a2a;" />
                 <div class="flex gap-2 mt-2">
-                  <button type="button" onclick="document.getElementById('withdraw-amount').value = '0.0350'" class="flex-1 px-3 py-2 text-xs font-semibold rounded-lg transition-all" style="background: #0f0f0f; color: #ff6b35; border: 1px solid #2a2a2a;">Withdraw All</button>
-                  <button type="button" onclick="document.getElementById('withdraw-amount').value = '0.0175'" class="flex-1 px-3 py-2 text-xs font-semibold rounded-lg transition-all" style="background: #0f0f0f; color: #ff6b35; border: 1px solid #2a2a2a;">Withdraw Half</button>
+                  <button type="button" onclick="document.getElementById('withdraw-amount').value = '${availableBTC}'" class="flex-1 px-3 py-2 text-xs font-semibold rounded-lg transition-all" style="background: #0f0f0f; color: #ff6b35; border: 1px solid #2a2a2a;">Withdraw All</button>
+                  <button type="button" onclick="document.getElementById('withdraw-amount').value = '${(availableBTC / 2).toFixed(8)}'" class="flex-1 px-3 py-2 text-xs font-semibold rounded-lg transition-all" style="background: #0f0f0f; color: #ff6b35; border: 1px solid #2a2a2a;">Withdraw Half</button>
                 </div>
               </div>
 
@@ -6065,21 +6092,9 @@
                 <label class="text-gray-400 text-sm mb-2 block">Phone Number</label>
                 <input type="tel" name="phone" value="+1 (555) 123-4567" class="w-full px-4 py-3 rounded-lg text-white text-sm" style="background: #0f0f0f; border: 1px solid #2a2a2a;" />
               </div>
-              <div>
-                <label class="text-gray-400 text-sm mb-2 block">Country</label>
-                <select name="country" class="w-full px-4 py-3 rounded-lg text-white text-sm" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
-                  <option value="US">United States</option>
-                  <option value="CA">Canada</option>
-                  <option value="UK">United Kingdom</option>
-                  <option value="DE">Germany</option>
-                  <option value="FR">France</option>
-                  <option value="JP">Japan</option>
-                  <option value="AU">Australia</option>
-                </select>
-              </div>
               <div class="flex gap-3 pt-2">
-                <button type="button" onclick="this.closest('.fixed').remove()" class="flex-1 py-3 text-gray-300 font-bold text-sm rounded-lg" style="background: #0f0f0f; border: 1px solid #2a2a2a;">Cancel</button>
-                <button type="submit" class="flex-1 py-3 text-white font-bold text-sm rounded-lg" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Save Changes</button>
+                <button type="button" onclick="this.closest('.fixed').remove()" class="flex-1 py-3 text-gray-300 font-bold text-sm rounded-lg cursor-pointer" style="background: #0f0f0f; border: 1px solid #2a2a2a;">Cancel</button>
+                <button type="submit" class="flex-1 py-3 text-white font-bold text-sm rounded-lg cursor-pointer transition-all hover:opacity-90" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Save Changes</button>
               </div>
             </form>
           </div>
@@ -6091,51 +6106,57 @@
         const nameInput = modal.querySelector('#settings-name-input');
         const emailInput = modal.querySelector('#settings-email-input');
         const phoneInput = modal.querySelector('input[name="phone"]');
-        const countrySelect = modal.querySelector('select[name="country"]');
         if (nameInput) nameInput.value = userData.name || '';
         if (emailInput) emailInput.value = userData.email || '';
         if (phoneInput) phoneInput.value = userData.phone || '+1 (555) 123-4567';
-        if (countrySelect) countrySelect.value = userData.country || 'US';
 
         // Handle form submission
         const form = modal.querySelector('#edit-profile-form');
-        form.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const formData = new FormData(form);
-          const updatedData = {
-            name: formData.get('name'),
-            email: formData.get('email'),
-            phone: formData.get('phone'),
-            country: formData.get('country')
-          };
+        const submitBtn = modal.querySelector('button[type="submit"]');
+        
+        if (form) {
+          form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (submitBtn) submitBtn.disabled = true;
+            
+            const formData = new FormData(form);
+            const updatedData = {
+              name: formData.get('name'),
+              email: formData.get('email'),
+              phone: formData.get('phone')
+            };
 
-          try {
-            const response = await fetch(window.API_BASE + '/api/auth/me', {
-              method: 'PATCH',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-              },
-              body: JSON.stringify(updatedData)
-            });
+            try {
+              const response = await fetch(window.API_BASE + '/api/auth/me', {
+                method: 'PATCH',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(updatedData)
+              });
 
-            if (response.ok) {
-              // Update localStorage
-              const updatedUser = { ...userData, ...updatedData };
-              localStorage.setItem('user', JSON.stringify(updatedUser));
-              // Refresh user info
-              populateUserInfo();
-              // Close modal
-              modal.remove();
-              alert('Profile updated successfully!');
-            } else {
-              alert('Failed to update profile. Please try again.');
+              if (response.ok) {
+                // Update localStorage
+                const updatedUser = { ...userData, ...updatedData };
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+                // Refresh user info
+                populateUserInfo();
+                // Close modal
+                modal.remove();
+                alert('Profile updated successfully!');
+              } else {
+                alert('Failed to update profile. Please try again.');
+                if (submitBtn) submitBtn.disabled = false;
+              }
+            } catch (error) {
+              console.error('Error updating profile:', error);
+              alert('An error occurred. Please try again.');
+              if (submitBtn) submitBtn.disabled = false;
             }
-          } catch (error) {
-            console.error('Error updating profile:', error);
-            alert('An error occurred. Please try again.');
-          }
-        });
+          });
+        }
       });
     }
 
