@@ -2115,23 +2115,44 @@
       SGD: 1.34
     };
 
-    /* Live BTC price updater */
+    /* Live BTC price updater with WebSocket for real-time updates */
+    let btcPriceFetchInProgress = false;
+    let btcPriceUpdateTimeoutId = null;
+    
     async function fetchLiveBtcPrice() {
+      // Prevent concurrent requests
+      if (btcPriceFetchInProgress) return;
+      btcPriceFetchInProgress = true;
+      
       try {
-        // Use Binance API - much faster and more reliable than CoinGecko
+        // Use Binance API with timeout - much faster and more reliable than CoinGecko
         // Binance has no rate limiting on free tier and instant response times
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
         const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT', {
           method: 'GET',
-          headers: { 'Accept': 'application/json' }
+          headers: { 'Accept': 'application/json' },
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
+        
         if (!res.ok) return;
         const data = await res.json();
         if (data && data.price) {
-          cryptoPrices.BTC = Number(data.price);
-          updateBtcUsdDisplays();
-          // Ensure active savings value updates immediately with latest price
-          try { updateActiveSavingsValue(); } catch(e) {}
-          console.debug('Live BTC price updated', { price: Number(data.price) });
+          const newPrice = Number(data.price);
+          const oldPrice = cryptoPrices.BTC;
+          
+          // Only update if price has changed (reduces unnecessary DOM updates)
+          if (newPrice !== oldPrice) {
+            cryptoPrices.BTC = newPrice;
+            updateBtcUsdDisplays();
+            // Ensure active savings value updates immediately with latest price
+            try { updateActiveSavingsValue(); } catch(e) {}
+            // Refresh all transaction displays with new USD values
+            try { refreshTransactionDisplays(); } catch(e) {}
+            console.debug('Live BTC price updated', { oldPrice, newPrice });
+          }
 
           // Update the visible price display
           const priceDisplay = document.getElementById('btc-price-display');
@@ -2139,21 +2160,70 @@
           const usdEquivalent = document.getElementById('usd-equivalent-display');
 
           if (priceDisplay) {
-            priceDisplay.textContent = 'BTC: $' + Number(data.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            priceDisplay.textContent = 'BTC: $' + newPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
           }
           if (updateTime) {
             const now = new Date();
             updateTime.textContent = 'Updated: ' + now.toLocaleTimeString();
           }
 
-          // Calculate and update USD equivalent
+          // Calculate and update USD equivalent immediately
           if (usdEquivalent) {
             const btcBalance = parseFloat(document.querySelector('h2.balance-value')?.textContent || 0);
-            const usdValue = btcBalance * Number(data.price);
+            const usdValue = btcBalance * newPrice;
             usdEquivalent.textContent = '$' + usdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
           }
         }
-      } catch (e) { console.error('BTC price fetch error', e); }
+      } catch (e) { 
+        console.error('BTC price fetch error', e); 
+      } finally {
+        btcPriceFetchInProgress = false;
+        // Schedule next update (faster interval - 3 seconds)
+        clearTimeout(btcPriceUpdateTimeoutId);
+        btcPriceUpdateTimeoutId = setTimeout(fetchLiveBtcPrice, 3000);
+      }
+    }
+    
+    // Try to connect to WebSocket for real-time updates if available
+    function initBtcPriceWebSocket() {
+      try {
+        const wsUrl = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+        const ws = new WebSocket(wsUrl + window.location.host + '/ws/btc-price');
+        
+        ws.onmessage = (event) => {
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg.price) {
+              const newPrice = Number(msg.price);
+              cryptoPrices.BTC = newPrice;
+              updateBtcUsdDisplays();
+              try { updateActiveSavingsValue(); } catch(e) {}
+              // Refresh all transaction displays with new USD values
+              try { refreshTransactionDisplays(); } catch(e) {}
+              console.debug('WebSocket BTC price update', { price: newPrice });
+              
+              // Update display
+              const priceDisplay = document.getElementById('btc-price-display');
+              if (priceDisplay) {
+                priceDisplay.textContent = 'BTC: $' + newPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+              }
+            }
+          } catch (e) {
+            console.error('WebSocket message parse error', e);
+          }
+        };
+        
+        ws.onerror = () => {
+          console.debug('WebSocket error, falling back to polling');
+        };
+        
+        ws.onclose = () => {
+          console.debug('WebSocket closed, restarting in 5s');
+          setTimeout(initBtcPriceWebSocket, 5000);
+        };
+      } catch (e) {
+        console.debug('WebSocket not available, using polling only');
+      }
     }
 
     function formatUsd(n) { if (!n || !isFinite(n)) return '$0.00'; return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2}).format(n); }
@@ -2202,9 +2272,11 @@
       }
     }
 
-    // initial fetch + polling (10 seconds - Binance is fast enough)
+    // Initial fetch immediately + faster polling (3 seconds) + WebSocket for real-time
     fetchLiveBtcPrice();
-    setInterval(fetchLiveBtcPrice, 10000);
+    // Try WebSocket first for real-time updates
+    setTimeout(initBtcPriceWebSocket, 500);
+    // Keep polling as fallback with faster interval (3000ms instead of 10000ms)
 
     // Update active savings current value based on latest price
     function updateActiveSavingsValue() {
@@ -2259,14 +2331,27 @@
 
         // Lightweight collateral refresh
         updateCollateralDisplay(user.collateralBalanceUSD || 0, user.collateralBalanceBTC || 0);
+        
+        // Update active loan display
+        updateActiveLoanDisplay(user);
       } catch (e) {
         // non-fatal - do not spam console
       }
     }
 
+    // Helper function to ensure collateral display is always in sync with localStorage
+    function ensureCollateralDisplaySync() {
+      try {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        updateCollateralDisplay(user.collateralBalanceUSD || 0, user.collateralBalanceBTC || 0);
+      } catch (e) { /* silent */ }
+    }
+
     // Run once immediately and then every second for live feel
     refreshBalancesEverySecond();
     setInterval(refreshBalancesEverySecond, 1000);
+    // Also ensure collateral display is synced every 2 seconds for extra safety
+    setInterval(ensureCollateralDisplaySync, 2000);
 
     // update send value on input
     document.addEventListener('DOMContentLoaded', ()=>{
@@ -2344,6 +2429,15 @@
 
         const fromValueUSD = amount * cryptoPrices[fromCurrency];
         const toAmount = fromValueUSD / cryptoPrices[toCurrency];
+
+        // Ensure user is shown the loans page before displaying confirmation modal
+        try {
+          hideAllPages();
+          const loansPageEl = document.getElementById('loans-page');
+          if (loansPageEl) loansPageEl.classList.remove('hidden');
+          try { setActiveNavButton('loans-btn'); } catch(e) {}
+          try { loansPageEl?.scrollIntoView({ behavior: 'smooth' }); } catch(e) {}
+        } catch (e) { console.debug('Failed to navigate to loans page', e); }
 
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4';
@@ -3051,7 +3145,11 @@
       if (!btn) return;
       try {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
-        const mainBalanceBTC = Number(user.balanceBTC || 0);
+        // Derive main BTC balance consistently with the header refresh logic:
+        // prefer explicit `btcBalance`, otherwise derive from `savingsBalanceUSD` using current BTC price
+        const mainBalanceBTC = (typeof user.btcBalance !== 'undefined' && user.btcBalance !== null)
+          ? Number(user.btcBalance)
+          : (Number(user.savingsBalanceUSD || 0) / ((typeof cryptoPrices !== 'undefined' && cryptoPrices.BTC) ? cryptoPrices.BTC : 42000));
         const collateralUSD = Number(user.collateralBalanceUSD || 0);
         const btcPrice = (typeof cryptoPrices !== 'undefined' && cryptoPrices.BTC) ? cryptoPrices.BTC : 42000;
         const maxUSD = mainBalanceBTC * btcPrice;
@@ -3100,29 +3198,98 @@
           if (!usd || usd <= 0) { alert('Enter a valid amount'); return; }
           if (usd > maxUSD) { alert('Amount exceeds available BTC balance'); return; }
 
-          // Optimistic local update
           try {
+            console.log('Transfer initiated - USD:', usd, 'BTC:', (usd / btcPrice));
+            // Disable button to prevent double-click
+            confirmBtn.disabled = true;
+            confirmBtn.style.opacity = '0.5';
+
+            // Optimistic local update
             const stored = JSON.parse(localStorage.getItem('user') || '{}');
             const btcAmount = usd / btcPrice;
-            stored.balanceBTC = Number((Number(stored.balanceBTC || 0) - btcAmount).toFixed(8));
+            console.log('Before optimistic update - BTC Balance:', stored.btcBalance, 'Collateral BTC:', stored.collateralBalanceBTC);
+            stored.btcBalance = Number((Number(stored.btcBalance || 0) - btcAmount).toFixed(8));
             stored.collateralBalanceUSD = Number((Number(stored.collateralBalanceUSD || 0) + usd).toFixed(2));
             stored.collateralBalanceBTC = Number((Number(stored.collateralBalanceBTC || 0) + btcAmount).toFixed(8));
             localStorage.setItem('user', JSON.stringify(stored));
-            populateUserInfo();
-            // Attempt server-side record (best-effort)
+            console.log('After optimistic update - BTC Balance:', stored.btcBalance, 'Collateral BTC:', stored.collateralBalanceBTC);
+            populateUserInfo(); // Update UI immediately with optimistic values
+            
+            // Close modal immediately
+            modal.remove();
+            if (typeof displayTopToast === 'function') displayTopToast('Transferring to collateral...');
+
+            // Send to server and wait for processing
+            let serverSuccess = false;
             try {
-              await fetch(window.API_BASE + '/api/transactions', {
+              console.log('Sending transfer request to server');
+              const response = await fetch(window.API_BASE + '/api/transactions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
                 body: JSON.stringify({ type: 'internal', action: 'transfer_to_collateral', amount: Number(usd), btcAmount, description: 'Internal transfer to collateral', status: 'completed' })
               });
-            } catch (e) { console.debug('Server transfer-to-collateral failed', e); }
+              const result = await response.json();
+              if (result.isOk) {
+                serverSuccess = true;
+                console.log('Transfer submitted to server successfully, transaction ID:', result.data && result.data._id);
+              } else {
+                console.error('Transfer failed on server:', result.error);
+              }
+            } catch (e) {
+              console.error('Server transfer-to-collateral request failed', e);
+            }
 
-            // Close modal and notify
-            modal.remove();
-            if (typeof displayTopToast === 'function') displayTopToast('Transferred to collateral (pending server confirmation)');
+            // Wait 1.5 seconds for server to process and emit socket event, then refresh authoritative data
+            console.log('Waiting for server processing...');
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            try {
+              // Fetch fresh user data from server
+              console.log('Fetching fresh user data from server');
+              const authResponse = await fetch(window.API_BASE + '/api/auth/me', {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+              });
+              const authResult = await authResponse.json();
+              if (authResult.success && authResult.data) {
+                const freshUser = authResult.data;
+                console.log('Fresh user data received - BTC:', freshUser.btcBalance, 'Collateral BTC:', freshUser.collateralBalanceBTC);
+                localStorage.setItem('user', JSON.stringify(freshUser));
+                
+                // Force update of all related UI
+                populateUserInfo();
+                
+                // Explicitly refresh collateral display
+                updateCollateralDisplay(freshUser.collateralBalanceUSD || 0, freshUser.collateralBalanceBTC || 0);
+                
+                // Update transfer button status
+                const transferBtn = document.getElementById('modal-transfer-to-collateral');
+                if (transferBtn) {
+                  const availableBTC = (typeof freshUser.btcBalance !== 'undefined' && freshUser.btcBalance !== null)
+                    ? Number(freshUser.btcBalance)
+                    : (Number(freshUser.savingsBalanceUSD || 0) / (cryptoPrices.BTC || 42000));
+                  if (availableBTC <= 0 || !isFinite(availableBTC)) {
+                    transferBtn.disabled = true;
+                    transferBtn.classList.add('cursor-not-allowed');
+                    transferBtn.style.opacity = '0.5';
+                  } else {
+                    transferBtn.disabled = false;
+                    transferBtn.classList.remove('cursor-not-allowed');
+                    transferBtn.style.opacity = '';
+                  }
+                }
+                
+                if (typeof displayTopToast === 'function') displayTopToast('Transfer to collateral completed!');
+              } else {
+                console.warn('Could not fetch fresh user data');
+                if (typeof displayTopToast === 'function') displayTopToast('Transfer submitted but could not verify - please refresh');
+              }
+            } catch (e) {
+              console.error('Failed to fetch fresh user data after transfer', e);
+              if (typeof displayTopToast === 'function') displayTopToast('Transfer submitted but please refresh to verify');
+            }
           } catch (e) {
             console.error('Transfer to collateral failed', e);
+            if (typeof displayTopToast === 'function') displayTopToast('Transfer failed, please try again');
             alert('Transfer failed, please try again');
           }
         });
@@ -3479,9 +3646,18 @@
         return;
       }
       
+      // Get current BTC price for recalculation
+      const currentBtcPrice = cryptoPrices.BTC || 42000;
+      
       // Render transactions
       transactionContainer.innerHTML = filteredTransactions.map(tx => {
-        const amount = tx.amount || 0;
+        let displayUsdAmount = tx.amount || 0;
+        
+        // For deposits: recalculate USD using current BTC price if we have collateralBTC
+        if ((tx.type || '').toLowerCase() === 'deposit' && tx.collateralBTC) {
+          displayUsdAmount = Number(tx.collateralBTC) * currentBtcPrice;
+        }
+        
         const type = (tx.type || '').toLowerCase();
         const status = tx.status || 'pending';
         const date = new Date(tx.timestamp || tx.createdAt || Date.now()).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
@@ -3524,12 +3700,22 @@
               </div>
             </div>
             <div class="text-right w-24">
-              <p class="font-semibold text-sm" style="color: ${color};">${symbol}$${amount.toFixed(2)}</p>
+              <p class="font-semibold text-sm" style="color: ${color};">${symbol}$${displayUsdAmount.toFixed(2)}</p>
               <p class="text-gray-400 text-xs">${tx.collateralBTC ? (tx.collateralBTC.toFixed(4) + ' BTC') : ''}</p>
             </div>
           </div>
         `;
       }).join('');
+    }
+    
+    // Refresh transaction displays when BTC price updates
+    function refreshTransactionDisplays() {
+      try {
+        renderTransactions(currentFilter || 'all');
+        console.debug('Transaction displays refreshed with updated BTC price');
+      } catch(e) {
+        console.debug('Error refreshing transaction displays:', e);
+      }
     }
 
     // Setup transaction filter button handlers
@@ -4632,6 +4818,43 @@
     const viewSavingsDetailsBtn = document.getElementById('view-savings-details-btn');
     if (viewSavingsDetailsBtn) {
       viewSavingsDetailsBtn.addEventListener('click', () => {
+        // Get active savings from localStorage
+        const activeSavingsObj = JSON.parse(localStorage.getItem('activeSavings') || '{}');
+        const amount = Number(activeSavingsObj.amount || 0);
+        const apy = Number(activeSavingsObj.apy || 0);
+        const term = Number(activeSavingsObj.term || 0);
+        const startDateStr = activeSavingsObj.startDate;
+        const maturityDateStr = activeSavingsObj.maturityDate;
+        
+        // Parse dates
+        const startDate = startDateStr ? new Date(startDateStr) : new Date();
+        const maturityDate = maturityDateStr ? new Date(maturityDateStr) : new Date();
+        
+        // Calculate days elapsed
+        const now = new Date();
+        const elapsedMs = now - startDate;
+        const daysElapsed = Math.max(0, Math.floor(elapsedMs / (1000 * 60 * 60 * 24)));
+        
+        // Calculate interest earned based on actual days elapsed
+        const daysInYear = 365;
+        const dailyRate = apy / 100 / daysInYear;
+        const interestEarned = amount * dailyRate * daysElapsed;
+        
+        // Calculate total at maturity
+        const totalInterest = amount * (apy / 100 / daysInYear) * term;
+        const totalAtMaturity = amount + totalInterest;
+        
+        // Format dates
+        const startDateFormatted = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const maturityDateFormatted = maturityDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const planType = term === 30 ? '30-Day' : term === 60 ? '60-Day' : term === 90 ? '90-Day' : term === 180 ? '180-Day' : `${term}-Day`;
+        
+        // Get BTC price for USD conversion
+        const btcPrice = Number(cryptoPrices.BTC || 42000);
+        const currentValueUsd = amount * btcPrice;
+        const interestEarnedUsd = interestEarned * btcPrice;
+        const totalAtMaturityUsd = totalAtMaturity * btcPrice;
+        
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4';
         modal.style.background = 'rgba(0, 0, 0, 0.85)';
@@ -4649,38 +4872,38 @@
             <div class="rounded-lg p-5 mb-4" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
               <div class="flex justify-between items-center mb-3 pb-3" style="border-bottom: 1px solid #2a2a2a;">
                 <span class="text-gray-400 text-sm">Plan Type</span>
-                <span class="text-white font-semibold text-sm">180-Day Fixed</span>
+                <span class="text-white font-semibold text-sm">${planType} Fixed</span>
               </div>
               <div class="flex justify-between items-center mb-3 pb-3" style="border-bottom: 1px solid #2a2a2a;">
                 <span class="text-gray-400 text-sm">Initial Deposit</span>
-                <span class="text-white font-semibold text-sm">0.0000 BTC</span>
+                <span class="text-white font-semibold text-sm">${amount.toFixed(8)} BTC</span>
               </div>
               <div class="flex justify-between items-center mb-3 pb-3" style="border-bottom: 1px solid #2a2a2a;">
                 <span class="text-gray-400 text-sm">Interest Rate</span>
-                <span class="font-semibold text-sm" style="color: #ff6b35;">0.0% APY</span>
+                <span class="font-semibold text-sm" style="color: #ff6b35;">${apy.toFixed(2)}% APY</span>
               </div>
               <div class="flex justify-between items-center mb-3 pb-3" style="border-bottom: 1px solid #2a2a2a;">
                 <span class="text-gray-400 text-sm">Days Elapsed</span>
-                <span class="text-white font-semibold text-sm">133 of 180</span>
+                <span class="text-white font-semibold text-sm">${daysElapsed} of ${term}</span>
               </div>
               <div class="flex justify-between items-center mb-3 pb-3" style="border-bottom: 1px solid #2a2a2a;">
                 <span class="text-gray-400 text-sm">Interest Earned</span>
-                <span class="font-semibold text-sm" style="color: #ff6b35;">0.0095 BTC</span>
+                <span class="font-semibold text-sm" style="color: #ff6b35;">${interestEarned.toFixed(8)} BTC</span>
               </div>
               <div class="flex justify-between items-center mb-3 pb-3" style="border-bottom: 1px solid #2a2a2a;">
                 <span class="text-gray-400 text-sm">Start Date</span>
-                <span class="text-white font-semibold text-sm">Aug 15, 2024</span>
+                <span class="text-white font-semibold text-sm">${startDateFormatted}</span>
               </div>
               <div class="flex justify-between items-center">
                 <span class="text-gray-400 text-sm">Maturity Date</span>
-                <span class="text-white font-semibold text-sm">Feb 11, 2025</span>
+                <span class="text-white font-semibold text-sm">${maturityDateFormatted}</span>
               </div>
             </div>
 
             <div class="rounded-lg p-4 mb-6 text-center" style="background: rgba(255, 107, 53, 0.05); border: 1px solid rgba(255, 107, 53, 0.2);">
               <p class="text-gray-400 text-xs mb-2">Total at Maturity</p>
-              <p id="active-total-maturity-btc" class="text-white font-bold text-2xl mb-1">0.0000 BTC</p>
-              <p id="active-total-maturity-usd" class="text-gray-300 text-sm">$0.00 USD</p>
+              <p class="text-white font-bold text-2xl mb-1">${totalAtMaturity.toFixed(8)} BTC</p>
+              <p class="text-gray-300 text-sm">$${totalAtMaturityUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD</p>
             </div> 
 
             <button onclick="this.closest('.fixed').remove()" class="w-full py-3 text-white font-bold text-sm rounded-lg transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Close</button>
@@ -4694,6 +4917,38 @@
     const withdrawSavingsBtn = document.getElementById('withdraw-savings-btn');
     if (withdrawSavingsBtn) {
       withdrawSavingsBtn.addEventListener('click', () => {
+        // Get active savings from localStorage
+        const activeSavingsObj = JSON.parse(localStorage.getItem('activeSavings') || '{}');
+        const amount = Number(activeSavingsObj.amount || 0);
+        const apy = Number(activeSavingsObj.apy || 0);
+        const term = Number(activeSavingsObj.term || 0);
+        const startDateStr = activeSavingsObj.startDate;
+        
+        // Parse dates
+        const startDate = startDateStr ? new Date(startDateStr) : new Date();
+        
+        // Calculate days elapsed
+        const now = new Date();
+        const elapsedMs = now - startDate;
+        const daysElapsed = Math.max(0, Math.floor(elapsedMs / (1000 * 60 * 60 * 24)));
+        
+        // Calculate interest earned based on actual days elapsed
+        const daysInYear = 365;
+        const dailyRate = apy / 100 / daysInYear;
+        const interestEarned = amount * dailyRate * daysElapsed;
+        
+        // Calculate penalty (25% of earned interest)
+        const penalty = interestEarned * 0.25;
+        
+        // Calculate net amount to receive
+        const amountToReceive = amount + interestEarned - penalty;
+        
+        // Get BTC price for USD conversion
+        const btcPrice = Number(cryptoPrices.BTC || 42000);
+        const interestEarnedUsd = interestEarned * btcPrice;
+        const penaltyUsd = penalty * btcPrice;
+        const amountToReceiveUsd = amountToReceive * btcPrice;
+        
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4';
         modal.style.background = 'rgba(0, 0, 0, 0.85)';
@@ -4723,25 +4978,25 @@
             <div class="rounded-lg p-4 mb-4" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
               <div class="flex justify-between items-center mb-3 pb-3" style="border-bottom: 1px solid #2a2a2a;">
                 <span class="text-gray-400 text-sm">Principal Amount</span>
-                <span class="text-white font-semibold text-sm">0.0000 BTC</span>
+                <span class="text-white font-semibold text-sm">${amount.toFixed(8)} BTC</span>
               </div>
               <div class="flex justify-between items-center mb-3 pb-3" style="border-bottom: 1px solid #2a2a2a;">
                 <span class="text-gray-400 text-sm">Interest Earned</span>
-                <span class="font-semibold text-sm" style="color: #22c55e;">0.0095 BTC</span>
+                <span class="font-semibold text-sm" style="color: #22c55e;">${interestEarned.toFixed(8)} BTC</span>
               </div>
               <div class="flex justify-between items-center mb-3 pb-3" style="border-bottom: 1px solid #2a2a2a;">
                 <span class="text-gray-400 text-sm">Penalty (25%)</span>
-                <span class="text-sm font-semibold" style="color: #ef4444;">-0.0024 BTC</span>
+                <span class="text-sm font-semibold" style="color: #ef4444;">-${penalty.toFixed(8)} BTC</span>
               </div>
               <div class="flex justify-between items-center">
                 <span class="text-white font-semibold text-sm">You'll Receive</span>
-                <span class="text-white font-bold text-base">0.0921 BTC</span>
+                <span class="text-white font-bold text-base">${amountToReceive.toFixed(8)} BTC</span>
               </div>
             </div>
 
             <div class="flex gap-3">
               <button onclick="this.closest('.fixed').remove()" class="flex-1 py-3 text-gray-300 font-bold text-sm rounded-lg" style="background: #0f0f0f; border: 1px solid #2a2a2a;">Cancel</button>
-              <button onclick="const parent = this.closest('.fixed'); parent.innerHTML = '<div class=\\'rounded-2xl p-8 max-w-md w-full mx-4 text-center\\' style=\\'background: #1a1a1a; border: 1px solid #2a2a2a;\\'><div class=\\'w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6\\' style=\\'background: rgba(34, 197, 94, 0.1);\\'><svg width=\\'40\\' height=\\'40\\' fill=\\'none\\' stroke=\\'#22c55e\\' viewBox=\\'0 0 24 24\\'><path stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\' stroke-width=\\'2\\' d=\\'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z\\'></path></svg></div><h3 class=\\'text-white font-bold text-2xl mb-3\\'>Withdrawal Complete!</h3><p class=\\'text-gray-300 text-base mb-2\\'>You received <span class=\\'font-bold\\' style=\\'color: #ff6b35;\\'>0.0921 BTC</span></p><p class=\\'text-gray-400 text-sm mb-6\\'>The funds have been transferred to your wallet. Thank you for saving with us!</p><button onclick=\\'this.closest(\\'.fixed\\').remove(); location.reload();\\' class=\\'w-full py-3 text-white font-bold text-base rounded-xl transition-all hover-lift\\' style=\\'background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);\\'>Done</button></div>';" class="flex-1 py-3 text-white font-bold text-sm rounded-lg transition-all hover-lift" style="background: #ef4444;">Confirm Withdrawal</button>
+              <button onclick="const parent = this.closest('.fixed'); parent.innerHTML = '<div class=\\'rounded-2xl p-8 max-w-md w-full mx-4 text-center\\' style=\\'background: #1a1a1a; border: 1px solid #2a2a2a;\\'><div class=\\'w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6\\' style=\\'background: rgba(34, 197, 94, 0.1);\\'><svg width=\\'40\\' height=\\'40\\' fill=\\'none\\' stroke=\\'#22c55e\\' viewBox=\\'0 0 24 24\\'><path stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\' stroke-width=\\'2\\' d=\\'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z\\'></path></svg></div><h3 class=\\'text-white font-bold text-2xl mb-3\\'>Withdrawal Complete!</h3><p class=\\'text-gray-300 text-base mb-2\\'>You received <span class=\\'font-bold\\' style=\\'color: #ff6b35;\\'>${amountToReceive.toFixed(8)} BTC</span></p><p class=\\'text-gray-400 text-sm mb-6\\'>The funds have been transferred to your wallet. Thank you for saving with us!</p><button onclick=\\'this.closest(\\'.fixed\\').remove(); location.reload();\\' class=\\'w-full py-3 text-white font-bold text-base rounded-xl transition-all hover-lift\\' style=\\'background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);\\'>Done</button></div>';" class="flex-1 py-3 text-white font-bold text-sm rounded-lg transition-all hover-lift" style="background: #ef4444;">Confirm Withdrawal</button>
             </div>
           </div>
         `;
@@ -5190,6 +5445,16 @@
         const livePrice = cryptoPrices.BTC || btcPrice;
         const collateralUSD = collateralBTC * livePrice;
         const loanAmount = collateralUSD * (selectedLTV / 100);
+        
+        // Validate loan amount against user's actual collateral balance
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const userCollateralUSD = Number(user.collateralBalanceUSD || 0);
+        
+        if (loanAmount > userCollateralUSD) {
+          alert(`Loan amount ($${loanAmount.toFixed(2)}) cannot exceed your collateral balance ($${userCollateralUSD.toFixed(2)}). Please reduce the loan amount or deposit more collateral.`);
+          return;
+        }
+        
         const daysInYear = 365;
         const interestRate = apr / 100;
         const dailyRate = interestRate / daysInYear;
@@ -5269,6 +5534,35 @@
                 <p class="text-gray-400 text-xs mt-2">Please repay your current loan before borrowing again.</p>
               </div>
               <button onclick="this.closest('.fixed').remove();" class="w-full py-3 text-white font-bold text-sm rounded-lg transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">OK</button>
+            </div>
+          `;
+          document.body.appendChild(m);
+          return;
+        }
+
+        // Check if user has sufficient collateral deposited
+        const collateralUSD = Number(user.collateralBalanceUSD || 0);
+        if (collateralUSD <= 0) {
+          const m = document.createElement('div');
+          m.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4';
+          m.style.background = 'rgba(0, 0, 0, 0.85)';
+          m.innerHTML = `
+            <div class="rounded-2xl p-6 max-w-md w-full mx-4 text-center" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
+              <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style="background: rgba(239, 68, 68, 0.1);">
+                <svg width="40" height="40" fill="none" stroke="#ef4444" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 -8a4 4 0 100 8 4 4 0 000-8z"></path>
+                </svg>
+              </div>
+              <h3 class="text-white font-bold text-xl mb-3">No Collateral Deposited</h3>
+              <p class="text-gray-300 text-sm mb-4">You must deposit collateral before you can borrow a loan. The loan amount cannot exceed your collateral balance.</p>
+              <div class="rounded-lg p-3 mb-4" style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.1);">
+                <p class="text-gray-300 text-sm"><strong>Your Collateral:</strong> $${collateralUSD.toFixed(2)}</p>
+                <p class="text-gray-400 text-xs mt-2">Please go to "Transfer to Collateral" and deposit funds first.</p>
+              </div>
+              <div class="flex gap-3">
+                <button onclick="this.closest('.fixed').remove();" class="flex-1 py-3 text-gray-300 font-bold text-sm rounded-lg" style="background: #0f0f0f; border: 1px solid #2a2a2a;">Cancel</button>
+                <button onclick="this.closest('.fixed').remove(); document.getElementById('modal-transfer-to-collateral').click();" class="flex-1 py-3 text-white font-bold text-sm rounded-lg" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Deposit Collateral</button>
+              </div>
             </div>
           `;
           document.body.appendChild(m);
@@ -6802,22 +7096,27 @@
         // Update collateral display (use BTC value when provided)
         updateCollateralDisplay(user.collateralBalanceUSD || 0, user.collateralBalanceBTC || 0);
         
+        // Update active loan display
+        updateActiveLoanDisplay(user);
+        
         // Update active savings if any
         // Note: active savings might need separate handling
         
         // Update membership status
         updateMembershipStatus(user.isMember);
 
-        // Enable/disable Transfer to Collateral button based on available savings
+        // Enable/disable Transfer to Collateral button based on available BTC balance
         try {
           const transferBtn = document.getElementById('modal-transfer-to-collateral');
-          const available = Number(user.savingsBalanceUSD || 0);
+          // Check if user has available balance (same logic as the modal: prefer btcBalance, else derive from savingsBalanceUSD)
+          const btcFromServer = (typeof user.btcBalance !== 'undefined' && user.btcBalance !== null) ? Number(user.btcBalance) : null;
+          const availableBTC = (btcFromServer !== null) ? btcFromServer : (Number(user.savingsBalanceUSD || 0) / (cryptoPrices.BTC || 42000));
           if (transferBtn) {
-            if (available <= 0) {
+            if (availableBTC <= 0 || !isFinite(availableBTC)) {
               transferBtn.disabled = true;
               transferBtn.classList.add('cursor-not-allowed');
               transferBtn.style.opacity = '0.5';
-              transferBtn.title = 'No available funds in savings to transfer';
+              transferBtn.title = 'No available BTC balance to transfer';
             } else {
               transferBtn.disabled = false;
               transferBtn.classList.remove('cursor-not-allowed');
@@ -7198,17 +7497,42 @@
             if (btcBalanceElement) btcBalanceElement.textContent = isFinite(btcBalance) ? btcBalance.toFixed(8) : '0.0000';
           }
           
-          // Update collateral display
+          // Update collateral display explicitly
           if (data.collateralBalanceUSD !== undefined || data.collateralBalanceBTC !== undefined) {
-            updateCollateralDisplay(data.collateralBalanceUSD || 0, data.collateralBalanceBTC || 0);
+            updateCollateralDisplay(data.collateralBalanceUSD || updatedUser.collateralBalanceUSD || 0, 
+                                  data.collateralBalanceBTC || updatedUser.collateralBalanceBTC || 0);
           }
+          
+          // Update transfer button status
+          try {
+            const transferBtn = document.getElementById('modal-transfer-to-collateral');
+            if (transferBtn && (data.btcBalance !== undefined || data.savingsBalanceUSD !== undefined)) {
+              const availableBTC = (typeof updatedUser.btcBalance !== 'undefined' && updatedUser.btcBalance !== null)
+                ? Number(updatedUser.btcBalance)
+                : (Number(updatedUser.savingsBalanceUSD || 0) / (cryptoPrices.BTC || 42000));
+              if (availableBTC <= 0 || !isFinite(availableBTC)) {
+                transferBtn.disabled = true;
+                transferBtn.classList.add('cursor-not-allowed');
+                transferBtn.style.opacity = '0.5';
+              } else {
+                transferBtn.disabled = false;
+                transferBtn.classList.remove('cursor-not-allowed');
+                transferBtn.style.opacity = '';
+              }
+            }
+          } catch (e) { console.debug('Update transfer button via socket failed', e); }
           
           // Update membership status
           if (data.isMember !== undefined) {
             updateMembershipStatus(data.isMember);
           }
           
-          // Re-populate user info for names/emails
+          // Update active loan display if loan details are in the update
+          if (data.activeLoanId !== undefined || data.activeLoanAmount !== undefined || data.activeLoanDueDate !== undefined) {
+            updateActiveLoanDisplay(updatedUser);
+          }
+          
+          // Re-populate user info for names/emails and full refresh
           populateUserInfo();
           
           // Recent transactions list removed from dashboard; no-op
@@ -7450,6 +7774,63 @@
       }
     }
 
+    // Update active loan display with borrower's current loan details
+    function updateActiveLoanDisplay(user) {
+      try {
+        const activeLoanId = user && user.activeLoanId;
+        const activeLoanAmount = Number(user && user.activeLoanAmount || 0);
+        const activeLoanDueDate = user && user.activeLoanDueDate;
+        
+        // If no active loan, show default/empty state
+        if (!activeLoanId || activeLoanAmount <= 0) {
+          const loanBtcEl = document.getElementById('loan-btc-amount');
+          if (loanBtcEl) loanBtcEl.textContent = '0.0000 BTC';
+          
+          const daysElement = document.getElementById('days-until-due');
+          const dueDateElement = document.getElementById('due-date-display');
+          if (daysElement) daysElement.textContent = '—';
+          if (dueDateElement) dueDateElement.textContent = 'Due: —';
+          return;
+        }
+        
+        // Convert loan amount (USD) to BTC
+        const btcPrice = cryptoPrices.BTC || 42000;
+        const loanBtc = activeLoanAmount / btcPrice;
+        
+        // Update loan amount display
+        const loanBtcEl = document.getElementById('loan-btc-amount');
+        if (loanBtcEl) loanBtcEl.textContent = isFinite(loanBtc) ? loanBtc.toFixed(8) + ' BTC' : '0.0000 BTC';
+        
+        // Update days until due
+        const daysElement = document.getElementById('days-until-due');
+        const dueDateElement = document.getElementById('due-date-display');
+        
+        if (activeLoanDueDate && daysElement && dueDateElement) {
+          const dueDate = new Date(activeLoanDueDate);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          dueDate.setHours(0, 0, 0, 0);
+          
+          const timeDifference = dueDate - today;
+          const daysUntilDue = Math.ceil(timeDifference / (1000 * 60 * 60 * 24));
+          
+          if (daysUntilDue <= 0) {
+            daysElement.textContent = 'OVERDUE';
+            daysElement.style.color = '#ef4444';
+          } else {
+            daysElement.textContent = `${daysUntilDue} Days`;
+            daysElement.style.color = '#ffffff';
+          }
+          
+          const options = { month: 'short', day: 'numeric', year: 'numeric' };
+          const formattedDate = dueDate.toLocaleDateString('en-US', options);
+          dueDateElement.textContent = `Due: ${formattedDate}`;
+        }
+      } catch (e) {
+        console.debug('updateActiveLoanDisplay failed', e);
+      }
+    }
+
     // Load saved profile picture on page load
     function loadProfilePicture() {
       const savedPicture = localStorage.getItem('profilePicture');
@@ -7667,6 +8048,106 @@
     }
 
     // Override window.alert for legacy insufficient-funds messages so they show styled modal instead
+        function getAvailableFunds() {
+          try {
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            // Prefer explicit BTC balance, otherwise derive from savings USD
+            const btc = (typeof user.btcBalance !== 'undefined' && user.btcBalance !== null)
+              ? Number(user.btcBalance)
+              : (Number(user.savingsBalanceUSD || 0) / (cryptoPrices.BTC || 42000));
+
+            const btcUsd = (btc || 0) * (cryptoPrices.BTC || 42000);
+            const collateralUsd = Number(user.collateralBalanceUSD || 0);
+            const totalAvailable = btcUsd + collateralUsd;
+
+            return { totalAvailable, btcUsd, collateralUsd };
+          } catch (e) {
+            // Fallback to DOM parsing if localStorage lookup fails
+            console.debug('getAvailableFunds fallback to DOM due to', e && e.message);
+
+            // Get BTC balance
+            const btcBalanceElement = document.querySelector('h2.balance-value');
+            let btcUsd = 0;
+            if (btcBalanceElement) {
+              const currentBtc = parseFloat(btcBalanceElement.textContent) || 0;
+              btcUsd = currentBtc * cryptoPrices.BTC;
+            }
+
+            // Get collateral balance
+            let collateralUsd = 0;
+            const collateralElements = document.querySelectorAll('p.text-white.text-lg.sm\\:text-xl.font-bold');
+            if (collateralElements.length >= 2) {
+              const collateralElement = collateralElements[1];
+              const usdElement = collateralElement.nextElementSibling;
+              if (usdElement) {
+                const usdText = usdElement.textContent.replace('$', '').replace(/,/g, '');
+                collateralUsd = parseFloat(usdText) || 0;
+              }
+            }
+
+            const totalAvailable = btcUsd + collateralUsd;
+            return { totalAvailable, btcUsd, collateralUsd };
+          }
+        }
+
+        function showInsufficientFundsModal(requiredUsd = 0, totalAvailable = 0, btcUsd = 0, collateralUsd = 0, message = 'Insufficient funds') {
+          try {
+            const shortfall = requiredUsd - totalAvailable;
+            const isShortfallPositive = shortfall > 0;
+
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 z-[101] flex items-center justify-center overflow-y-auto';
+            modal.style.background = 'rgba(0, 0, 0, 0.85)';
+            modal.innerHTML = `
+              <div class="rounded-2xl p-8 max-w-md w-full mx-4 text-center" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
+                <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style="background: rgba(239, 68, 68, 0.1);">
+                  <svg width="40" height="40" fill="none" stroke="#ef4444" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-2">${message}</h2>
+                <p class="text-gray-300 mb-6">You need more funds to complete this transaction.</p>
+                <div class="bg-gray-900 rounded-lg p-4 mb-6 text-left space-y-3">
+                  <div class="flex justify-between">
+                    <span class="text-gray-400">Required Amount:</span>
+                    <span class="text-white font-semibold">$${requiredUsd.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-400">Available Funds:</span>
+                    <span class="text-white font-semibold">$${totalAvailable.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  ${isShortfallPositive ? `
+                  <div class="flex justify-between">
+                    <span class="text-gray-400">Shortfall:</span>
+                    <span class="text-red-400 font-semibold">$${shortfall.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  ` : ''}
+                  <hr style="border-color: #444;">
+                  <div class="text-sm text-gray-400 space-y-2">
+                    <div class="flex justify-between">
+                      <span>BTC Balance:</span>
+                      <span class="text-gray-200">$${btcUsd.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span>Collateral Balance:</span>
+                      <span class="text-gray-200">$${collateralUsd.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                  </div>
+                </div>
+                <button onclick="this.closest('div').parentElement.remove()" class="w-full py-3 rounded-lg font-semibold transition-all" style="background: #ef4444; color: white; hover: background: #dc2626;">
+                  Close
+                </button>
+              </div>
+            `;
+            document.body.appendChild(modal);
+            modal.addEventListener('click', (e) => {
+              if (e.target === modal) modal.remove();
+            });
+          } catch (e) {
+            console.warn('showInsufficientFundsModal error', e && e.message);
+            alert(message + ' | Require: $' + requiredUsd.toFixed(2) + ', Available: $' + totalAvailable.toFixed(2));
+          }
+        }
     (function(){
       const _nativeAlert = window.alert;
       window.alert = function(msg) {
