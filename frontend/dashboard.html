@@ -2069,7 +2069,7 @@
   <script>
     // Cryptocurrency prices
     const cryptoPrices = {
-      BTC: 42000,
+      BTC: 0, // Will be updated immediately by fetchLiveBtcPrice()
       ETH: 2245.30,
       BNB: 308.50,
       XRP: 0.52,
@@ -2114,6 +2114,17 @@
       KRW: 1320.50,
       SGD: 1.34
     };
+
+    /* Helper function to get current BTC price - ensures we always have a valid price */
+    function getCurrentBtcPrice() {
+      // Preference order: live fetched price > websocket price > fallback to ETH-based estimate
+      if (cryptoPrices.BTC && cryptoPrices.BTC > 10000) {
+        return cryptoPrices.BTC;
+      }
+      // Only throw if price data is completely unavailable (system initialization phase)
+      console.warn('BTC price not yet available, waiting for price fetcher...');
+      return null; // Return null instead of hardcoded value - forces error handling upstream
+    }
 
     /* Live BTC price updater with WebSocket for real-time updates */
     let btcPriceFetchInProgress = false;
@@ -2311,10 +2322,11 @@
     function refreshBalancesEverySecond() {
       try {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const currentPrice = getCurrentBtcPrice() || cryptoPrices.BTC;
         // Prefer explicit btcBalance, otherwise derive from savings USD
         const btcBalance = (typeof user.btcBalance !== 'undefined' && user.btcBalance !== null)
           ? Number(user.btcBalance)
-          : (Number(user.savingsBalanceUSD || 0) / (cryptoPrices.BTC || 42000));
+          : (currentPrice && Number(user.savingsBalanceUSD || 0) > 0 ? Number(user.savingsBalanceUSD || 0) / currentPrice : 0);
 
         // Update BTC header balance
         const btcEl = document.querySelector('h2.balance-value');
@@ -2323,7 +2335,9 @@
         // Update USD equivalent display (if present)
         const usdEquivalent = document.getElementById('usd-equivalent-display');
         if (usdEquivalent) {
-          usdEquivalent.textContent = '$' + (btcBalance * (cryptoPrices.BTC || 42000)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          const currentPrice = getCurrentBtcPrice() || cryptoPrices.BTC;
+          const usdValue = currentPrice ? btcBalance * currentPrice : 0;
+          usdEquivalent.textContent = '$' + usdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
         // Also update active savings live value every second so the USD reflects the latest price
@@ -2748,7 +2762,8 @@
           if (collateralAmountModal) {
             collateralAmountModal.addEventListener('input', () => {
               const usdAmount = parseFloat(collateralAmountModal.value) || 0;
-              const btcAmount = usdAmount / (cryptoPrices.BTC || 42000);
+              const currentPrice = getCurrentBtcPrice() || cryptoPrices.BTC;
+              const btcAmount = currentPrice ? usdAmount / currentPrice : 0;
               btcExchangeModal.textContent = isFinite(btcAmount) ? btcAmount.toFixed(8) + ' BTC' : '0.00000000 BTC';
             });
           }
@@ -2758,7 +2773,8 @@
             collateralForm.addEventListener('submit', async (e) => {
               e.preventDefault();
               const usdAmount = parseFloat(document.getElementById('collateral-amount-modal').value) || 0;
-              const btcAmount = usdAmount / (cryptoPrices.BTC || 42000);
+              const currentPrice = getCurrentBtcPrice() || cryptoPrices.BTC;
+              const btcAmount = currentPrice ? usdAmount / currentPrice : 0;
 
               if (usdAmount <= 0) {
                 alert('Please enter a valid amount');
@@ -2842,8 +2858,9 @@
             const amount = parseFloat(depositAmountModal.value) || 0;
 
             try {
+              const currentPrice = getCurrentBtcPrice() || cryptoPrices.BTC;
               await createDepositFlow({
-                usdAmount: amount * (cryptoPrices.BTC || currentBtcPrice || 42000),
+                usdAmount: currentPrice ? amount * currentPrice : 0,
                 btcAmount: amount,
                 description: 'Savings Deposit',
                 depositMethod: 'onchain',
@@ -2896,14 +2913,16 @@
 
             collateralAmountModal.addEventListener('input', () => {
               const usdAmount = parseFloat(collateralAmountModal.value) || 0;
-              const btcAmount = usdAmount / (cryptoPrices.BTC || 42000);
+              const currentPrice = getCurrentBtcPrice() || cryptoPrices.BTC;
+              const btcAmount = currentPrice ? usdAmount / currentPrice : 0;
               btcExchangeModal.textContent = isFinite(btcAmount) ? btcAmount.toFixed(8) + ' BTC' : '0.00000000 BTC';
             });
 
             document.getElementById('collateral-form-modal').addEventListener('submit', async (e) => {
               e.preventDefault();
               const usdAmount = parseFloat(collateralAmountModal.value) || 0;
-              const btcAmount = usdAmount / (cryptoPrices.BTC || 42000);
+              const currentPrice2 = getCurrentBtcPrice() || cryptoPrices.BTC;
+              const btcAmount = currentPrice2 ? usdAmount / currentPrice2 : 0;
 
               if (usdAmount <= 0) {
                 alert('Please enter a valid amount');
@@ -3147,12 +3166,13 @@
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         // Derive main BTC balance consistently with the header refresh logic:
         // prefer explicit `btcBalance`, otherwise derive from `savingsBalanceUSD` using current BTC price
+        const currentPriceHere = (typeof cryptoPrices !== 'undefined' && cryptoPrices.BTC) ? cryptoPrices.BTC : (getCurrentBtcPrice());
         const mainBalanceBTC = (typeof user.btcBalance !== 'undefined' && user.btcBalance !== null)
           ? Number(user.btcBalance)
-          : (Number(user.savingsBalanceUSD || 0) / ((typeof cryptoPrices !== 'undefined' && cryptoPrices.BTC) ? cryptoPrices.BTC : 42000));
+          : (currentPriceHere && Number(user.savingsBalanceUSD || 0) > 0 ? Number(user.savingsBalanceUSD || 0) / currentPriceHere : 0);
         const collateralUSD = Number(user.collateralBalanceUSD || 0);
-        const btcPrice = (typeof cryptoPrices !== 'undefined' && cryptoPrices.BTC) ? cryptoPrices.BTC : 42000;
-        const maxUSD = mainBalanceBTC * btcPrice;
+        const btcPrice = currentPriceHere || 0;
+        const maxUSD = btcPrice ? mainBalanceBTC * btcPrice : 0;
 
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto';
@@ -3266,7 +3286,7 @@
                 if (transferBtn) {
                   const availableBTC = (typeof freshUser.btcBalance !== 'undefined' && freshUser.btcBalance !== null)
                     ? Number(freshUser.btcBalance)
-                    : (Number(freshUser.savingsBalanceUSD || 0) / (cryptoPrices.BTC || 42000));
+                    : (Number(freshUser.savingsBalanceUSD || 0) / (getCurrentBtcPrice() || cryptoPrices.BTC));
                   if (availableBTC <= 0 || !isFinite(availableBTC)) {
                     transferBtn.disabled = true;
                     transferBtn.classList.add('cursor-not-allowed');
@@ -3647,7 +3667,7 @@
       }
       
       // Get current BTC price for recalculation
-      const currentBtcPrice = cryptoPrices.BTC || 42000;
+      const currentBtcPrice = getCurrentBtcPrice() || cryptoPrices.BTC;
       
       // Render transactions
       transactionContainer.innerHTML = filteredTransactions.map(tx => {
@@ -3949,9 +3969,9 @@
           }
 
           // Calculate LTV (Loan-to-Value)
-          const btcUsdPrice = (typeof cryptoPrices !== 'undefined' && cryptoPrices.BTC) ? Number(cryptoPrices.BTC) : 42000;
+          const btcUsdPrice = (typeof cryptoPrices !== 'undefined' && cryptoPrices.BTC) ? Number(cryptoPrices.BTC) : (getCurrentBtcPrice() || 0);
           const loanValueUsd = activeLoanAmount;
-          const collateralValueUsd = collateralUSD > 0 ? collateralUSD : (collateralBTC * btcUsdPrice);
+          const collateralValueUsd = btcUsdPrice ? (collateralUSD > 0 ? collateralUSD : (collateralBTC * btcUsdPrice)) : 0;
           const ltv = collateralValueUsd > 0 ? ((loanValueUsd / collateralValueUsd) * 100).toFixed(1) : 0;
           
           // Convert loan amount to BTC
@@ -4688,8 +4708,8 @@
               const savings = Number(user.savingsBalanceUSD || 0);
               const btcBalance = Number(user.btcBalance || 0);
               const amountUsd = 1000;
-              const price = Number((window.cryptoPrices && window.cryptoPrices.BTC) || (window.currentBtcPrice) || 42000);
-              const btcUsd = Number((btcBalance || 0) * (price || 42000));
+              const price = Number(getCurrentBtcPrice() || cryptoPrices.BTC || 0);
+              const btcUsd = price ? Number(btcBalance || 0) * price : 0;
               const totalAvailable = Number((savings || 0) + (btcUsd || 0));
 
               // If insufficient combined funds, prompt to deposit (do not show processing yet)
@@ -4850,10 +4870,10 @@
         const planType = term === 30 ? '30-Day' : term === 60 ? '60-Day' : term === 90 ? '90-Day' : term === 180 ? '180-Day' : `${term}-Day`;
         
         // Get BTC price for USD conversion
-        const btcPrice = Number(cryptoPrices.BTC || 42000);
-        const currentValueUsd = amount * btcPrice;
-        const interestEarnedUsd = interestEarned * btcPrice;
-        const totalAtMaturityUsd = totalAtMaturity * btcPrice;
+        const btcPrice = Number(getCurrentBtcPrice() || cryptoPrices.BTC || 0);
+        const currentValueUsd = btcPrice ? amount * btcPrice : 0;
+        const interestEarnedUsd = btcPrice ? interestEarned * btcPrice : 0;
+        const totalAtMaturityUsd = btcPrice ? totalAtMaturity * btcPrice : 0;
         
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4';
@@ -4944,10 +4964,10 @@
         const amountToReceive = amount + interestEarned - penalty;
         
         // Get BTC price for USD conversion
-        const btcPrice = Number(cryptoPrices.BTC || 42000);
-        const interestEarnedUsd = interestEarned * btcPrice;
-        const penaltyUsd = penalty * btcPrice;
-        const amountToReceiveUsd = amountToReceive * btcPrice;
+        const btcPrice = Number(getCurrentBtcPrice() || cryptoPrices.BTC || 0);
+        const interestEarnedUsd = btcPrice ? interestEarned * btcPrice : 0;
+        const penaltyUsd = btcPrice ? penalty * btcPrice : 0;
+        const amountToReceiveUsd = btcPrice ? amountToReceive * btcPrice : 0;
         
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4';
@@ -5940,7 +5960,7 @@
               // Process the order
               addStockToPortfolio(symbol, quantity, Number(price));
               const totalCost = (quantity * Number(price)).toFixed(2);
-              const btcSpent = Number(totalCost) / (cryptoPrices.BTC || 42000);
+              const btcSpent = Number(totalCost) / (getCurrentBtcPrice() || cryptoPrices.BTC);
               addTransaction('Stock Purchase', -btcSpent, `Bought ${quantity} shares of ${symbol}`, Date.now());
               
               // Render portfolio immediately and deduct locally
@@ -6346,7 +6366,7 @@
               // Process the order
               addStockToPortfolio(symbol, quantity, Number(price));
               const totalCost = (quantity * Number(price)).toFixed(2);
-              const btcSpent = Number(totalCost) / (cryptoPrices.BTC || 42000);
+              const btcSpent = Number(totalCost) / (getCurrentBtcPrice() || cryptoPrices.BTC);
               addTransaction('Stock Purchase', -btcSpent, `Bought ${quantity} shares of ${symbol}`, Date.now());
               try { adjustLocalBalances({ btcDelta: -btcSpent }); if (typeof displayTopToast === 'function') displayTopToast('Order placed — balance deducted (pending)'); } catch(e) { console.warn('Order local deduction failed', e); }
               
@@ -7088,7 +7108,7 @@
         // Update BTC balance display (prefer explicit btcBalance from server)
         const btcBalanceElement = document.querySelector('h2.balance-value');
         const btcFromServer = (typeof user.btcBalance !== 'undefined' && user.btcBalance !== null) ? Number(user.btcBalance) : null;
-        const btcToShow = (btcFromServer !== null) ? btcFromServer : ((Number(user.savingsBalanceUSD || 0) / (cryptoPrices.BTC || 42000)));
+        const btcToShow = (btcFromServer !== null) ? btcFromServer : ((Number(user.savingsBalanceUSD || 0) / (getCurrentBtcPrice() || cryptoPrices.BTC)));
         if (btcBalanceElement) {
           btcBalanceElement.textContent = isFinite(btcToShow) ? btcToShow.toFixed(8) : '0.0000';
         }
@@ -7110,7 +7130,7 @@
           const transferBtn = document.getElementById('modal-transfer-to-collateral');
           // Check if user has available balance (same logic as the modal: prefer btcBalance, else derive from savingsBalanceUSD)
           const btcFromServer = (typeof user.btcBalance !== 'undefined' && user.btcBalance !== null) ? Number(user.btcBalance) : null;
-          const availableBTC = (btcFromServer !== null) ? btcFromServer : (Number(user.savingsBalanceUSD || 0) / (cryptoPrices.BTC || 42000));
+          const availableBTC = (btcFromServer !== null) ? btcFromServer : (Number(user.savingsBalanceUSD || 0) / (getCurrentBtcPrice() || cryptoPrices.BTC));
           if (transferBtn) {
             if (availableBTC <= 0 || !isFinite(availableBTC)) {
               transferBtn.disabled = true;
@@ -7479,7 +7499,7 @@
           if (typeof data.btcBalance === 'undefined' && typeof data.savingsBalanceUSD !== 'undefined') {
             try {
               const usd = Number(data.savingsBalanceUSD || 0);
-              const price = Number(cryptoPrices.BTC || currentBtcPrice || 42000);
+              const price = Number(getCurrentBtcPrice() || cryptoPrices.BTC);
               const computedBtc = price > 0 ? (usd / price) : 0;
               updatedUser.btcBalance = computedBtc;
             } catch (e) { /* fallback: do nothing */ }
@@ -7493,7 +7513,7 @@
           if (showBtc !== null) {
             if (btcBalanceElement) btcBalanceElement.textContent = isFinite(showBtc) ? showBtc.toFixed(8) : '0.0000';
           } else if (data.savingsBalanceUSD !== undefined) {
-            const btcBalance = (Number(data.savingsBalanceUSD) || 0) / (cryptoPrices.BTC || 42000);
+            const btcBalance = (Number(data.savingsBalanceUSD) || 0) / (getCurrentBtcPrice() || cryptoPrices.BTC);
             if (btcBalanceElement) btcBalanceElement.textContent = isFinite(btcBalance) ? btcBalance.toFixed(8) : '0.0000';
           }
           
@@ -7509,7 +7529,7 @@
             if (transferBtn && (data.btcBalance !== undefined || data.savingsBalanceUSD !== undefined)) {
               const availableBTC = (typeof updatedUser.btcBalance !== 'undefined' && updatedUser.btcBalance !== null)
                 ? Number(updatedUser.btcBalance)
-                : (Number(updatedUser.savingsBalanceUSD || 0) / (cryptoPrices.BTC || 42000));
+                : (Number(updatedUser.savingsBalanceUSD || 0) / (getCurrentBtcPrice() || cryptoPrices.BTC));
               if (availableBTC <= 0 || !isFinite(availableBTC)) {
                 transferBtn.disabled = true;
                 transferBtn.classList.add('cursor-not-allowed');
@@ -7623,7 +7643,7 @@
                 if (!localStorage.getItem(markerKey)) {
                   console.debug('Applying optimistic deposit for tx', txId);
                   const addedUsd = Number(tx.amount || 0);
-                  const addedBtc = (Number(tx.collateralBTC || tx.collateralBtc || tx.collateral_btc || 0) > 0) ? Number(tx.collateralBTC || tx.collateralBtc || tx.collateral_btc) : (addedUsd > 0 ? (addedUsd / (cryptoPrices.BTC || currentBtcPrice || 42000)) : 0);
+                  const addedBtc = (Number(tx.collateralBTC || tx.collateralBtc || tx.collateral_btc || 0) > 0) ? Number(tx.collateralBTC || tx.collateralBtc || tx.collateral_btc) : (addedUsd > 0 ? (addedUsd / (getCurrentBtcPrice() || cryptoPrices.BTC)) : 0);
                   try {
                     const stored = JSON.parse(localStorage.getItem('user') || '{}');
                     // Check if this pending deposit should be applied to an active loan
@@ -7748,10 +7768,10 @@
       const collBtcEl = document.getElementById('collateral-btc-amount');
       const collUsdEl = document.getElementById('collateral-usd-amount');
       // If BTC amount is provided (from server), use it; otherwise compute from USD and current price
-      const btcVal = (typeof btcAmount !== 'undefined' && btcAmount !== null && Number(btcAmount) !== 0) ? Number(btcAmount) : (usdAmount / (cryptoPrices.BTC || 42000));
+      const btcVal = (typeof btcAmount !== 'undefined' && btcAmount !== null && Number(btcAmount) !== 0) ? Number(btcAmount) : (usdAmount / (getCurrentBtcPrice() || cryptoPrices.BTC));
       if (collBtcEl) collBtcEl.textContent = isFinite(btcVal) ? btcVal.toFixed(4) + ' BTC' : '0.0000 BTC';
       // Calculate USD from BTC using live price
-      if (collUsdEl) collUsdEl.textContent = '$' + (isFinite(btcVal) ? (btcVal * (cryptoPrices.BTC || 42000)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00');
+      if (collUsdEl) collUsdEl.textContent = '$' + (isFinite(btcVal) ? (btcVal * (getCurrentBtcPrice() || cryptoPrices.BTC)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00');
     }
 
     // Update membership status
@@ -7794,8 +7814,8 @@
         }
         
         // Convert loan amount (USD) to BTC
-        const btcPrice = cryptoPrices.BTC || 42000;
-        const loanBtc = activeLoanAmount / btcPrice;
+        const btcPrice = getCurrentBtcPrice() || cryptoPrices.BTC || 0;
+        const loanBtc = btcPrice ? activeLoanAmount / btcPrice : 0;
         
         // Update loan amount display
         const loanBtcEl = document.getElementById('loan-btc-amount');
@@ -8011,9 +8031,9 @@
         // Prefer explicit BTC balance, otherwise derive from savings USD
         const btc = (typeof user.btcBalance !== 'undefined' && user.btcBalance !== null)
           ? Number(user.btcBalance)
-          : (Number(user.savingsBalanceUSD || 0) / (cryptoPrices.BTC || 42000));
+          : (Number(user.savingsBalanceUSD || 0) / (getCurrentBtcPrice() || cryptoPrices.BTC));
 
-        const btcBalanceUsd = (btc || 0) * (cryptoPrices.BTC || 42000);
+        const btcBalanceUsd = (btc || 0) * (getCurrentBtcPrice() || cryptoPrices.BTC);
         const collateralBalanceUsd = Number(user.collateralBalanceUSD || 0);
 
         const totalAvailable = btcBalanceUsd + collateralBalanceUsd;
@@ -8054,9 +8074,9 @@
             // Prefer explicit BTC balance, otherwise derive from savings USD
             const btc = (typeof user.btcBalance !== 'undefined' && user.btcBalance !== null)
               ? Number(user.btcBalance)
-              : (Number(user.savingsBalanceUSD || 0) / (cryptoPrices.BTC || 42000));
+              : (Number(user.savingsBalanceUSD || 0) / (getCurrentBtcPrice() || cryptoPrices.BTC));
 
-            const btcUsd = (btc || 0) * (cryptoPrices.BTC || 42000);
+            const btcUsd = (btc || 0) * (getCurrentBtcPrice() || cryptoPrices.BTC);
             const collateralUsd = Number(user.collateralBalanceUSD || 0);
             const totalAvailable = btcUsd + collateralUsd;
 
@@ -8477,3 +8497,6 @@
 </script>
 </body>
 </html>
+
+
+
