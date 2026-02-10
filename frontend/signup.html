@@ -492,13 +492,6 @@
         errorState.classList.add('hidden');
       }
 
-      function generatePromoCode() {
-        const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-        let s = 'XAPO-';
-        for (let i = 0; i < 8; i++) s += chars.charAt(Math.floor(Math.random() * chars.length));
-        return s;
-      }
-
       function showError(message) {
         loadingState.classList.add('hidden');
         successState.classList.add('hidden');
@@ -524,15 +517,14 @@
 
         // Sign up API call
         const promoInput = (formData.get('promoCode') || '').trim();
-        const promoToSend = promoInput || generatePromoCode();
         const userData = {
           name: `${formData.get('firstName')} ${formData.get('lastName')}`,
           email: formData.get('email'),
           password: password,
           phone: formData.get('phone'),
-          country: formData.get('country'),
-          promoCode: promoToSend
+          country: formData.get('country')
         };
+        if (promoInput) userData.promoCode = promoInput;
 
         showModal();
         showLoading();
@@ -554,13 +546,16 @@
 
           if (result.success) {
             localStorage.setItem('token', result.token);
-            // Ensure the user object contains our promoCode
-            const userObj = Object.assign({}, result.data || {}, { promoCode: userData.promoCode });
+            const userObj = Object.assign({}, result.data || {});
             localStorage.setItem('user', JSON.stringify(userObj));
-            // Show success and promo in modal
+            // Show promo bonus message ONLY if a valid promo code was actually applied
             try {
               const promoEl = document.getElementById('welcome-promo');
-              if (promoEl) promoEl.textContent = `Promo code: ${userData.promoCode} — Welcome! Make a deposit to receive a 100% bonus.`;
+              if (promoEl && result.data && result.data.promoApplied) {
+                promoEl.textContent = `Promo code applied — Welcome! Make a deposit to receive a 100% bonus.`;
+              } else if (promoEl) {
+                promoEl.textContent = '';
+              }
             } catch (e) {}
             showSuccess();
             // After signup, redirect to dashboard
