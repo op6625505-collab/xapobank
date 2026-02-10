@@ -3726,127 +3726,134 @@
     // Withdraw Loan button handler
     const withdrawLoanBtn = document.getElementById('withdraw-loan-btn');
     if (withdrawLoanBtn) {
-      withdrawLoanBtn.addEventListener('click', async () => {
-        // Get user data from localStorage
-        const userStr = localStorage.getItem('user');
-        const user = userStr ? JSON.parse(userStr) : {};
-        
-        // Get actual loan data
-        const activeLoanId = user.activeLoanId || null;
-        const activeLoanAmount = Number(user.activeLoanAmount || 0);
-        const collateralBTC = Number(user.collateralBalanceBTC || 0);
-        const collateralUSD = Number(user.collateralBalanceUSD || 0);
-        
-        // If no active loan, don't show modal
-        if (!activeLoanId || activeLoanAmount <= 0) {
-          showInsufficientFundsModal(0, 0, 0, 0, 'No active loan available to withdraw');
-          return;
-        }
+      withdrawLoanBtn.addEventListener('click', () => {
+        try {
+          // Get user data from localStorage
+          const userStr = localStorage.getItem('user');
+          const user = userStr ? JSON.parse(userStr) : {};
+          
+          // Get actual loan data
+          const activeLoanId = user.activeLoanId || null;
+          const activeLoanAmount = Number(user.activeLoanAmount || 0);
+          const collateralBTC = Number(user.collateralBalanceBTC || 0);
+          const collateralUSD = Number(user.collateralBalanceUSD || 0);
+          
+          // If no active loan, show alert
+          if (!activeLoanId || activeLoanAmount <= 0) {
+            alert('No active loan available to withdraw. Please borrow first.');
+            return;
+          }
 
-        // Calculate LTV (Loan-to-Value)
-        const btcUsdPrice = Number(cryptoPrices.BTC || 42000);
-        const loanValueUsd = activeLoanAmount;
-        const collateralValueUsd = collateralUSD > 0 ? collateralUSD : (collateralBTC * btcUsdPrice);
-        const ltv = collateralValueUsd > 0 ? ((loanValueUsd / collateralValueUsd) * 100).toFixed(1) : 0;
-        
-        // Convert loan amount to BTC
-        const availableBTC = (activeLoanAmount / btcUsdPrice).toFixed(8);
-        const availableUSD = activeLoanAmount.toFixed(2);
+          // Calculate LTV (Loan-to-Value)
+          const btcUsdPrice = (typeof cryptoPrices !== 'undefined' && cryptoPrices.BTC) ? Number(cryptoPrices.BTC) : 42000;
+          const loanValueUsd = activeLoanAmount;
+          const collateralValueUsd = collateralUSD > 0 ? collateralUSD : (collateralBTC * btcUsdPrice);
+          const ltv = collateralValueUsd > 0 ? ((loanValueUsd / collateralValueUsd) * 100).toFixed(1) : 0;
+          
+          // Convert loan amount to BTC
+          const availableBTC = (activeLoanAmount / btcUsdPrice).toFixed(8);
+          const availableUSD = activeLoanAmount.toFixed(2);
 
-        const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto';
-        modal.style.background = 'rgba(0, 0, 0, 0.85)';
-        modal.innerHTML = `
-          <div class="rounded-2xl p-8 max-w-md w-full mx-4 my-8" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
-            <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style="background: rgba(255, 107, 53, 0.1);">
-              <svg width="40" height="40" fill="none" stroke="#ff6b35" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-              </svg>
-            </div>
-            <h3 class="text-white font-bold text-2xl mb-3 text-center">Withdraw Loan</h3>
-            <p class="text-gray-400 text-sm mb-6 text-center">Transfer loan funds to your wallet</p>
-            
-            <form id="withdraw-loan-form" class="space-y-4">
-              <div class="rounded-lg p-4 mb-4" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
-                <div class="flex justify-between items-center mb-2">
-                  <span class="text-gray-400 text-sm">Available to Withdraw</span>
-                  <span class="text-white font-bold text-base">${availableBTC} BTC</span>
-                </div>
-                <div class="flex justify-between items-center mb-3">
-                  <span class="text-gray-400 text-xs">USD Value</span>
-                  <span class="text-gray-300 text-sm">$${availableUSD}</span>
-                </div>
-                <div class="pt-3" style="border-top: 1px solid #2a2a2a;">
-                  <div class="flex justify-between items-center mb-1">
-                    <span class="text-gray-400 text-xs">Collateral</span>
-                    <span class="text-gray-300 text-xs">${collateralBTC.toFixed(8)} BTC</span>
-                  </div>
-                  <div class="flex justify-between items-center">
-                    <span class="text-gray-400 text-xs">Loan-to-Value (LTV)</span>
-                    <span class="text-gray-300 text-xs">${ltv}%</span>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label class="text-gray-400 text-sm mb-2 block">Withdrawal Amount (BTC)</label>
-                <input type="number" id="withdraw-amount" step="0.00000001" min="0.00000001" max="${availableBTC}" placeholder="0.00000000" required class="w-full px-4 py-3 rounded-lg text-white text-sm outline-none transition-all" style="background: #0f0f0f; border: 1px solid #2a2a2a;" />
-                <div class="flex gap-2 mt-2">
-                  <button type="button" onclick="document.getElementById('withdraw-amount').value = '${availableBTC}'" class="flex-1 px-3 py-2 text-xs font-semibold rounded-lg transition-all" style="background: #0f0f0f; color: #ff6b35; border: 1px solid #2a2a2a;">Withdraw All</button>
-                  <button type="button" onclick="document.getElementById('withdraw-amount').value = '${(availableBTC / 2).toFixed(8)}'" class="flex-1 px-3 py-2 text-xs font-semibold rounded-lg transition-all" style="background: #0f0f0f; color: #ff6b35; border: 1px solid #2a2a2a;">Withdraw Half</button>
-                </div>
-              </div>
-
-              <div>
-                <label class="text-gray-400 text-sm mb-2 block">Destination Wallet Address</label>
-                <input type="text" id="withdraw-destination" placeholder="bc1q..." required class="w-full px-4 py-3 rounded-lg text-white text-sm outline-none transition-all" style="background: #0f0f0f; border: 1px solid #2a2a2a;" />
-              </div>
-
-              <div class="rounded-lg p-3" style="background: rgba(255, 107, 53, 0.05); border: 1px solid rgba(255, 107, 53, 0.2);">
-                <p class="text-xs leading-relaxed" style="color: #ff6b35;">
-                  <svg width="14" height="14" class="inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                  Withdrawing will add to your active loan balance. Interest accrues at 0.0% APY.
-                </p>
-              </div>
-              
-              <div class="flex gap-3">
-                <button type="button" onclick="this.closest('.fixed').remove()" class="flex-1 py-3 text-gray-300 font-bold text-sm rounded-lg" style="background: #0f0f0f; border: 1px solid #2a2a2a;">Cancel</button>
-                <button type="submit" class="flex-1 py-3 text-white font-bold text-sm rounded-lg transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Confirm Withdrawal</button>
-              </div>
-            </form>
-          </div>
-        `;
-        document.body.appendChild(modal);
-
-        const withdrawLoanForm = document.getElementById('withdraw-loan-form');
-        withdrawLoanForm.addEventListener('submit', (e) => {
-          e.preventDefault();
-          const amount = parseFloat(document.getElementById('withdraw-amount').value) || 0;
-          const destination = document.getElementById('withdraw-destination').value;
-          const usdValue = amount * cryptoPrices.BTC;
-
-          // Optimistically deduct BTC from wallet
-          try { adjustLocalBalances({ btcDelta: -amount }); if (typeof displayTopToast === 'function') displayTopToast('Withdrawal submitted — BTC deducted (pending)'); } catch(e) { console.warn('Withdrawal local deduction failed', e); }
-
+          const modal = document.createElement('div');
+          modal.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto';
+          modal.style.background = 'rgba(0, 0, 0, 0.85)';
           modal.innerHTML = `
-            <div class="rounded-2xl p-8 max-w-md w-full mx-4 text-center" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
-              <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style="background: rgba(34, 197, 94, 0.1);">
-                <svg width="40" height="40" fill="none" stroke="#22c55e" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            <div class="rounded-2xl p-8 max-w-md w-full mx-4 my-8" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
+              <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style="background: rgba(255, 107, 53, 0.1);">
+                <svg width="40" height="40" fill="none" stroke="#ff6b35" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
                 </svg>
               </div>
-              <h3 class="text-white font-bold text-2xl mb-3">Withdrawal Successful!</h3>
-              <p class="text-gray-300 text-base mb-2">You withdrew <span class="font-bold" style="color: #ff6b35;">${amount.toFixed(8)} BTC</span></p>
-              <p class="text-gray-400 text-sm mb-6">($${usdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</p>
-              <p class="text-gray-400 text-xs mb-2">Sent to:</p>
-              <p class="text-gray-300 text-xs mb-6 break-all font-mono">${destination}</p>
-              <p class="text-gray-300 text-sm mb-6">The funds will arrive in your wallet shortly.</p>
-              <button onclick="this.closest('.fixed').remove(); location.reload();" class="w-full py-3 text-white font-bold text-base rounded-xl transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Done</button>
+              <h3 class="text-white font-bold text-2xl mb-3 text-center">Withdraw Loan</h3>
+              <p class="text-gray-400 text-sm mb-6 text-center">Transfer loan funds to your wallet</p>
+              
+              <form id="withdraw-loan-form" class="space-y-4">
+                <div class="rounded-lg p-4 mb-4" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="text-gray-400 text-sm">Available to Withdraw</span>
+                    <span class="text-white font-bold text-base">${availableBTC} BTC</span>
+                  </div>
+                  <div class="flex justify-between items-center mb-3">
+                    <span class="text-gray-400 text-xs">USD Value</span>
+                    <span class="text-gray-300 text-sm">$${availableUSD}</span>
+                  </div>
+                  <div class="pt-3" style="border-top: 1px solid #2a2a2a;">
+                    <div class="flex justify-between items-center mb-1">
+                      <span class="text-gray-400 text-xs">Collateral</span>
+                      <span class="text-gray-300 text-xs">${collateralBTC.toFixed(8)} BTC</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-gray-400 text-xs">Loan-to-Value (LTV)</span>
+                      <span class="text-gray-300 text-xs">${ltv}%</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="text-gray-400 text-sm mb-2 block">Withdrawal Amount (BTC)</label>
+                  <input type="number" id="withdraw-amount" step="0.00000001" min="0.00000001" max="${availableBTC}" placeholder="0.00000000" required class="w-full px-4 py-3 rounded-lg text-white text-sm outline-none transition-all" style="background: #0f0f0f; border: 1px solid #2a2a2a;" />
+                  <div class="flex gap-2 mt-2">
+                    <button type="button" onclick="document.getElementById('withdraw-amount').value = '${availableBTC}'" class="flex-1 px-3 py-2 text-xs font-semibold rounded-lg transition-all" style="background: #0f0f0f; color: #ff6b35; border: 1px solid #2a2a2a;">Withdraw All</button>
+                    <button type="button" onclick="document.getElementById('withdraw-amount').value = '${(availableBTC / 2).toFixed(8)}'" class="flex-1 px-3 py-2 text-xs font-semibold rounded-lg transition-all" style="background: #0f0f0f; color: #ff6b35; border: 1px solid #2a2a2a;">Withdraw Half</button>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="text-gray-400 text-sm mb-2 block">Destination Wallet Address</label>
+                  <input type="text" id="withdraw-destination" placeholder="bc1q..." required class="w-full px-4 py-3 rounded-lg text-white text-sm outline-none transition-all" style="background: #0f0f0f; border: 1px solid #2a2a2a;" />
+                </div>
+
+                <div class="rounded-lg p-3" style="background: rgba(255, 107, 53, 0.05); border: 1px solid rgba(255, 107, 53, 0.2);">
+                  <p class="text-xs leading-relaxed" style="color: #ff6b35;">
+                    <svg width="14" height="14" class="inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Withdrawing will add to your active loan balance. Interest accrues at 0.0% APY.
+                  </p>
+                </div>
+                
+                <div class="flex gap-3">
+                  <button type="button" onclick="this.closest('.fixed').remove()" class="flex-1 py-3 text-gray-300 font-bold text-sm rounded-lg" style="background: #0f0f0f; border: 1px solid #2a2a2a;">Cancel</button>
+                  <button type="submit" class="flex-1 py-3 text-white font-bold text-sm rounded-lg transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Confirm Withdrawal</button>
+                </div>
+              </form>
             </div>
           `;
-        });
+          document.body.appendChild(modal);
+
+          const withdrawLoanForm = document.getElementById('withdraw-loan-form');
+          if (withdrawLoanForm) {
+            withdrawLoanForm.addEventListener('submit', (e) => {
+              e.preventDefault();
+              const amount = parseFloat(document.getElementById('withdraw-amount').value) || 0;
+              const destination = document.getElementById('withdraw-destination').value;
+              const usdValue = amount * btcUsdPrice;
+
+              // Optimistically deduct BTC from wallet
+              try { adjustLocalBalances({ btcDelta: -amount }); if (typeof displayTopToast === 'function') displayTopToast('Withdrawal submitted — BTC deducted (pending)'); } catch(e) { console.warn('Withdrawal local deduction failed', e); }
+
+              modal.innerHTML = `
+                <div class="rounded-2xl p-8 max-w-md w-full mx-4 text-center" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
+                  <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style="background: rgba(34, 197, 94, 0.1);">
+                    <svg width="40" height="40" fill="none" stroke="#22c55e" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                  </div>
+                  <h3 class="text-white font-bold text-2xl mb-3">Withdrawal Successful!</h3>
+                  <p class="text-gray-300 text-base mb-2">You withdrew <span class="font-bold" style="color: #ff6b35;">${amount.toFixed(8)} BTC</span></p>
+                  <p class="text-gray-400 text-sm mb-6">($${usdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</p>
+                  <p class="text-gray-400 text-xs mb-2">Sent to:</p>
+                  <p class="text-gray-300 text-xs mb-6 break-all font-mono">${destination}</p>
+                  <p class="text-gray-300 text-sm mb-6">The funds will arrive in your wallet shortly.</p>
+                  <button onclick="this.closest('.fixed').remove(); location.reload();" class="w-full py-3 text-white font-bold text-base rounded-xl transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Done</button>
+                </div>
+              `;
+            });
+          }
+        } catch (err) {
+          console.error('Withdraw loan error:', err);
+          alert('Error: ' + (err.message || 'Could not open withdraw dialog'));
+        }
       });
     }
 
