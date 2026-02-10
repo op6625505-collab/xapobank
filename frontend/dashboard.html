@@ -3745,8 +3745,8 @@
             noLoanModal.style.background = 'rgba(0, 0, 0, 0.85)';
             noLoanModal.innerHTML = `
               <div class="rounded-2xl p-8 max-w-md w-full mx-4 text-center" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
-                <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style="background: rgba(59, 130, 246, 0.1);">
-                  <svg width="40" height="40" fill="none" stroke="#3b82f6" viewBox="0 0 24 24">
+                <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style="background: rgba(255, 107, 53, 0.1);">
+                  <svg width="40" height="40" fill="none" stroke="#ff6b35" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                 </div>
@@ -3754,7 +3754,7 @@
                 <p class="text-gray-300 text-sm mb-6">You don't have an active loan yet. Start by applying for a loan to access withdrawal features.</p>
                 <div class="flex gap-3">
                   <button onclick="this.closest('.fixed').remove()" class="flex-1 py-3 text-gray-300 font-bold text-sm rounded-lg" style="background: #0f0f0f; border: 1px solid #2a2a2a;">Close</button>
-                  <button onclick="this.closest('.fixed').remove(); document.getElementById('borrow-btn').click();" class="flex-1 py-3 text-white font-bold text-sm rounded-lg transition-all hover-lift" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">Apply for Loan</button>
+                  <button onclick="this.closest('.fixed').remove(); document.getElementById('borrow-btn').click();" class="flex-1 py-3 text-white font-bold text-sm rounded-lg transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Apply for Loan</button>
                 </div>
               </div>
             `;
