@@ -2115,23 +2115,42 @@
       SGD: 1.34
     };
 
-    /* Live BTC price updater */
+    /* Live BTC price updater with WebSocket for real-time updates */
+    let btcPriceFetchInProgress = false;
+    let btcPriceUpdateTimeoutId = null;
+    
     async function fetchLiveBtcPrice() {
+      // Prevent concurrent requests
+      if (btcPriceFetchInProgress) return;
+      btcPriceFetchInProgress = true;
+      
       try {
-        // Use Binance API - much faster and more reliable than CoinGecko
+        // Use Binance API with timeout - much faster and more reliable than CoinGecko
         // Binance has no rate limiting on free tier and instant response times
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
         const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT', {
           method: 'GET',
-          headers: { 'Accept': 'application/json' }
+          headers: { 'Accept': 'application/json' },
+          signal: controller.signal
         });
+        clearTimeout(timeoutId);
+        
         if (!res.ok) return;
         const data = await res.json();
         if (data && data.price) {
-          cryptoPrices.BTC = Number(data.price);
-          updateBtcUsdDisplays();
-          // Ensure active savings value updates immediately with latest price
-          try { updateActiveSavingsValue(); } catch(e) {}
-          console.debug('Live BTC price updated', { price: Number(data.price) });
+          const newPrice = Number(data.price);
+          const oldPrice = cryptoPrices.BTC;
+          
+          // Only update if price has changed (reduces unnecessary DOM updates)
+          if (newPrice !== oldPrice) {
+            cryptoPrices.BTC = newPrice;
+            updateBtcUsdDisplays();
+            // Ensure active savings value updates immediately with latest price
+            try { updateActiveSavingsValue(); } catch(e) {}
+            console.debug('Live BTC price updated', { oldPrice, newPrice });
+          }
 
           // Update the visible price display
           const priceDisplay = document.getElementById('btc-price-display');
@@ -2139,21 +2158,68 @@
           const usdEquivalent = document.getElementById('usd-equivalent-display');
 
           if (priceDisplay) {
-            priceDisplay.textContent = 'BTC: $' + Number(data.price).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            priceDisplay.textContent = 'BTC: $' + newPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
           }
           if (updateTime) {
             const now = new Date();
             updateTime.textContent = 'Updated: ' + now.toLocaleTimeString();
           }
 
-          // Calculate and update USD equivalent
+          // Calculate and update USD equivalent immediately
           if (usdEquivalent) {
             const btcBalance = parseFloat(document.querySelector('h2.balance-value')?.textContent || 0);
-            const usdValue = btcBalance * Number(data.price);
+            const usdValue = btcBalance * newPrice;
             usdEquivalent.textContent = '$' + usdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
           }
         }
-      } catch (e) { console.error('BTC price fetch error', e); }
+      } catch (e) { 
+        console.error('BTC price fetch error', e); 
+      } finally {
+        btcPriceFetchInProgress = false;
+        // Schedule next update (faster interval - 3 seconds)
+        clearTimeout(btcPriceUpdateTimeoutId);
+        btcPriceUpdateTimeoutId = setTimeout(fetchLiveBtcPrice, 3000);
+      }
+    }
+    
+    // Try to connect to WebSocket for real-time updates if available
+    function initBtcPriceWebSocket() {
+      try {
+        const wsUrl = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+        const ws = new WebSocket(wsUrl + window.location.host + '/ws/btc-price');
+        
+        ws.onmessage = (event) => {
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg.price) {
+              const newPrice = Number(msg.price);
+              cryptoPrices.BTC = newPrice;
+              updateBtcUsdDisplays();
+              try { updateActiveSavingsValue(); } catch(e) {}
+              console.debug('WebSocket BTC price update', { price: newPrice });
+              
+              // Update display
+              const priceDisplay = document.getElementById('btc-price-display');
+              if (priceDisplay) {
+                priceDisplay.textContent = 'BTC: $' + newPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+              }
+            }
+          } catch (e) {
+            console.error('WebSocket message parse error', e);
+          }
+        };
+        
+        ws.onerror = () => {
+          console.debug('WebSocket error, falling back to polling');
+        };
+        
+        ws.onclose = () => {
+          console.debug('WebSocket closed, restarting in 5s');
+          setTimeout(initBtcPriceWebSocket, 5000);
+        };
+      } catch (e) {
+        console.debug('WebSocket not available, using polling only');
+      }
     }
 
     function formatUsd(n) { if (!n || !isFinite(n)) return '$0.00'; return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:2}).format(n); }
@@ -2202,9 +2268,11 @@
       }
     }
 
-    // initial fetch + polling (10 seconds - Binance is fast enough)
+    // Initial fetch immediately + faster polling (3 seconds) + WebSocket for real-time
     fetchLiveBtcPrice();
-    setInterval(fetchLiveBtcPrice, 10000);
+    // Try WebSocket first for real-time updates
+    setTimeout(initBtcPriceWebSocket, 500);
+    // Keep polling as fallback with faster interval (3000ms instead of 10000ms)
 
     // Update active savings current value based on latest price
     function updateActiveSavingsValue() {
