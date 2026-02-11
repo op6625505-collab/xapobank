@@ -3051,7 +3051,7 @@
       if (!btn) return;
       try {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
-        const mainBalanceBTC = Number(user.balanceBTC || 0);
+        const mainBalanceBTC = Number(user.btcBalance || 0);
         const collateralUSD = Number(user.collateralBalanceUSD || 0);
         const btcPrice = (typeof cryptoPrices !== 'undefined' && cryptoPrices.BTC) ? cryptoPrices.BTC : 42000;
         const maxUSD = mainBalanceBTC * btcPrice;
@@ -3104,10 +3104,12 @@
           try {
             const stored = JSON.parse(localStorage.getItem('user') || '{}');
             const btcAmount = usd / btcPrice;
-            stored.balanceBTC = Number((Number(stored.balanceBTC || 0) - btcAmount).toFixed(8));
+            stored.btcBalance = Number((Number(stored.btcBalance || 0) - btcAmount).toFixed(8));
             stored.collateralBalanceUSD = Number((Number(stored.collateralBalanceUSD || 0) + usd).toFixed(2));
             stored.collateralBalanceBTC = Number((Number(stored.collateralBalanceBTC || 0) + btcAmount).toFixed(8));
             localStorage.setItem('user', JSON.stringify(stored));
+            // Immediately update collateral display before fetching from server
+            updateCollateralDisplay(stored.collateralBalanceUSD, stored.collateralBalanceBTC);
             populateUserInfo();
             // Attempt server-side record (best-effort)
             try {
