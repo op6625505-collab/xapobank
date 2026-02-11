@@ -3100,6 +3100,8 @@
           if (!usd || usd <= 0) { alert('Enter a valid amount'); return; }
           if (usd > maxUSD) { alert('Amount exceeds available BTC balance'); return; }
 
+          confirmBtn.disabled = true;
+          
           // Optimistic local update
           try {
             const stored = JSON.parse(localStorage.getItem('user') || '{}');
@@ -3110,22 +3112,30 @@
             localStorage.setItem('user', JSON.stringify(stored));
             // Immediately update collateral display before fetching from server
             updateCollateralDisplay(stored.collateralBalanceUSD, stored.collateralBalanceBTC);
-            populateUserInfo();
-            // Attempt server-side record (best-effort)
-            try {
-              await fetch(window.API_BASE + '/api/transactions', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-                body: JSON.stringify({ type: 'internal', action: 'transfer_to_collateral', amount: Number(usd), btcAmount, description: 'Internal transfer to collateral', status: 'completed' })
-              });
-            } catch (e) { console.debug('Server transfer-to-collateral failed', e); }
+            
+            // Send to server and await response
+            const response = await fetch(window.API_BASE + '/api/transactions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+              body: JSON.stringify({ type: 'internal', action: 'transfer_to_collateral', amount: Number(usd), btcAmount, description: 'Internal transfer to collateral', status: 'completed' })
+            });
+            
+            if (!response.ok) {
+              throw new Error('Server response was not ok: ' + response.status);
+            }
+            
+            const result = await response.json();
+            
+            // Refresh user data from server to confirm
+            await populateUserInfo();
 
             // Close modal and notify
             modal.remove();
-            if (typeof displayTopToast === 'function') displayTopToast('Transferred to collateral (pending server confirmation)');
+            if (typeof displayTopToast === 'function') displayTopToast('Successfully transferred to collateral!');
           } catch (e) {
             console.error('Transfer to collateral failed', e);
-            alert('Transfer failed, please try again');
+            alert('Transfer failed, please try again: ' + (e.message || ''));
+            confirmBtn.disabled = false;
           }
         });
       } catch (e) { console.debug('transfer-to-collateral handler error', e); }
