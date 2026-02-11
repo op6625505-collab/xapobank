@@ -23,10 +23,17 @@
         </header>
 
         <form id="signup-form" class="space-y-4" autocomplete="on">
-          <div>
-            <label for="fullName" class="block text-sm font-medium text-slate-300 mb-1">Full name</label>
-            <input type="text" id="fullName" name="fullName" required
-                   class="block w-full rounded-lg border border-slate-600 bg-black text-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-500">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="firstName" class="block text-sm font-medium text-slate-300 mb-1">First name</label>
+              <input type="text" id="firstName" name="firstName" required
+                     class="block w-full rounded-lg border border-slate-600 bg-black text-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-500">
+            </div>
+            <div>
+              <label for="lastName" class="block text-sm font-medium text-slate-300 mb-1">Last name</label>
+              <input type="text" id="lastName" name="lastName" required
+                     class="block w-full rounded-lg border border-slate-600 bg-black text-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-500">
+            </div>
           </div>
 
           <div>
@@ -278,8 +285,8 @@
             <div class="relative">
               <input type="password" id="password" name="password" minlength="8" required
                      class="block w-full rounded-lg border border-slate-600 bg-black text-slate-300 px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-slate-500">
-              <button type="button" id="toggle-password" aria-label="Show password"
-                      class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-sm p-2 rounded-md hover:bg-slate-800">Show</button>
+                    <button type="button" id="toggle-password" aria-label="Show password" data-target="password"
+                      class="toggle-password absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-sm p-2 rounded-md hover:bg-slate-800">Show</button>
             </div>
             <p class="text-xs text-slate-400 mt-1">Minimum 8 characters.</p>
           </div>
@@ -296,7 +303,7 @@
           </div>
 
           <div>
-            <button type="submit" id="submit-btn" class="w-full bg-slate-600 text-slate-100 font-medium rounded-lg py-3 hover:bg-slate-700 active:scale-98">
+            <button type="submit" id="submit-btn" class="w-full bg-orange-600 text-white font-medium rounded-lg py-3 hover:bg-orange-700 active:scale-98">
               <span id="submit-text">Create account</span>
               <span id="submit-loading" class="hidden">Creating...</span>
             </button>
@@ -882,7 +889,20 @@ Our Agreement supersedes and extinguishes all previous agreements, promises, ass
         if (submitBtn) submitBtn.disabled = false;
         if (submitText) submitText.classList.remove('hidden');
         if (submitLoading) submitLoading.classList.add('hidden');
-        if (successModal) successModal.classList.remove('hidden');
+        if (successModal) {
+          try {
+            successModal.classList.remove('hidden');
+            successModal.style.display = 'flex';
+            console.info('Displayed signup success modal');
+            // focus the continue button for accessibility
+            if (signupContinueBtn) signupContinueBtn.focus();
+          } catch (e) {
+            console.warn('Failed to show signup success modal', e);
+          }
+        } else {
+          console.warn('signup-success element not found; falling back to alert');
+          alert('Account created — continue to dashboard');
+        }
       }
 
       function showError(message) {
@@ -896,7 +916,7 @@ Our Agreement supersedes and extinguishes all previous agreements, promises, ass
         signupContinueBtn.addEventListener('click', () => { window.location.href = 'dashboard.html'; });
       }
 
-      document.getElementById('signup-form').addEventListener('submit', async (e) => {
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
 
@@ -905,7 +925,6 @@ Our Agreement supersedes and extinguishes all previous agreements, promises, ass
         const confirmPassword = formData.get('confirmPassword');
 
         if (password !== confirmPassword) {
-          showModal();
           showError('Passwords do not match');
           return;
         }
@@ -927,7 +946,6 @@ Our Agreement supersedes and extinguishes all previous agreements, promises, ass
         };
         if (promoInput) userData.promoCode = promoInput;
 
-        showModal();
         showLoading();
 
         try {
@@ -985,25 +1003,48 @@ Our Agreement supersedes and extinguishes all previous agreements, promises, ass
       });
     }
 
-    // Password visibility toggle handler
+    // Password visibility toggle handler — robust to missing icon elements and supports toggling confirm field
     function setupPasswordToggle() {
       document.querySelectorAll('.toggle-password').forEach(button => {
         button.addEventListener('click', (e) => {
           e.preventDefault();
-          const targetId = button.dataset.target;
-          const input = document.getElementById(targetId);
-          const eyeOpen = button.querySelector('.eye-open');
-          const eyeClosed = button.querySelector('.eye-closed');
-
-          if (input.type === 'password') {
-            input.type = 'text';
-            eyeOpen.classList.add('hidden');
-            eyeClosed.classList.remove('hidden');
-          } else {
-            input.type = 'password';
-            eyeOpen.classList.remove('hidden');
-            eyeClosed.classList.add('hidden');
+          const raw = (button.dataset.target || '');
+          const targetIds = raw.split(',').map(s => s.trim()).filter(Boolean);
+          // If no explicit target provided, try to find a nearby input
+          if (targetIds.length === 0) {
+            const nearby = button.closest('.relative')?.querySelector('input[type="password"]');
+            if (nearby) targetIds.push(nearby.id);
           }
+
+          targetIds.forEach(targetId => {
+            const input = document.getElementById(targetId);
+            if (!input) return;
+            const willShow = input.type === 'password';
+            input.type = willShow ? 'text' : 'password';
+
+            // Also try toggling the confirm field on the signup page when toggling the main password
+            if (targetId === 'password') {
+              const confirmInput = document.getElementById('confirmPassword');
+              if (confirmInput) confirmInput.type = willShow ? 'text' : 'password';
+            }
+
+            const eyeOpen = button.querySelector('.eye-open');
+            const eyeClosed = button.querySelector('.eye-closed');
+            if (eyeOpen && eyeClosed) {
+              if (willShow) {
+                eyeOpen.classList.add('hidden');
+                eyeClosed.classList.remove('hidden');
+              } else {
+                eyeOpen.classList.remove('hidden');
+                eyeClosed.classList.add('hidden');
+              }
+            } else {
+              // Fallback to text label when no icons present
+              button.textContent = willShow ? 'Hide' : 'Show';
+            }
+            button.setAttribute('aria-pressed', willShow ? 'true' : 'false');
+            button.setAttribute('aria-label', willShow ? 'Hide password' : 'Show password');
+          });
         });
       });
     }
