@@ -1,41 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#0ea5e9">
-  <title>Sign Up - Xapo Bank</title>
-  <link rel="icon" href="/IMG_2730.PNG" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="/xapo_logo.svg">
+   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>XapoBank - Sign Up</title>
+  <script src="/config.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    @media (min-width: 768px) { .card { padding: 2.5rem; } }
-  </style>
-  <script src="https://backend-xapobank-1.onrender.com/config.js"></script>
-  <script>
-    // Fallback runtime config for signup page when config.js isn't served from the static host
-    (function(){
-      try {
-        if (!window.API_BASE && !window.API_URL) {
-          window.API_BASE = 'https://backend-xapobank-1.onrender.com';
-          window.API_URL = window.API_BASE;
-        }
-      } catch (e) { /* ignore */ }
-    })();
-  </script>
-  <script>
-    // Register service worker to proxy /api/* from static site to backend.
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').then(reg => {
-        console.debug('Service worker registered', reg);
-        const sendApiBase = (worker) => {
-          try { worker.postMessage({ type: 'setApiBase', value: window.API_BASE || window.API_URL || 'https://xapoloan.onrender.com' }); } catch (e) {}
-        };
-        if (reg.waiting) sendApiBase(reg.waiting);
-        if (reg.active) sendApiBase(reg.active);
-      }).catch(err => console.warn('Service worker registration failed', err));
-    }
-  </script>
+
+  
 </head>
 <body class="bg-black text-slate-300 min-h-screen flex items-center justify-center py-8">
   <main class="w-full max-w-md px-4">
@@ -70,74 +45,232 @@
             <label for="country" class="block text-sm font-medium text-slate-300 mb-1">Country</label>
             <select id="country" name="country" class="block w-full rounded-lg border border-slate-600 bg-black text-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-500">
               <option value="">Select your country</option>
-              <option value="United States">United States</option>
-              <option value="United Kingdom">United Kingdom</option>
-              <option value="Canada">Canada</option>
-              <option value="Australia">Australia</option>
-              <option value="India">India</option>
-              <option value="China">China</option>
-              <option value="Japan">Japan</option>
-              <option value="Germany">Germany</option>
-              <option value="France">France</option>
-              <option value="Italy">Italy</option>
-              <option value="Spain">Spain</option>
-              <option value="Mexico">Mexico</option>
-              <option value="Brazil">Brazil</option>
-              <option value="Argentina">Argentina</option>
-              <option value="South Africa">South Africa</option>
-              <option value="Nigeria">Nigeria</option>
-              <option value="Egypt">Egypt</option>
-              <option value="Turkey">Turkey</option>
-              <option value="Saudi Arabia">Saudi Arabia</option>
-              <option value="United Arab Emirates">United Arab Emirates</option>
-              <option value="Russia">Russia</option>
-              <option value="Netherlands">Netherlands</option>
-              <option value="Belgium">Belgium</option>
-              <option value="Sweden">Sweden</option>
-              <option value="Norway">Norway</option>
-              <option value="Denmark">Denmark</option>
-              <option value="Finland">Finland</option>
-              <option value="Poland">Poland</option>
-              <option value="Austria">Austria</option>
-              <option value="Switzerland">Switzerland</option>
-              <option value="Ireland">Ireland</option>
-              <option value="Portugal">Portugal</option>
-              <option value="Greece">Greece</option>
-              <option value="Czech Republic">Czech Republic</option>
-              <option value="Hungary">Hungary</option>
-              <option value="Romania">Romania</option>
-              <option value="Bulgaria">Bulgaria</option>
-              <option value="Slovakia">Slovakia</option>
-              <option value="Slovenia">Slovenia</option>
-              <option value="Croatia">Croatia</option>
-              <option value="Serbia">Serbia</option>
-              <option value="Chile">Chile</option>
-              <option value="Peru">Peru</option>
-              <option value="Colombia">Colombia</option>
-              <option value="Venezuela">Venezuela</option>
-              <option value="Uruguay">Uruguay</option>
-              <option value="Ecuador">Ecuador</option>
-              <option value="Bolivia">Bolivia</option>
-              <option value="Philippines">Philippines</option>
-              <option value="Indonesia">Indonesia</option>
-              <option value="Malaysia">Malaysia</option>
-              <option value="Singapore">Singapore</option>
-              <option value="Thailand">Thailand</option>
-              <option value="Vietnam">Vietnam</option>
-              <option value="South Korea">South Korea</option>
-              <option value="New Zealand">New Zealand</option>
-              <option value="Israel">Israel</option>
-              <option value="Iran">Iran</option>
-              <option value="Pakistan">Pakistan</option>
-              <option value="Bangladesh">Bangladesh</option>
-              <option value="Kenya">Kenya</option>
-              <option value="Morocco">Morocco</option>
-              <option value="Algeria">Algeria</option>
-              <option value="Ghana">Ghana</option>
-              <option value="Cameroon">Cameroon</option>
-              <option value="Uganda">Uganda</option>
-              <option value="Tanzania">Tanzania</option>
-            </select>
+        <option value="AF">Afghanistan</option>
+        <option value="AL">Albania</option>
+        <option value="DZ">Algeria</option>
+        <option value="AS">American Samoa</option>
+        <option value="AD">Andorra</option>
+        <option value="AO">Angola</option>
+        <option value="AI">Anguilla</option>
+        <option value="AQ">Antarctica</option>
+        <option value="AG">Antigua and Barbuda</option>
+        <option value="AR">Argentina</option>
+        <option value="AM">Armenia</option>
+        <option value="AW">Aruba</option>
+        <option value="AU">Australia</option>
+        <option value="AT">Austria</option>
+        <option value="AZ">Azerbaijan</option>
+        <option value="BS">Bahamas</option>
+        <option value="BH">Bahrain</option>
+        <option value="BD">Bangladesh</option>
+        <option value="BB">Barbados</option>
+        <option value="BY">Belarus</option>
+        <option value="BE">Belgium</option>
+        <option value="BZ">Belize</option>
+        <option value="BJ">Benin</option>
+        <option value="BM">Bermuda</option>
+        <option value="BT">Bhutan</option>
+        <option value="BO">Bolivia</option>
+        <option value="BA">Bosnia and Herzegovina</option>
+        <option value="BW">Botswana</option>
+        <option value="BR">Brazil</option>
+        <option value="BN">Brunei</option>
+        <option value="BG">Bulgaria</option>
+        <option value="BF">Burkina Faso</option>
+        <option value="BI">Burundi</option>
+        <option value="KH">Cambodia</option>
+        <option value="CM">Cameroon</option>
+        <option value="CA">Canada</option>
+        <option value="CV">Cape Verde</option>
+        <option value="KY">Cayman Islands</option>
+        <option value="CF">Central African Republic</option>
+        <option value="TD">Chad</option>
+        <option value="CL">Chile</option>
+        <option value="CN">China</option>
+        <option value="CO">Colombia</option>
+        <option value="KM">Comoros</option>
+        <option value="CG">Congo</option>
+        <option value="CD">Congo, Democratic Republic</option>
+        <option value="CK">Cook Islands</option>
+        <option value="CR">Costa Rica</option>
+        <option value="CI">Côte d'Ivoire</option>
+        <option value="HR">Croatia</option>
+        <option value="CU">Cuba</option>
+        <option value="CW">Curaçao</option>
+        <option value="CY">Cyprus</option>
+        <option value="CZ">Czech Republic</option>
+        <option value="DK">Denmark</option>
+        <option value="DJ">Djibouti</option>
+        <option value="DM">Dominica</option>
+        <option value="DO">Dominican Republic</option>
+        <option value="EC">Ecuador</option>
+        <option value="EG">Egypt</option>
+        <option value="SV">El Salvador</option>
+        <option value="GQ">Equatorial Guinea</option>
+        <option value="ER">Eritrea</option>
+        <option value="EE">Estonia</option>
+        <option value="ET">Ethiopia</option>
+        <option value="FK">Falkland Islands</option>
+        <option value="FO">Faroe Islands</option>
+        <option value="FJ">Fiji</option>
+        <option value="FI">Finland</option>
+        <option value="FR">France</option>
+        <option value="GA">Gabon</option>
+        <option value="GM">Gambia</option>
+        <option value="GE">Georgia</option>
+        <option value="DE">Germany</option>
+        <option value="GH">Ghana</option>
+        <option value="GI">Gibraltar</option>
+        <option value="GR">Greece</option>
+        <option value="GL">Greenland</option>
+        <option value="GD">Grenada</option>
+        <option value="GU">Guam</option>
+        <option value="GT">Guatemala</option>
+        <option value="GG">Guernsey</option>
+        <option value="GN">Guinea</option>
+        <option value="GW">Guinea-Bissau</option>
+        <option value="GY">Guyana</option>
+        <option value="HT">Haiti</option>
+        <option value="HN">Honduras</option>
+        <option value="HK">Hong Kong</option>
+        <option value="HU">Hungary</option>
+        <option value="IS">Iceland</option>
+        <option value="IN">India</option>
+        <option value="ID">Indonesia</option>
+        <option value="IR">Iran</option>
+        <option value="IQ">Iraq</option>
+        <option value="IE">Ireland</option>
+        <option value="IM">Isle of Man</option>
+        <option value="IL">Israel</option>
+        <option value="IT">Italy</option>
+        <option value="JM">Jamaica</option>
+        <option value="JP">Japan</option>
+        <option value="JE">Jersey</option>
+        <option value="JO">Jordan</option>
+        <option value="KZ">Kazakhstan</option>
+        <option value="KE">Kenya</option>
+        <option value="KI">Kiribati</option>
+        <option value="KP">Korea, North</option>
+        <option value="KR">Korea, South</option>
+        <option value="KW">Kuwait</option>
+        <option value="KG">Kyrgyzstan</option>
+        <option value="LA">Laos</option>
+        <option value="LV">Latvia</option>
+        <option value="LB">Lebanon</option>
+        <option value="LS">Lesotho</option>
+        <option value="LR">Liberia</option>
+        <option value="LY">Libya</option>
+        <option value="LI">Liechtenstein</option>
+        <option value="LT">Lithuania</option>
+        <option value="LU">Luxembourg</option>
+        <option value="MO">Macau</option>
+        <option value="MK">Macedonia</option>
+        <option value="MG">Madagascar</option>
+        <option value="MW">Malawi</option>
+        <option value="MY">Malaysia</option>
+        <option value="MV">Maldives</option>
+        <option value="ML">Mali</option>
+        <option value="MT">Malta</option>
+        <option value="MH">Marshall Islands</option>
+        <option value="MR">Mauritania</option>
+        <option value="MU">Mauritius</option>
+        <option value="MX">Mexico</option>
+        <option value="FM">Micronesia</option>
+        <option value="MD">Moldova</option>
+        <option value="MC">Monaco</option>
+        <option value="MN">Mongolia</option>
+        <option value="ME">Montenegro</option>
+        <option value="MS">Montserrat</option>
+        <option value="MA">Morocco</option>
+        <option value="MZ">Mozambique</option>
+        <option value="MM">Myanmar</option>
+        <option value="NA">Namibia</option>
+        <option value="NR">Nauru</option>
+        <option value="NP">Nepal</option>
+        <option value="NL">Netherlands</option>
+        <option value="NC">New Caledonia</option>
+        <option value="NZ">New Zealand</option>
+        <option value="NI">Nicaragua</option>
+        <option value="NE">Niger</option>
+        <option value="NG">Nigeria</option>
+        <option value="NU">Niue</option>
+        <option value="NF">Norfolk Island</option>
+        <option value="MP">Northern Mariana Islands</option>
+        <option value="NO">Norway</option>
+        <option value="OM">Oman</option>
+        <option value="PK">Pakistan</option>
+        <option value="PW">Palau</option>
+        <option value="PS">Palestine</option>
+        <option value="PA">Panama</option>
+        <option value="PG">Papua New Guinea</option>
+        <option value="PY">Paraguay</option>
+        <option value="PE">Peru</option>
+        <option value="PH">Philippines</option>
+        <option value="PN">Pitcairn</option>
+        <option value="PL">Poland</option>
+        <option value="PT">Portugal</option>
+        <option value="PR">Puerto Rico</option>
+        <option value="QA">Qatar</option>
+        <option value="RO">Romania</option>
+        <option value="RU">Russia</option>
+        <option value="RW">Rwanda</option>
+        <option value="WS">Samoa</option>
+        <option value="SM">San Marino</option>
+        <option value="ST">São Tomé and Príncipe</option>
+        <option value="SA">Saudi Arabia</option>
+        <option value="SN">Senegal</option>
+        <option value="RS">Serbia</option>
+        <option value="SC">Seychelles</option>
+        <option value="SL">Sierra Leone</option>
+        <option value="SG">Singapore</option>
+        <option value="SX">Sint Maarten</option>
+        <option value="SK">Slovakia</option>
+        <option value="SI">Slovenia</option>
+        <option value="SB">Solomon Islands</option>
+        <option value="SO">Somalia</option>
+        <option value="ZA">South Africa</option>
+        <option value="SS">South Sudan</option>
+        <option value="ES">Spain</option>
+        <option value="LK">Sri Lanka</option>
+        <option value="SD">Sudan</option>
+        <option value="SR">Suriname</option>
+        <option value="SZ">Swaziland</option>
+        <option value="SE">Sweden</option>
+        <option value="CH">Switzerland</option>
+        <option value="SY">Syria</option>
+        <option value="TW">Taiwan</option>
+        <option value="TJ">Tajikistan</option>
+        <option value="TZ">Tanzania</option>
+        <option value="TH">Thailand</option>
+        <option value="TL">Timor-Leste</option>
+        <option value="TG">Togo</option>
+        <option value="TK">Tokelau</option>
+        <option value="TO">Tonga</option>
+        <option value="TT">Trinidad and Tobago</option>
+        <option value="TN">Tunisia</option>
+        <option value="TR">Turkey</option>
+        <option value="TM">Turkmenistan</option>
+        <option value="TC">Turks and Caicos Islands</option>
+        <option value="TV">Tuvalu</option>
+        <option value="UG">Uganda</option>
+        <option value="UA">Ukraine</option>
+        <option value="AE">United Arab Emirates</option>
+        <option value="GB">United Kingdom</option>
+        <option value="US">United States</option>
+        <option value="UY">Uruguay</option>
+        <option value="UZ">Uzbekistan</option>
+        <option value="VU">Vanuatu</option>
+        <option value="VA">Vatican City</option>
+        <option value="VE">Venezuela</option>
+        <option value="VN">Vietnam</option>
+        <option value="VG">Virgin Islands, British</option>
+        <option value="VI">Virgin Islands, U.S.</option>
+        <option value="WF">Wallis and Futuna</option>
+        <option value="EH">Western Sahara</option>
+        <option value="YE">Yemen</option>
+        <option value="ZM">Zambia</option>
+        <option value="ZW">Zimbabwe</option>
+       </select>
           </div>
 
           <div>
@@ -720,154 +853,155 @@ Our Agreement supersedes and extinguishes all previous agreements, promises, ass
   </main>
 
   <script>
-    // Password toggle (for first password field)
-    const toggleBtn = document.getElementById('toggle-password');
-    const passwordInput = document.getElementById('password');
-    toggleBtn.addEventListener('click', () => {
-      if (passwordInput.type === 'password') {
-        passwordInput.type = 'text';
-        toggleBtn.textContent = 'Hide';
-        toggleBtn.setAttribute('aria-pressed', 'true');
-      } else {
-        passwordInput.type = 'password';
-        toggleBtn.textContent = 'Show';
-        toggleBtn.setAttribute('aria-pressed', 'false');
+    function initializeSignUp() {
+      const modal = document.getElementById('signup-modal');
+      const loadingState = document.getElementById('loading-state');
+      const successState = document.getElementById('success-state');
+      const errorState = document.getElementById('error-state');
+      const errorMessage = document.getElementById('error-message');
+      const closeModal = document.getElementById('close-modal');
+
+      function showModal() {
+        modal.classList.remove('hidden');
       }
-    });
 
-    // Client-side validation and submit
-    document.getElementById('signup-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const submitBtn = document.getElementById('submit-btn');
-      const submitText = document.getElementById('submit-text');
-      const submitLoading = document.getElementById('submit-loading');
+      function hideModal() {
+        modal.classList.add('hidden');
+        loadingState.classList.add('hidden');
+        successState.classList.add('hidden');
+        errorState.classList.add('hidden');
+      }
 
-      const fullName = document.getElementById('fullName').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
-      const confirm = document.getElementById('confirmPassword').value;
-      const terms = document.getElementById('terms').checked;
+      function showLoading() {
+        loadingState.classList.remove('hidden');
+        successState.classList.add('hidden');
+        errorState.classList.add('hidden');
+      }
 
-      if (!terms) { alert('You must accept the terms.'); return; }
-      if (password !== confirm) { alert('Passwords do not match.'); return; }
-      if (password.length < 8) { alert('Password must be at least 8 characters.'); return; }
+      function showSuccess() {
+        loadingState.classList.add('hidden');
+        successState.classList.remove('hidden');
+        errorState.classList.add('hidden');
+      }
 
-      submitText.classList.add('hidden');
-      submitLoading.classList.remove('hidden');
-      submitBtn.disabled = true;
+      function showError(message) {
+        loadingState.classList.add('hidden');
+        successState.classList.add('hidden');
+        errorState.classList.remove('hidden');
+        errorMessage.textContent = message;
+      }
 
-      const phone = document.getElementById('phone').value.trim();
-      const country = document.getElementById('country').value;
-      const payload = { fullName, email, password, phone, country };
-      try {
-        const API_BASE = 'https://backend-xapobank-1.onrender.com';
-        const res = await fetch(API_BASE + '/api/auth/register', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-        });
-        let data;
-        try { data = await res.json(); } catch (e) { data = null; }
-        if (res.ok) {
-          // Auto-login: save token and user then show success popout before redirect
-          if (data && data.token) localStorage.setItem('token', data.token);
-          if (data && data.data) { try { localStorage.setItem('user', JSON.stringify(data.data)); } catch (e) { console.warn('Could not store user', e); } }
-          // If register didn't return a token, try to login explicitly using credentials
-          if ((!data || !data.token) && payload.email && payload.password) {
-            try {
-              const loginRes = await fetch(API_BASE + '/api/auth/login', {
-                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: payload.email, password: payload.password })
-              });
-              const loginJ = await loginRes.json().catch(()=>null);
-              if (loginRes.ok && loginJ && (loginJ.token || loginJ.data?.token)) {
-                const tokenVal = loginJ.token || loginJ.data.token;
-                localStorage.setItem('token', tokenVal);
-                if (loginJ.data) try { localStorage.setItem('user', JSON.stringify(loginJ.data)); } catch(e){}
-              }
-            } catch (e) { console.warn('Auto-login after register failed', e); }
+      closeModal.addEventListener('click', hideModal);
+
+      document.getElementById('signup-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+
+        // Validate password confirmation
+        const password = formData.get('password');
+        const confirmPassword = formData.get('confirmPassword');
+
+        if (password !== confirmPassword) {
+          showModal();
+          showError('Passwords do not match');
+          return;
+        }
+
+        // Sign up API call
+        const promoInput = (formData.get('promoCode') || '').trim();
+        const userData = {
+          name: `${formData.get('firstName')} ${formData.get('lastName')}`,
+          email: formData.get('email'),
+          password: password,
+          phone: formData.get('phone'),
+          country: formData.get('country')
+        };
+        if (promoInput) userData.promoCode = promoInput;
+
+        showModal();
+        showLoading();
+
+        try {
+          if (typeof window.API_BASE === 'undefined') {
+            throw new Error('API configuration not loaded');
           }
-          const pop = document.getElementById('signup-success');
-          const cont = document.getElementById('signup-continue');
-          if (pop) pop.classList.remove('hidden');
-          // Continue button redirects immediately to dashboard (use root for Vercel)
-          const dashboardPath = '/';
-          if (cont) cont.addEventListener('click', () => { window.location.href = dashboardPath; });
-          // Auto-redirect after 2.5s
-          setTimeout(() => { window.location.href = dashboardPath; }, 2500);
-        } else {
-          const msg = (data && (data.message || data.error)) ? (data.message || data.error) : `Sign-up failed (${res.status})`;
-          alert(msg);
+
+          const response = await fetch(window.API_BASE + '/api/auth/register', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            localStorage.setItem('token', result.token);
+            const userObj = Object.assign({}, result.data || {});
+            localStorage.setItem('user', JSON.stringify(userObj));
+            // Show promo bonus message ONLY if a valid promo code was actually applied
+            try {
+              const promoEl = document.getElementById('welcome-promo');
+              if (promoEl && result.data && result.data.promoApplied) {
+                promoEl.textContent = `Promo code applied — Welcome! Make a deposit to receive a 100% bonus.`;
+              } else if (promoEl) {
+                promoEl.textContent = '';
+              }
+            } catch (e) {}
+            showSuccess();
+            // After signup, redirect to dashboard
+            setTimeout(() => {
+              window.location.href = 'dashboard.html';
+            }, 1600);
+          } else {
+            showError(result.message || 'Registration failed');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          showError('An error occurred. Please try again.');
         }
-      } catch (err) {
-        console.error(err);
-        alert('Network error — please try again.');
-      } finally {
-        submitText.classList.remove('hidden');
-        submitLoading.classList.add('hidden');
-        submitBtn.disabled = false;
+      });
+    }
+
+    // Password visibility toggle handler
+    function setupPasswordToggle() {
+      document.querySelectorAll('.toggle-password').forEach(button => {
+        button.addEventListener('click', (e) => {
+          e.preventDefault();
+          const targetId = button.dataset.target;
+          const input = document.getElementById(targetId);
+          const eyeOpen = button.querySelector('.eye-open');
+          const eyeClosed = button.querySelector('.eye-closed');
+
+          if (input.type === 'password') {
+            input.type = 'text';
+            eyeOpen.classList.add('hidden');
+            eyeClosed.classList.remove('hidden');
+          } else {
+            input.type = 'password';
+            eyeOpen.classList.remove('hidden');
+            eyeClosed.classList.add('hidden');
+          }
+        });
+      });
+    }
+
+    // Wait for config.js to load
+    function waitForConfig() {
+      if (typeof window.API_BASE !== 'undefined') {
+        initializeSignUp();
+        setupPasswordToggle();
+      } else {
+        setTimeout(waitForConfig, 100);
       }
-    });
+    }
 
-    // Terms & Privacy modal wiring: open, close, accept
-    (function(){
-      function qs(id){ return document.getElementById(id); }
-      var termsLink = qs('terms-link');
-      var termsModal = qs('terms-modal');
-      var closeTop = qs('close-terms');
-      var closeBottom = qs('close-terms-bottom');
-      var acceptBtn = qs('accept-terms-btn');
-      var termsCheckbox = qs('terms');
-
-      var privacyLink = qs('privacy-link');
-      var privacyModal = qs('privacy-modal');
-      var closePrivacyTop = qs('close-privacy');
-      var closePrivacyBottom = qs('close-privacy-bottom');
-      var acceptPrivacyBtn = qs('accept-privacy-btn');
-
-      if (!termsLink || !termsModal) {
-        if (!privacyLink || !privacyModal) return;
-      }
-
-      if (termsLink) termsLink.addEventListener('click', function(e){
-        e.preventDefault();
-        if (termsModal) {
-          termsModal.classList.remove('hidden');
-          var heading = termsModal.querySelector('h3');
-          if (heading) { heading.setAttribute('tabindex','-1'); heading.focus(); }
-        }
-      });
-
-      if (privacyLink) privacyLink.addEventListener('click', function(e){
-        e.preventDefault();
-        if (privacyModal) {
-          privacyModal.classList.remove('hidden');
-          var heading = privacyModal.querySelector('h3');
-          if (heading) { heading.setAttribute('tabindex','-1'); heading.focus(); }
-        }
-      });
-
-      if (closeTop) closeTop.addEventListener('click', function(){ if (termsModal) termsModal.classList.add('hidden'); });
-      if (closeBottom) closeBottom.addEventListener('click', function(){ if (termsModal) termsModal.classList.add('hidden'); });
-      if (acceptBtn) acceptBtn.addEventListener('click', function(){
-        if (termsCheckbox) termsCheckbox.checked = true;
-        if (termsModal) termsModal.classList.add('hidden');
-      });
-
-      if (closePrivacyTop) closePrivacyTop.addEventListener('click', function(){ if (privacyModal) privacyModal.classList.add('hidden'); });
-      if (closePrivacyBottom) closePrivacyBottom.addEventListener('click', function(){ if (privacyModal) privacyModal.classList.add('hidden'); });
-      if (acceptPrivacyBtn) acceptPrivacyBtn.addEventListener('click', function(){
-        if (termsCheckbox) termsCheckbox.checked = true;
-        if (privacyModal) privacyModal.classList.add('hidden');
-      });
-
-      if (termsModal) termsModal.addEventListener('click', function(e){ if (e.target === termsModal) termsModal.classList.add('hidden'); });
-      if (privacyModal) privacyModal.addEventListener('click', function(e){ if (e.target === privacyModal) privacyModal.classList.add('hidden'); });
-
-      document.addEventListener('keydown', function(e){
-        if (e.key === 'Escape') {
-          if (termsModal && !termsModal.classList.contains('hidden')) termsModal.classList.add('hidden');
-          if (privacyModal && !privacyModal.classList.contains('hidden')) privacyModal.classList.add('hidden');
-        }
-      });
-    })();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', waitForConfig);
+    } else {
+      waitForConfig();
+    }
   </script>
 </body>
 </html>
