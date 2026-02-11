@@ -854,44 +854,47 @@ Our Agreement supersedes and extinguishes all previous agreements, promises, ass
 
   <script>
     function initializeSignUp() {
-      const modal = document.getElementById('signup-modal');
-      const loadingState = document.getElementById('loading-state');
-      const successState = document.getElementById('success-state');
-      const errorState = document.getElementById('error-state');
-      const errorMessage = document.getElementById('error-message');
-      const closeModal = document.getElementById('close-modal');
+      // Elements that exist in this page
+      const submitBtn = document.getElementById('submit-btn');
+      const submitText = document.getElementById('submit-text');
+      const submitLoading = document.getElementById('submit-loading');
+      const successModal = document.getElementById('signup-success');
+      const signupContinueBtn = document.getElementById('signup-continue');
 
-      function showModal() {
-        modal.classList.remove('hidden');
-      }
-
-      function hideModal() {
-        modal.classList.add('hidden');
-        loadingState.classList.add('hidden');
-        successState.classList.add('hidden');
-        errorState.classList.add('hidden');
+      // Fallback inline error element (create if missing)
+      let errorEl = document.getElementById('signup-error-inline');
+      if (!errorEl) {
+        errorEl = document.createElement('div');
+        errorEl.id = 'signup-error-inline';
+        errorEl.className = 'hidden mb-4 text-sm text-red-400';
+        const form = document.getElementById('signup-form');
+        form.parentNode.insertBefore(errorEl, form);
       }
 
       function showLoading() {
-        loadingState.classList.remove('hidden');
-        successState.classList.add('hidden');
-        errorState.classList.add('hidden');
+        if (submitBtn) submitBtn.disabled = true;
+        if (submitText) submitText.classList.add('hidden');
+        if (submitLoading) submitLoading.classList.remove('hidden');
+        if (errorEl) { errorEl.classList.add('hidden'); errorEl.textContent = ''; }
       }
 
       function showSuccess() {
-        loadingState.classList.add('hidden');
-        successState.classList.remove('hidden');
-        errorState.classList.add('hidden');
+        if (submitBtn) submitBtn.disabled = false;
+        if (submitText) submitText.classList.remove('hidden');
+        if (submitLoading) submitLoading.classList.add('hidden');
+        if (successModal) successModal.classList.remove('hidden');
       }
 
       function showError(message) {
-        loadingState.classList.add('hidden');
-        successState.classList.add('hidden');
-        errorState.classList.remove('hidden');
-        errorMessage.textContent = message;
+        if (submitBtn) submitBtn.disabled = false;
+        if (submitText) submitText.classList.remove('hidden');
+        if (submitLoading) submitLoading.classList.add('hidden');
+        if (errorEl) { errorEl.textContent = message; errorEl.classList.remove('hidden'); }
       }
 
-      closeModal.addEventListener('click', hideModal);
+      if (signupContinueBtn) {
+        signupContinueBtn.addEventListener('click', () => { window.location.href = 'dashboard.html'; });
+      }
 
       document.getElementById('signup-form').addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -932,7 +935,9 @@ Our Agreement supersedes and extinguishes all previous agreements, promises, ass
             throw new Error('API configuration not loaded');
           }
 
-          const response = await fetch(window.API_BASE + '/api/auth/register', {
+          const url = window.API_BASE.replace(/\/$/, '') + '/api/auth/register';
+          console.info('Register POST to', url);
+          const response = await fetch(url, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -940,9 +945,15 @@ Our Agreement supersedes and extinguishes all previous agreements, promises, ass
             body: JSON.stringify(userData),
           });
 
-          const result = await response.json();
+          // Read raw text first and parse JSON safely to avoid parse errors
+          let raw = null;
+          try { raw = await response.text(); } catch (e) { console.warn('Failed to read register response text', e); }
+          let result = null;
+          if (raw) {
+            try { result = JSON.parse(raw); } catch (e) { console.warn('Failed to parse register JSON', e, raw.slice(0,200)); result = null; }
+          }
 
-          if (result.success && result.token) {
+          if (result && result.success && result.token) {
             localStorage.setItem('token', result.token);
             const userObj = Object.assign({}, result.data || {});
             localStorage.setItem('user', JSON.stringify(userObj));
@@ -960,11 +971,12 @@ Our Agreement supersedes and extinguishes all previous agreements, promises, ass
             setTimeout(() => {
               window.location.href = 'dashboard.html';
             }, 1200);
-          } else if (result.success && !result.token) {
+          } else if (result && result.success && !result.token) {
             // Server reported success but didn't return a token
             showError('Registration succeeded but no session token was returned. Please sign in.');
           } else {
-            showError(result.message || 'Registration failed');
+            const msg = (result && result.message) ? result.message : (response && response.status ? `HTTP ${response.status}` : 'Registration failed');
+            showError(msg);
           }
         } catch (error) {
           console.error('Error:', error);
