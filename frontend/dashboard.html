@@ -575,7 +575,7 @@
       </div>
      </div><!-- Danger Zone -->
      <div class="mb-8">
-      <h3 class="text-white font-semibold text-base mb-3 px-2">Danger Zone</h3>
+      <h3 class="text-white font-semibold text-base mb-3 px-2"></h3>
       <div class="rounded-xl overflow-hidden" style="background: #1a1a1a; border: 1px solid rgba(239, 68, 68, 0.3);"><button id="logout-btn" class="w-full p-4 flex items-center justify-between hover-lift transition-all" style="border-bottom: 1px solid rgba(239, 68, 68, 0.2);">
         <div class="flex items-center gap-3">
          <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: rgba(239, 68, 68, 0.1);">
@@ -5298,9 +5298,79 @@
           </div>
         `;
         document.body.appendChild(modal);
-        try { localStorage.setItem('activeLoan', JSON.stringify({ appliedAt: new Date().toISOString() })); } catch(e) {}
-        try { updateActiveBadges(); } catch(e) {}
-        try { updateDaysUntilDue(); } catch(e) {}
+        try {
+          // Build a richer local activeLoan record so the dashboard can display immediately
+          const appliedAt = new Date().toISOString();
+          // Preferred sources: available loan USD, collateral input, result period
+          const availableLoanUsdEl = document.getElementById('available-loan-usd');
+          const collateralInput = document.getElementById('loan-collateral-amount');
+          const resultPeriodEl = document.getElementById('result-period');
+
+          let principalUSD = 0;
+          try {
+            if (availableLoanUsdEl) principalUSD = Number((availableLoanUsdEl.textContent || '').toString().replace(/[^0-9.\-]/g, '')) || 0;
+            // fallback to result-total if available
+            if (!principalUSD) {
+              const resultTotal = document.getElementById('result-total');
+              if (resultTotal) principalUSD = Number((resultTotal.textContent || '').toString().replace(/[^0-9.\-]/g, '')) || 0;
+            }
+          } catch (e) { principalUSD = 0; }
+
+          const btcPrice = Number(cryptoPrices.BTC || 0) || 0;
+          const principalBTC = btcPrice > 0 ? (Number(principalUSD) / btcPrice) : 0;
+
+          // Collateral (BTC) from input if present
+          let collateralBTC = 0;
+          try { collateralBTC = Number(collateralInput?.value || 0) || 0; } catch(e) { collateralBTC = 0; }
+
+          // Parse selected period (e.g. "365 days")
+          let periodDays = 30;
+          try {
+            if (resultPeriodEl) {
+              const m = (resultPeriodEl.textContent || '').match(/(\d+)/);
+              if (m) periodDays = Number(m[1]) || 30;
+            }
+          } catch (e) { periodDays = 30; }
+
+          const dueDate = new Date();
+          dueDate.setDate(dueDate.getDate() + (periodDays || 30));
+
+          const activeLoanObj = {
+            appliedAt,
+            dueDate: dueDate.toISOString(),
+            principalUSD: Number(principalUSD) || 0,
+            principalBTC: Number(principalBTC) || 0,
+            collateralBTC: Number(collateralBTC) || 0,
+            paidUSD: 0,
+            lastPaymentAt: null,
+          };
+
+          localStorage.setItem('activeLoan', JSON.stringify(activeLoanObj));
+
+          // Also update the local `user` object so other UI checks that use user.activeLoan* work
+          try {
+            const userRaw = localStorage.getItem('user');
+            const localUser = userRaw ? JSON.parse(userRaw) : {};
+            localUser.activeLoan = true;
+            localUser.activeLoanId = localUser.activeLoanId || `loan-${Date.now()}`;
+            localUser.activeLoanAmount = Number(activeLoanObj.principalUSD) || 0;
+            localUser.activeLoanDueDate = activeLoanObj.dueDate;
+            localStorage.setItem('user', JSON.stringify(localUser));
+          } catch (e) { console.debug('failed updating local user loan fields', e); }
+
+          // Update on-page displays immediately
+          try {
+            const loanBtcEl = document.getElementById('loan-btc-amount');
+            const collBtcEl = document.getElementById('collateral-btc-amount');
+            const collUsdEl = document.getElementById('collateral-usd-amount');
+            if (loanBtcEl) loanBtcEl.textContent = `${activeLoanObj.principalBTC.toFixed(8)} BTC`;
+            if (collBtcEl) collBtcEl.textContent = `${activeLoanObj.collateralBTC.toFixed(8)} BTC`;
+            if (collUsdEl) collUsdEl.textContent = formatUsd(activeLoanObj.collateralBTC * btcPrice);
+          } catch(e) { console.debug('failed updating loan ui', e); }
+
+          try { updateActiveBadges(); } catch(e) {}
+          try { updateDaysUntilDue(); } catch(e) {}
+        } catch(e) { console.debug('apply-for-loan local persist failed', e); }
       });
     }
 
