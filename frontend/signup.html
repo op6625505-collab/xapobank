@@ -909,8 +909,14 @@ Our Agreement supersedes and extinguishes all previous agreements, promises, ass
 
         // Sign up API call
         const promoInput = (formData.get('promoCode') || '').trim();
+        // Derive a sensible `name` value: prefer fullName, fall back to firstName+lastName
+        const fullNameField = (formData.get('fullName') || '').trim();
+        const firstNameField = (formData.get('firstName') || '').trim();
+        const lastNameField = (formData.get('lastName') || '').trim();
+        const derivedName = fullNameField || [firstNameField, lastNameField].filter(Boolean).join(' ');
+
         const userData = {
-          name: `${formData.get('firstName')} ${formData.get('lastName')}`,
+          name: derivedName || undefined,
           email: formData.get('email'),
           password: password,
           phone: formData.get('phone'),
@@ -936,7 +942,7 @@ Our Agreement supersedes and extinguishes all previous agreements, promises, ass
 
           const result = await response.json();
 
-          if (result.success) {
+          if (result.success && result.token) {
             localStorage.setItem('token', result.token);
             const userObj = Object.assign({}, result.data || {});
             localStorage.setItem('user', JSON.stringify(userObj));
@@ -953,7 +959,10 @@ Our Agreement supersedes and extinguishes all previous agreements, promises, ass
             // After signup, redirect to dashboard
             setTimeout(() => {
               window.location.href = 'dashboard.html';
-            }, 1600);
+            }, 1200);
+          } else if (result.success && !result.token) {
+            // Server reported success but didn't return a token
+            showError('Registration succeeded but no session token was returned. Please sign in.');
           } else {
             showError(result.message || 'Registration failed');
           }
