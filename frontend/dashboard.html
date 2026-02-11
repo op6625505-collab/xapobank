@@ -575,7 +575,7 @@
       </div>
      </div><!-- Danger Zone -->
      <div class="mb-8">
-      <h3 class="text-white font-semibold text-base mb-3 px-2">Danger Zone</h3>
+      <h3 class="text-white font-semibold text-base mb-3 px-2"></h3>
       <div class="rounded-xl overflow-hidden" style="background: #1a1a1a; border: 1px solid rgba(239, 68, 68, 0.3);"><button id="logout-btn" class="w-full p-4 flex items-center justify-between hover-lift transition-all" style="border-bottom: 1px solid rgba(239, 68, 68, 0.2);">
         <div class="flex items-center gap-3">
          <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: rgba(239, 68, 68, 0.1);">
@@ -964,8 +964,6 @@
         </div><!-- Loan Amount Preview (70% LTV) -->
         <div class="rounded-lg p-4" style="background: rgba(255, 107, 53, 0.05); border: 1px solid rgba(255, 107, 53, 0.2);">
          <div class="flex justify-between items-center mb-2"><span class="text-gray-400 text-sm">Available Loan Amount (70% LTV)</span> <span id="available-loan-btc" class="text-white font-bold text-base">0.00000000 BTC</span>
-         </div>
-         <div class="flex justify-between items-center"><span class="text-gray-400 text-xs">USD Value</span> <span id="available-loan-usd" class="font-semibold text-sm" style="color: #ff6b35;">$0.00</span>
          </div>
         </div>
        </div><!-- Loan Period -->
@@ -5114,7 +5112,6 @@
     const loanCollateralInput = document.getElementById('loan-collateral-amount');
     const loanCollateralUsdInput = document.getElementById('loan-collateral-usd');
     const availableLoanBtc = document.getElementById('available-loan-btc');
-    const availableLoanUsd = document.getElementById('available-loan-usd');
     const loanPeriodRadios = document.querySelectorAll('.loan-period-radio');
     // LTV is now fixed at 50% (removed selector)
     const loanResults = document.getElementById('loan-results');
@@ -5171,14 +5168,9 @@
     
     function updateAvailableLoan(btcAmount) {
       const loanBtc = btcAmount * 0.7; // 70% LTV
-      const livePrice = cryptoPrices.BTC || btcPrice;
-      const loanUsd = loanBtc * livePrice;
       
       if (availableLoanBtc) {
         availableLoanBtc.textContent = loanBtc.toFixed(8) + ' BTC';
-      }
-      if (availableLoanUsd) {
-        availableLoanUsd.textContent = '$' + loanUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       }
     }
 
@@ -5325,13 +5317,13 @@
           // Build a richer local activeLoan record so the dashboard can display immediately
           const appliedAt = new Date().toISOString();
           // Preferred sources: available loan USD, collateral input, result period
-          const availableLoanUsdEl = document.getElementById('available-loan-usd');
+          const resultLoanUsdEl = document.getElementById('result-loan-usd');
           const collateralInput = document.getElementById('loan-collateral-amount');
           const resultPeriodEl = document.getElementById('result-period');
 
           let principalUSD = 0;
           try {
-            if (availableLoanUsdEl) principalUSD = Number((availableLoanUsdEl.textContent || '').toString().replace(/[^0-9.\-]/g, '')) || 0;
+            if (resultLoanUsdEl) principalUSD = Number((resultLoanUsdEl.textContent || '').toString().replace(/[^0-9.\-]/g, '')) || 0;
             // fallback to result-total if available
             if (!principalUSD) {
               const resultTotal = document.getElementById('result-total');
