@@ -110,23 +110,45 @@
       const password = formData.get('password') || '';
       if (!email || !password) return showError('Email and password are required');
 
+      if (typeof window.API_BASE === 'undefined' || !window.API_BASE) {
+        console.error('API_BASE is not defined');
+        return showError('API not configured. Ensure config.js is loading.');
+      }
+
       try {
-        const res = await fetch(window.API_BASE + '/api/auth/login', {
+        const url = window.API_BASE.replace(/\/$/, '') + '/api/auth/login';
+        console.info('Sign in POST to', url);
+        const res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })
         });
-        const body = await res.json();
-        if (!res.ok || !body.success) {
-          return showError(body.message || 'Sign in failed');
+
+        let body;
+        try { body = await res.json(); } catch (e) { body = null; }
+
+        if (!res.ok) {
+          const serverMsg = body && body.message ? body.message : `HTTP ${res.status}`;
+          console.warn('Sign in failed', { status: res.status, body });
+          return showError(serverMsg || 'Sign in failed');
         }
-        if (!body.token) return showError('No session token received from server');
+
+        if (!body || !body.success) {
+          console.warn('Sign in response not successful', body);
+          return showError((body && body.message) || 'Sign in failed');
+        }
+
+        if (!body.token) {
+          console.error('No token in sign in response', body);
+          return showError('No session token received from server');
+        }
+
         localStorage.setItem('token', body.token);
         localStorage.setItem('user', JSON.stringify(body.data || {}));
         window.location.href = 'dashboard.html';
       } catch (err) {
         console.error('Sign in error', err);
-        showError('An error occurred during sign in');
+        showError(err && err.message ? `Sign in error: ${err.message}` : 'An error occurred during sign in');
       }
     }
 
