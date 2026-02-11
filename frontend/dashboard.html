@@ -2962,7 +2962,7 @@
                   <h3 class="text-white font-bold text-xl mb-2">Processing Payment</h3>
                   <p class="text-gray-400 text-sm mb-4">Waiting for blockchain confirmation...</p>
                   <p class="text-orange-500 font-bold text-2xl" id="deposit-countdown-display">${countdown}</p>
-                  <p class="text-gray-400 text-xs mt-2">Admin will review your deposit</p>
+                  <p class="text-gray-400 text-xs mt-2">Confirming deposit</p>
                 </div>
               `;
 
@@ -2984,7 +2984,7 @@
                       <h3 class="text-white font-bold text-2xl mb-3">Deposit Submitted!</h3>
                       <p class="text-gray-300 text-base mb-2">Successfully submitted deposit of <span class="font-bold" style="color: #ff6b35;">${(btcAmount || 0).toFixed(8)} BTC</span></p>
                       <p class="text-gray-400 text-sm mb-2">USD Equivalent: <span class="text-white font-semibold">${formatUsd(usdAmount || 0)}</span></p>
-                      <p class="text-gray-400 text-sm mb-6">Your deposit is pending admin confirmation</p>
+                      <p class="text-gray-400 text-sm mb-6">processing</p>
                       <button onclick="this.closest('.fixed').remove();" class="w-full py-3 text-white font-bold text-base rounded-xl transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Done</button>
                     </div>
                   `;
@@ -4287,7 +4287,7 @@
                 </svg>
               </div>
               <h3 class="text-white font-bold text-2xl mb-3">Savings Plan Submitted!</h3>
-              <p class="text-gray-300 text-base mb-6">Your savings plan is pending admin confirmation</p>
+              <p class="text-gray-300 text-base mb-6">processing</p>
             
             <div class="rounded-lg p-5 mb-6" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
               <div class="mb-4 pb-4" style="border-bottom: 1px solid #2a2a2a;">
@@ -4909,7 +4909,7 @@
 
           } catch (error) {
             console.error('Repayment handler failed', error);
-            alert('Failed to process repayment locally. Please deposit to your dashboard and the admin will route it to loans.');
+            alert('Failed to process repayment locally. Please deposit to your dashboard.');
           }
         });
       });
