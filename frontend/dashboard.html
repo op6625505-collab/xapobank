@@ -999,8 +999,16 @@
         <p id="result-period" class="text-white font-bold text-xl">365 days</p>
        </div>
        <div class="rounded-lg p-4" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
+        <p class="text-gray-400 text-xs mb-2">Loan Amount (BTC)</p>
+        <p id="result-loan-btc" class="text-white font-bold text-xl">0.00000000 BTC</p>
+       </div>
+       <div class="rounded-lg p-4" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
+        <p class="text-gray-400 text-xs mb-2">Loan Amount (USD)</p>
+        <p id="result-loan-usd" class="font-bold text-xl" style="color: #ff6b35;">USD 0.00</p>
+       </div>
+       <div class="rounded-lg p-4" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
         <p class="text-gray-400 text-xs mb-2">Initial Loan-to-Value</p>
-        <p id="result-ltv" class="text-white font-bold text-xl">50%</p>
+        <p id="result-ltv" class="text-white font-bold text-xl">70%</p>
        </div>
        <div class="rounded-lg p-4" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
         <p class="text-gray-400 text-xs mb-2">Annual Percentage Rate</p>
@@ -5196,20 +5204,23 @@
         
         const collateralBTC = parseFloat(loanCollateralInput.value) || 0;
         const selectedPeriod = parseInt(document.querySelector('input[name="loan-period"]:checked').value);
-        const selectedLTV = 50; // Fixed LTV at 50%
+        const selectedLTV = 70; // Fixed LTV at 70% (matches preview)
         
         // Calculate loan values using live BTC price
         const livePrice = cryptoPrices.BTC || btcPrice;
         const collateralUSD = collateralBTC * livePrice;
-        const loanAmount = collateralUSD * (selectedLTV / 100);
+        const loanAmountBTC = collateralBTC * (selectedLTV / 100);
+        const loanAmountUSD = loanAmountBTC * livePrice;
         const daysInYear = 365;
         const interestRate = apr / 100;
         const dailyRate = interestRate / daysInYear;
-        const estimatedInterest = loanAmount * dailyRate * selectedPeriod;
-        const totalRepayment = loanAmount + estimatedInterest;
+        const estimatedInterest = loanAmountUSD * dailyRate * selectedPeriod;
+        const totalRepayment = loanAmountUSD + estimatedInterest;
         
         // Update results
         document.getElementById('result-period').textContent = `${selectedPeriod} days`;
+        document.getElementById('result-loan-btc').textContent = `${loanAmountBTC.toFixed(8)} BTC`;
+        document.getElementById('result-loan-usd').textContent = `USD ${loanAmountUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         document.getElementById('result-ltv').textContent = `${selectedLTV}%`;
         document.getElementById('result-apr').textContent = `${apr.toFixed(2)}%`;
         document.getElementById('result-air').textContent = `${apr.toFixed(2)}%`;
