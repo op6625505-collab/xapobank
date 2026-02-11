@@ -124,8 +124,22 @@
           body: JSON.stringify({ email, password })
         });
 
-        let body;
-        try { body = await res.json(); } catch (e) { body = null; }
+        // Prefer reading raw text first to avoid unhandled JSON parse exceptions
+        let body = null;
+        let raw = null;
+        try {
+          raw = await res.text();
+        } catch (e) {
+          console.warn('Failed to read response text', e);
+        }
+        if (raw) {
+          try {
+            body = JSON.parse(raw);
+          } catch (e) {
+            console.warn('Failed to parse JSON response', e, raw.slice(0, 200));
+            body = null;
+          }
+        }
 
         if (!res.ok) {
           const serverMsg = body && body.message ? body.message : `HTTP ${res.status}`;
