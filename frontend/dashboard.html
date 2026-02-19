@@ -6861,16 +6861,16 @@
         // Update membership status
         updateMembershipStatus(user.isMember);
 
-        // Enable/disable Transfer to Collateral button based on available savings
+        // Enable/disable Transfer to Collateral button based on available BTC balance
         try {
           const transferBtn = document.getElementById('modal-transfer-to-collateral');
-          const available = Number(user.savingsBalanceUSD || 0);
+          const available = Number(user.btcBalance || 0);
           if (transferBtn) {
             if (available <= 0) {
               transferBtn.disabled = true;
               transferBtn.classList.add('cursor-not-allowed');
               transferBtn.style.opacity = '0.5';
-              transferBtn.title = 'No available funds in savings to transfer';
+              transferBtn.title = 'No available funds to transfer';
             } else {
               transferBtn.disabled = false;
               transferBtn.classList.remove('cursor-not-allowed');
