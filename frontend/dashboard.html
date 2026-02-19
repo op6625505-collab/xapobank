@@ -573,39 +573,9 @@
         <svg width="20" height="20" fill="none" stroke="#666666" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg></button>
       </div>
-     <div class="mb-4">
-      <h3 class="text-white font-semibold text-base mb-3 px-2">Identity Verification</h3>
-      <div class="rounded-xl overflow-hidden" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
-       <div id="verification-status" class="p-4 flex items-center justify-between" style="border-bottom: 1px solid #2a2a2a;">
-        <div class="flex items-center gap-3">
-         <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: rgba(255, 107, 53, 0.1);">
-          <svg width="20" height="20" fill="none" stroke="#ff6b35" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-         </div>
-         <div class="text-left">
-          <p class="text-white font-semibold text-sm" id="verification-title">Verification Status</p>
-          <p class="text-gray-400 text-xs" id="verification-message">Not verified yet</p>
-         </div>
-        </div>
-        <div id="verification-badge" class="px-3 py-1 rounded-full text-xs font-semibold" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">Not Verified</div>
-       </div>
-       <button id="verify-id-btn" class="w-full p-4 flex items-center justify-between hover-lift transition-all" style="border-bottom: 1px solid #2a2a2a;">
-        <div class="flex items-center gap-3">
-         <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: rgba(34, 197, 94, 0.1);">
-          <svg width="20" height="20" fill="none" stroke="#22c55e" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-5m-4-6l4 4m0 0l4-4m-4 4v12" />
-          </svg>
-         </div>
-         <div class="text-left">
-          <p class="text-white font-semibold text-sm">Upload ID Document</p>
-          <p class="text-gray-400 text-xs">National ID or International Passport + selfie photo</p>
-         </div>
-        </div>
-        <svg width="20" height="20" fill="none" stroke="#666666" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-        </svg></button>
-      </div>
-     </div>
+     </div><!-- Danger Zone -->
      <div class="mb-8">
-      <h3 class="text-white font-semibold text-base mb-3 px-2"></h3>
+      <h3 class="text-white font-semibold text-base mb-3 px-2">Danger Zone</h3>
       <div class="rounded-xl overflow-hidden" style="background: #1a1a1a; border: 1px solid rgba(239, 68, 68, 0.3);"><button id="logout-btn" class="w-full p-4 flex items-center justify-between hover-lift transition-all" style="border-bottom: 1px solid rgba(239, 68, 68, 0.2);">
         <div class="flex items-center gap-3">
          <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: rgba(239, 68, 68, 0.1);">
@@ -995,6 +965,8 @@
         <div class="rounded-lg p-4" style="background: rgba(255, 107, 53, 0.05); border: 1px solid rgba(255, 107, 53, 0.2);">
          <div class="flex justify-between items-center mb-2"><span class="text-gray-400 text-sm">Available Loan Amount (70% LTV)</span> <span id="available-loan-btc" class="text-white font-bold text-base">0.00000000 BTC</span>
          </div>
+         <div class="flex justify-between items-center"><span class="text-gray-400 text-xs">USD Value</span> <span id="available-loan-usd" class="font-semibold text-sm" style="color: #ff6b35;">$0.00</span>
+         </div>
         </div>
        </div><!-- Loan Period -->
        <div><label class="text-gray-400 text-sm mb-3 block">Loan Period</label>
@@ -1027,16 +999,8 @@
         <p id="result-period" class="text-white font-bold text-xl">365 days</p>
        </div>
        <div class="rounded-lg p-4" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
-        <p class="text-gray-400 text-xs mb-2">Loan Amount (BTC)</p>
-        <p id="result-loan-btc" class="text-white font-bold text-xl">0.00000000 BTC</p>
-       </div>
-       <div class="rounded-lg p-4" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
-        <p class="text-gray-400 text-xs mb-2">Loan Amount (USD)</p>
-        <p id="result-loan-usd" class="font-bold text-xl" style="color: #ff6b35;">USD 0.00</p>
-       </div>
-       <div class="rounded-lg p-4" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
         <p class="text-gray-400 text-xs mb-2">Initial Loan-to-Value</p>
-        <p id="result-ltv" class="text-white font-bold text-xl">70%</p>
+        <p id="result-ltv" class="text-white font-bold text-xl">50%</p>
        </div>
        <div class="rounded-lg p-4" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
         <p class="text-gray-400 text-xs mb-2">Annual Percentage Rate</p>
@@ -1063,6 +1027,140 @@
         <p id="result-total" class="font-bold text-xl" style="color: #ff6b35;">USD 205,020.28</p>
        </div>
       </div><button id="apply-for-loan-btn" class="w-full py-3 text-white font-bold text-base rounded-lg transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Apply for Loan</button>
+     </div><br><br>
+    </div><!-- Membership Page -->
+    <div id="membership-page" class="hidden max-w-7xl mx-auto">
+     <div class="mb-6"><button id="back-to-home-membership" class="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-4">
+       <svg width="20" height="20" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+       </svg><span class="text-sm font-medium">Back to Home</span> </button>
+      <h2 class="text-white font-bold text-2xl sm:text-3xl mb-2">Premium Membership</h2>
+      <p class="text-gray-400 text-sm">Unlock exclusive benefits and priority services</p>
+     </div><!-- Hero Section -->
+     <div class="text-center mb-8">
+      <h3 class="text-white font-bold text-3xl sm:text-4xl mb-3">One Membership. Infinite Potential.</h3>
+      <p class="text-gray-400 text-base sm:text-lg mb-6">See what sets us apart.</p>
+     </div><!-- Comparison Table -->
+     <div class="rounded-xl overflow-hidden mb-8" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
+      <div class="overflow-x-auto">
+       <table class="w-full">
+        <thead>
+         <tr style="background: #0f0f0f;">
+          <th class="text-left p-4 text-white font-semibold text-sm">Features</th>
+          <th class="text-center p-4 text-gray-400 font-semibold text-sm">Exchanges</th>
+          <th class="text-center p-4 text-gray-400 font-semibold text-sm">Hardware Wallets</th>
+          <th class="text-center p-4 text-gray-400 font-semibold text-sm">Traditional Banks</th>
+          <th class="text-center p-4 font-semibold text-sm" style="color: #ff6b35;">
+           <div class="flex items-center justify-center gap-2">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            </svg> Us
+           </div></th>
+         </tr>
+        </thead>
+        <tbody>
+         <tr style="border-top: 1px solid #2a2a2a;">
+          <td class="p-4 text-white text-sm">Secure Bitcoin Custody</td>
+          <td class="text-center p-4">
+           <svg class="inline" width="20" height="20" fill="none" stroke="#22c55e" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+           </svg></td>
+          <td class="text-center p-4">
+           <svg class="inline" width="20" height="20" fill="none" stroke="#22c55e" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+           </svg></td>
+          <td class="text-center p-4">
+           <svg class="inline" width="20" height="20" fill="none" stroke="#ef4444" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+           </svg></td>
+          <td class="text-center p-4">
+           <svg class="inline" width="24" height="24" fill="none" stroke="#ff6b35" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+           </svg></td>
+         </tr>
+         <tr style="border-top: 1px solid #2a2a2a;">
+          <td class="p-4 text-white text-sm">Daily Interest Paid in Bitcoin</td>
+          <td class="text-center p-4">
+           <svg class="inline" width="20" height="20" fill="none" stroke="#ef4444" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+           </svg></td>
+          <td class="text-center p-4">
+           <svg class="inline" width="20" height="20" fill="none" stroke="#ef4444" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+           </svg></td>
+          <td class="text-center p-4">
+           <svg class="inline" width="20" height="20" fill="none" stroke="#ef4444" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+           </svg></td>
+          <td class="text-center p-4">
+           <svg class="inline" width="24" height="24" fill="none" stroke="#ff6b35" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+           </svg></td>
+         </tr>
+         <tr style="border-top: 1px solid #2a2a2a;">
+          <td class="p-4 text-white text-sm">Global Debit Card with Zero FX Fees</td>
+          <td class="text-center p-4">
+           <svg class="inline" width="20" height="20" fill="none" stroke="#ef4444" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+           </svg></td>
+          <td class="text-center p-4">
+           <svg class="inline" width="20" height="20" fill="none" stroke="#ef4444" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+           </svg></td>
+          <td class="text-center p-4">
+           <svg class="inline" width="20" height="20" fill="none" stroke="#ef4444" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+           </svg></td>
+          <td class="text-center p-4">
+           <svg class="inline" width="24" height="24" fill="none" stroke="#ff6b35" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+           </svg></td>
+         </tr>
+         <tr style="border-top: 1px solid #2a2a2a;">
+          <td class="p-4 text-white text-sm">Buy and Sell with Best-in-Class Bitcoin Price</td>
+          <td class="text-center p-4">
+           <svg class="inline" width="20" height="20" fill="none" stroke="#22c55e" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+           </svg></td>
+          <td class="text-center p-4">
+           <svg class="inline" width="20" height="20" fill="none" stroke="#ef4444" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+           </svg></td>
+          <td class="text-center p-4">
+           <svg class="inline" width="20" height="20" fill="none" stroke="#ef4444" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+           </svg></td>
+          <td class="text-center p-4">
+           <svg class="inline" width="24" height="24" fill="none" stroke="#ff6b35" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+           </svg></td>
+         </tr>
+         <tr style="border-top: 1px solid #2a2a2a;">
+          <td class="p-4 text-white text-sm">Bitcoin-Backed Loan</td>
+          <td class="text-center p-4">
+           <svg class="inline" width="20" height="20" fill="none" stroke="#ef4444" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+           </svg></td>
+          <td class="text-center p-4">
+           <svg class="inline" width="20" height="20" fill="none" stroke="#ef4444" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+           </svg></td>
+          <td class="text-center p-4">
+           <svg class="inline" width="20" height="20" fill="none" stroke="#ef4444" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+           </svg></td>
+          <td class="text-center p-4">
+           <svg class="inline" width="24" height="24" fill="none" stroke="#ff6b35" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+           </svg></td>
+         </tr>
+         <tr style="border-top: 1px solid #2a2a2a;">
+          <td class="p-4 text-white text-sm">Beneficiary Feature</td>
+          <td class="text-center p-4">
+           <svg class="inline" width="20" height="20" fill="none" stroke="#ef4444" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+           </svg></td>
+          <td class="text-center p-4">
+           <svg class="inline" width="20" height="20" fill="none" stroke="#ef4444" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+           </svg></td>
+          <td class="text-center p-4">
+           <svg class="inline" width="20" height="20" fill="none" stroke="#ef4444" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+           </svg></td>
+          <td class="text-center p-4">
+           <svg class="inline" width="24" height="24" fill="none" stroke="#ff6b35" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+           </svg></td>
+         </tr>
+        </tbody>
+       </table>
+      </div>
+     </div>
+     <div class="rounded-xl p-6 sm:p-8 mb-6 text-center" style="background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(255, 69, 0, 0.1) 100%); border: 1px solid rgba(255, 107, 53, 0.3);">
+      <div class="inline-flex items-center justify-center w-20 h-20 rounded-full mb-6" style="background: rgba(255, 107, 53, 0.2);">
+       <svg width="40" height="40" fill="none" stroke="#ff6b35" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+       </svg>
+      </div>
+      <h3 class="text-white font-bold text-4xl sm:text-5xl mb-2">$1,000</h3>
+      <p class="text-gray-300 text-base mb-1">USD/year</p>
+      <p class="text-gray-400 text-sm">Required for membership</p>
+     </div><br><br>
+     <div class="flex gap-3"><button id="cancel-membership" class="flex-1 py-3 sm:py-4 text-gray-300 font-bold text-sm sm:text-base rounded-xl transition-all hover-lift" style="background: #1a1a1a; border: 1px solid #2a2a2a;">Cancel</button> <button id="apply-membership-page-btn" class="flex-1 py-3 sm:py-4 text-white font-bold text-sm sm:text-base rounded-xl transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Apply Now</button>
      </div><br><br>
     </div><!-- Exchange Page -->
     <div id="exchange-page" class="hidden max-w-7xl mx-auto">
@@ -2864,7 +2962,7 @@
                   <h3 class="text-white font-bold text-xl mb-2">Processing Payment</h3>
                   <p class="text-gray-400 text-sm mb-4">Waiting for blockchain confirmation...</p>
                   <p class="text-orange-500 font-bold text-2xl" id="deposit-countdown-display">${countdown}</p>
-                  <p class="text-gray-400 text-xs mt-2">Confirming deposit</p>
+                  <p class="text-gray-400 text-xs mt-2">Admin will review your deposit</p>
                 </div>
               `;
 
@@ -2886,7 +2984,7 @@
                       <h3 class="text-white font-bold text-2xl mb-3">Deposit Submitted!</h3>
                       <p class="text-gray-300 text-base mb-2">Successfully submitted deposit of <span class="font-bold" style="color: #ff6b35;">${(btcAmount || 0).toFixed(8)} BTC</span></p>
                       <p class="text-gray-400 text-sm mb-2">USD Equivalent: <span class="text-white font-semibold">${formatUsd(usdAmount || 0)}</span></p>
-                      <p class="text-gray-400 text-sm mb-6">processing</p>
+                      <p class="text-gray-400 text-sm mb-6">Your deposit is pending admin confirmation</p>
                       <button onclick="this.closest('.fixed').remove();" class="w-full py-3 text-white font-bold text-base rounded-xl transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Done</button>
                     </div>
                   `;
@@ -2953,7 +3051,7 @@
       if (!btn) return;
       try {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
-        const mainBalanceBTC = Number(user.btcBalance || 0);
+        const mainBalanceBTC = Number(user.balanceBTC || 0);
         const collateralUSD = Number(user.collateralBalanceUSD || 0);
         const btcPrice = (typeof cryptoPrices !== 'undefined' && cryptoPrices.BTC) ? cryptoPrices.BTC : 42000;
         const maxUSD = mainBalanceBTC * btcPrice;
@@ -3002,42 +3100,30 @@
           if (!usd || usd <= 0) { alert('Enter a valid amount'); return; }
           if (usd > maxUSD) { alert('Amount exceeds available BTC balance'); return; }
 
-          confirmBtn.disabled = true;
-          
           // Optimistic local update
           try {
             const stored = JSON.parse(localStorage.getItem('user') || '{}');
             const btcAmount = usd / btcPrice;
-            stored.btcBalance = Number((Number(stored.btcBalance || 0) - btcAmount).toFixed(8));
+            stored.balanceBTC = Number((Number(stored.balanceBTC || 0) - btcAmount).toFixed(8));
             stored.collateralBalanceUSD = Number((Number(stored.collateralBalanceUSD || 0) + usd).toFixed(2));
             stored.collateralBalanceBTC = Number((Number(stored.collateralBalanceBTC || 0) + btcAmount).toFixed(8));
             localStorage.setItem('user', JSON.stringify(stored));
-            // Immediately update collateral display before fetching from server
-            updateCollateralDisplay(stored.collateralBalanceUSD, stored.collateralBalanceBTC);
-            
-            // Send to server and await response
-            const response = await fetch(window.API_BASE + '/api/transactions', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-              body: JSON.stringify({ type: 'internal', action: 'transfer_to_collateral', amount: Number(usd), btcAmount, description: 'Internal transfer to collateral', status: 'completed' })
-            });
-            
-            if (!response.ok) {
-              throw new Error('Server response was not ok: ' + response.status);
-            }
-            
-            const result = await response.json();
-            
-            // Refresh user data from server to confirm
-            await populateUserInfo();
+            populateUserInfo();
+            // Attempt server-side record (best-effort)
+            try {
+              await fetch(window.API_BASE + '/api/transactions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                body: JSON.stringify({ type: 'internal', action: 'transfer_to_collateral', amount: Number(usd), btcAmount, description: 'Internal transfer to collateral', status: 'completed' })
+              });
+            } catch (e) { console.debug('Server transfer-to-collateral failed', e); }
 
             // Close modal and notify
             modal.remove();
-            if (typeof displayTopToast === 'function') displayTopToast('Successfully transferred to collateral!');
+            if (typeof displayTopToast === 'function') displayTopToast('Transferred to collateral (pending server confirmation)');
           } catch (e) {
             console.error('Transfer to collateral failed', e);
-            alert('Transfer failed, please try again: ' + (e.message || ''));
-            confirmBtn.disabled = false;
+            alert('Transfer failed, please try again');
           }
         });
       } catch (e) { console.debug('transfer-to-collateral handler error', e); }
@@ -3048,8 +3134,7 @@
     if (exchangeBtn) {
       exchangeBtn.addEventListener('click', () => {
         hideAllPages();
-        const exchangePage = document.getElementById('exchange-page');
-        if (exchangePage) exchangePage.classList.remove('hidden');
+        document.getElementById('exchange-page').classList.remove('hidden');
         setActiveNavButton('home-nav-btn');
         initializeExchangePage();
       });
@@ -3992,8 +4077,7 @@
     if (savingsBtn) {
       savingsBtn.addEventListener('click', () => {
         hideAllPages();
-        const savingsPage = document.getElementById('savings-page');
-        if (savingsPage) savingsPage.classList.remove('hidden');
+        document.getElementById('savings-page').classList.remove('hidden');
         setActiveNavButton('home-nav-btn'); // Keep home active since savings is accessed from home
       });
     }
@@ -4203,7 +4287,7 @@
                 </svg>
               </div>
               <h3 class="text-white font-bold text-2xl mb-3">Savings Plan Submitted!</h3>
-              <p class="text-gray-300 text-base mb-6">processing</p>
+              <p class="text-gray-300 text-base mb-6">Your savings plan is pending admin confirmation</p>
             
             <div class="rounded-lg p-5 mb-6" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
               <div class="mb-4 pb-4" style="border-bottom: 1px solid #2a2a2a;">
@@ -4252,8 +4336,7 @@
     if (membershipBtn) {
       membershipBtn.addEventListener('click', () => {
         hideAllPages();
-        const membershipPage = document.getElementById('membership-page');
-        if (membershipPage) membershipPage.classList.remove('hidden');
+        document.getElementById('membership-page').classList.remove('hidden');
         setActiveNavButton('membership-btn');
       });
     }
@@ -4457,11 +4540,10 @@
               confirmBtn.disabled = true;
               confirmBtn.textContent = 'Confirming...';
               try {
-                const currentBtcPrice = (window.cryptoPrices && window.cryptoPrices.BTC) || (window.currentBtcPrice) || 89229;
                 const resp = await fetch(window.API_BASE + '/api/transactions', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-                  body: JSON.stringify({ type: 'membership', amount: 1000, description: 'Premium Membership Fee', status: 'completed', internalPayment: true, currentBtcPrice: currentBtcPrice })
+                  body: JSON.stringify({ type: 'membership', amount: 1000, description: 'Premium Membership Fee', status: 'completed', internalPayment: true })
                 });
                 const result = await resp.json().catch(() => ({}));
                 if (!result || !result.isOk) {
@@ -4827,7 +4909,7 @@
 
           } catch (error) {
             console.error('Repayment handler failed', error);
-            alert('Failed to process repayment locally. Please deposit to your dashboard.');
+            alert('Failed to process repayment locally. Please deposit to your dashboard and the admin will route it to loans.');
           }
         });
       });
@@ -4837,11 +4919,15 @@
 
     // Navigation Management System
     function hideAllPages() {
-      const pageIds = ['home-page', 'exchange-page', 'savings-page', 'membership-page', 'settings-page', 'card-page', 'loans-page', 'stocks-page', 'transactions-page'];
-      pageIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.classList.add('hidden');
-      });
+      document.getElementById('home-page').classList.add('hidden');
+      document.getElementById('exchange-page').classList.add('hidden');
+      document.getElementById('savings-page').classList.add('hidden');
+      document.getElementById('membership-page').classList.add('hidden');
+      document.getElementById('settings-page').classList.add('hidden');
+      document.getElementById('card-page').classList.add('hidden');
+      document.getElementById('loans-page').classList.add('hidden');
+      document.getElementById('stocks-page').classList.add('hidden');
+      document.getElementById('transactions-page').classList.add('hidden');
     }
 
     function setActiveNavButton(buttonId) {
@@ -4865,8 +4951,7 @@
     if (cardBtn) {
       cardBtn.addEventListener('click', () => {
         hideAllPages();
-        const cardPage = document.getElementById('card-page');
-        if (cardPage) cardPage.classList.remove('hidden');
+        document.getElementById('card-page').classList.remove('hidden');
         setActiveNavButton('card-btn');
       });
     }
@@ -4989,8 +5074,7 @@
     if (loansBtn) {
       loansBtn.addEventListener('click', () => {
         hideAllPages();
-        const loansPage = document.getElementById('loans-page');
-        if (loansPage) loansPage.classList.remove('hidden');
+        document.getElementById('loans-page').classList.remove('hidden');
         setActiveNavButton('loans-btn');
       });
     }
@@ -5010,6 +5094,7 @@
     const loanCollateralInput = document.getElementById('loan-collateral-amount');
     const loanCollateralUsdInput = document.getElementById('loan-collateral-usd');
     const availableLoanBtc = document.getElementById('available-loan-btc');
+    const availableLoanUsd = document.getElementById('available-loan-usd');
     const loanPeriodRadios = document.querySelectorAll('.loan-period-radio');
     // LTV is now fixed at 50% (removed selector)
     const loanResults = document.getElementById('loan-results');
@@ -5066,9 +5151,14 @@
     
     function updateAvailableLoan(btcAmount) {
       const loanBtc = btcAmount * 0.7; // 70% LTV
+      const livePrice = cryptoPrices.BTC || btcPrice;
+      const loanUsd = loanBtc * livePrice;
       
       if (availableLoanBtc) {
         availableLoanBtc.textContent = loanBtc.toFixed(8) + ' BTC';
+      }
+      if (availableLoanUsd) {
+        availableLoanUsd.textContent = '$' + loanUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       }
     }
 
@@ -5094,23 +5184,20 @@
         
         const collateralBTC = parseFloat(loanCollateralInput.value) || 0;
         const selectedPeriod = parseInt(document.querySelector('input[name="loan-period"]:checked').value);
-        const selectedLTV = 70; // Fixed LTV at 70% (matches preview)
+        const selectedLTV = 50; // Fixed LTV at 50%
         
         // Calculate loan values using live BTC price
         const livePrice = cryptoPrices.BTC || btcPrice;
         const collateralUSD = collateralBTC * livePrice;
-        const loanAmountBTC = collateralBTC * (selectedLTV / 100);
-        const loanAmountUSD = loanAmountBTC * livePrice;
+        const loanAmount = collateralUSD * (selectedLTV / 100);
         const daysInYear = 365;
         const interestRate = apr / 100;
         const dailyRate = interestRate / daysInYear;
-        const estimatedInterest = loanAmountUSD * dailyRate * selectedPeriod;
-        const totalRepayment = loanAmountUSD + estimatedInterest;
+        const estimatedInterest = loanAmount * dailyRate * selectedPeriod;
+        const totalRepayment = loanAmount + estimatedInterest;
         
         // Update results
         document.getElementById('result-period').textContent = `${selectedPeriod} days`;
-        document.getElementById('result-loan-btc').textContent = `${loanAmountBTC.toFixed(8)} BTC`;
-        document.getElementById('result-loan-usd').textContent = `USD ${loanAmountUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         document.getElementById('result-ltv').textContent = `${selectedLTV}%`;
         document.getElementById('result-apr').textContent = `${apr.toFixed(2)}%`;
         document.getElementById('result-air').textContent = `${apr.toFixed(2)}%`;
@@ -5211,79 +5298,9 @@
           </div>
         `;
         document.body.appendChild(modal);
-        try {
-          // Build a richer local activeLoan record so the dashboard can display immediately
-          const appliedAt = new Date().toISOString();
-          // Preferred sources: available loan USD, collateral input, result period
-          const resultLoanUsdEl = document.getElementById('result-loan-usd');
-          const collateralInput = document.getElementById('loan-collateral-amount');
-          const resultPeriodEl = document.getElementById('result-period');
-
-          let principalUSD = 0;
-          try {
-            if (resultLoanUsdEl) principalUSD = Number((resultLoanUsdEl.textContent || '').toString().replace(/[^0-9.\-]/g, '')) || 0;
-            // fallback to result-total if available
-            if (!principalUSD) {
-              const resultTotal = document.getElementById('result-total');
-              if (resultTotal) principalUSD = Number((resultTotal.textContent || '').toString().replace(/[^0-9.\-]/g, '')) || 0;
-            }
-          } catch (e) { principalUSD = 0; }
-
-          const btcPrice = Number(cryptoPrices.BTC || 0) || 0;
-          const principalBTC = btcPrice > 0 ? (Number(principalUSD) / btcPrice) : 0;
-
-          // Collateral (BTC) from input if present
-          let collateralBTC = 0;
-          try { collateralBTC = Number(collateralInput?.value || 0) || 0; } catch(e) { collateralBTC = 0; }
-
-          // Parse selected period (e.g. "365 days")
-          let periodDays = 30;
-          try {
-            if (resultPeriodEl) {
-              const m = (resultPeriodEl.textContent || '').match(/(\d+)/);
-              if (m) periodDays = Number(m[1]) || 30;
-            }
-          } catch (e) { periodDays = 30; }
-
-          const dueDate = new Date();
-          dueDate.setDate(dueDate.getDate() + (periodDays || 30));
-
-          const activeLoanObj = {
-            appliedAt,
-            dueDate: dueDate.toISOString(),
-            principalUSD: Number(principalUSD) || 0,
-            principalBTC: Number(principalBTC) || 0,
-            collateralBTC: Number(collateralBTC) || 0,
-            paidUSD: 0,
-            lastPaymentAt: null,
-          };
-
-          localStorage.setItem('activeLoan', JSON.stringify(activeLoanObj));
-
-          // Also update the local `user` object so other UI checks that use user.activeLoan* work
-          try {
-            const userRaw = localStorage.getItem('user');
-            const localUser = userRaw ? JSON.parse(userRaw) : {};
-            localUser.activeLoan = true;
-            localUser.activeLoanId = localUser.activeLoanId || `loan-${Date.now()}`;
-            localUser.activeLoanAmount = Number(activeLoanObj.principalUSD) || 0;
-            localUser.activeLoanDueDate = activeLoanObj.dueDate;
-            localStorage.setItem('user', JSON.stringify(localUser));
-          } catch (e) { console.debug('failed updating local user loan fields', e); }
-
-          // Update on-page displays immediately
-          try {
-            const loanBtcEl = document.getElementById('loan-btc-amount');
-            const collBtcEl = document.getElementById('collateral-btc-amount');
-            const collUsdEl = document.getElementById('collateral-usd-amount');
-            if (loanBtcEl) loanBtcEl.textContent = `${activeLoanObj.principalBTC.toFixed(8)} BTC`;
-            if (collBtcEl) collBtcEl.textContent = `${activeLoanObj.collateralBTC.toFixed(8)} BTC`;
-            if (collUsdEl) collUsdEl.textContent = formatUsd(activeLoanObj.collateralBTC * btcPrice);
-          } catch(e) { console.debug('failed updating loan ui', e); }
-
-          try { updateActiveBadges(); } catch(e) {}
-          try { updateDaysUntilDue(); } catch(e) {}
-        } catch(e) { console.debug('apply-for-loan local persist failed', e); }
+        try { localStorage.setItem('activeLoan', JSON.stringify({ appliedAt: new Date().toISOString() })); } catch(e) {}
+        try { updateActiveBadges(); } catch(e) {}
+        try { updateDaysUntilDue(); } catch(e) {}
       });
     }
 
@@ -5292,8 +5309,7 @@
     if (stocksBtn) {
       stocksBtn.addEventListener('click', () => {
         hideAllPages();
-        const stocksPage = document.getElementById('stocks-page');
-        if (stocksPage) stocksPage.classList.remove('hidden');
+        document.getElementById('stocks-page').classList.remove('hidden');
         setActiveNavButton('home-nav-btn');
         // Render portfolio and load live stocks data when entering stocks page
         renderPortfolio();
@@ -5306,8 +5322,7 @@
     if (transactionsBtn) {
       transactionsBtn.addEventListener('click', () => {
         hideAllPages();
-        const transactionsPage = document.getElementById('transactions-page');
-        if (transactionsPage) transactionsPage.classList.remove('hidden');
+        document.getElementById('transactions-page').classList.remove('hidden');
         setActiveNavButton('home-nav-btn');
       });
     }
@@ -6398,8 +6413,8 @@
                 <p>This Privacy Notice aims to give you information on how Xapo collects and processes your personal data. It is important that you read this Privacy Notice together with any other Privacy Notice or fair processing policy we may provide on specific occasions when we are collecting or processing personal data about you.</p>
                 
                 <h5 class="text-orange-400 font-semibold">2. Data Collection</h5>
-                <p><strong class="text-orange-500">Submitted Information:</strong> Full legal name, Avatar, Address, Proof of Address, Email address, Phone number, Date of Birth, Tax information, and other relevant documents.</p>
-                <p><strong class="text-orange-500">Purpose:</strong> To comply with financial crime and anti-money laundering laws, protect against fraud, and confirm your eligibility to use our services.</p>
+                <p><strong class="text-orange-500">Submitted Information:</strong> Full legal name, Avatar, Passport photo, Address, Proof of Address, Email address, Phone number, Date of Birth, Tax information, and other identity verification documents.</p>
+                <p><strong class="text-orange-500">Purpose:</strong> To verify your identity and liveness, comply with financial crime and anti-money laundering laws, protect against fraud, and confirm your eligibility to use our services.</p>
                 
                 <h5 class="text-orange-400 font-semibold">3. Legal Basis for Processing</h5>
                 <p>We will only use your Personal Data when the law allows us to, including: Consent, Contract requirements, Legal or regulatory obligations, and Legitimate interests.</p>
@@ -6447,128 +6462,6 @@
     });
 
     // Notification preferences
-    // Identity verification upload (ID + selfie)
-    const verifyIdBtn = document.getElementById('verify-id-btn');
-    if (verifyIdBtn) {
-      verifyIdBtn.addEventListener('click', () => {
-        const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 z-[110] flex items-center justify-center overflow-y-auto p-4';
-        modal.style.background = 'rgba(0,0,0,0.85)';
-        modal.innerHTML = `
-          <div class="rounded-2xl p-6 max-w-md w-full mx-4" style="background: #1a1a1a; border:1px solid #2a2a2a;">
-            <h3 class="text-white font-bold text-xl mb-2">Submit identity document</h3>
-            <form id="verification-form">
-              <div class="mb-3 text-sm">
-                <label class="text-gray-400 text-xs">ID Type</label>
-                <select id="id-type" class="w-full mt-1 p-2 rounded bg-[#0f0f0f] border border-[#2a2a2a] text-white">
-                  <option value="national_id">National ID</option>
-                  <option value="passport">International Passport</option>
-                </select>
-              </div>
-              <div class="mb-3 text-sm">
-                <label class="text-gray-400 text-xs">ID Document (image or PDF, ≤5MB)</label>
-                <input id="id-document" type="file" accept="image/*,.pdf" class="w-full mt-1 text-sm text-gray-200" />
-              </div>
-              <div class="mb-3 text-sm">
-                <label class="text-gray-400 text-xs">Selfie photo (image, ≤5MB)</label>
-                <input id="verification-selfie" type="file" accept="image/*" class="w-full mt-1 text-sm text-gray-200" />
-              </div>
-              <div id="verification-error" class="hidden text-sm mb-3" style="color: #ef4444;"></div>
-              <div class="flex gap-3">
-                <button type="button" id="verification-cancel" class="flex-1 py-3 text-gray-300 font-bold text-sm rounded-lg" style="background:#0f0f0f;border:1px solid #2a2a2a;">Cancel</button>
-                <button type="submit" id="verification-submit" class="flex-1 py-3 text-white font-bold text-sm rounded-lg" style="background: linear-gradient(135deg,#ff6b35 0%,#ff4500 100%);">Submit</button>
-              </div>
-            </form>
-          </div>
-        `;
-        document.body.appendChild(modal);
-
-        const form = modal.querySelector('#verification-form');
-        const idTypeSelect = modal.querySelector('#id-type');
-        const idInput = modal.querySelector('#id-document');
-        const selfieInput = modal.querySelector('#verification-selfie');
-        const errorDiv = modal.querySelector('#verification-error');
-        const cancelBtn = modal.querySelector('#verification-cancel');
-
-        cancelBtn.addEventListener('click', () => modal.remove());
-
-        form.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          errorDiv.classList.add('hidden');
-          errorDiv.textContent = '';
-          const idType = idTypeSelect.value;
-          const idFile = idInput.files[0];
-          const selfieFile = selfieInput.files[0];
-
-          if (!idFile) {
-            errorDiv.textContent = 'Please select an ID document file.';
-            errorDiv.classList.remove('hidden');
-            return;
-          }
-          if (!selfieFile) {
-            errorDiv.textContent = 'Please select a selfie photo.';
-            errorDiv.classList.remove('hidden');
-            return;
-          }
-          if (idFile.size > 5 * 1024 * 1024) {
-            errorDiv.textContent = 'ID document must be 5MB or smaller.';
-            errorDiv.classList.remove('hidden');
-            return;
-          }
-          if (selfieFile.size > 5 * 1024 * 1024) {
-            errorDiv.textContent = 'Selfie photo must be 5MB or smaller.';
-            errorDiv.classList.remove('hidden');
-            return;
-          }
-
-          const token = localStorage.getItem('token');
-          if (!token) { window.location.href = 'signin.html'; return; }
-
-          const submitBtn = modal.querySelector('#verification-submit');
-          submitBtn.disabled = true;
-          submitBtn.textContent = 'Submitting...';
-
-          try {
-            const fd = new FormData();
-            fd.append('idType', idType);
-            fd.append('idDocument', idFile);
-            fd.append('verificationPhoto', selfieFile);
-
-            const resp = await fetch((window.API_BASE || '') + '/api/auth/verify-identity', {
-              method: 'POST',
-              headers: { 'Authorization': 'Bearer ' + token },
-              body: fd
-            });
-            const j = await resp.json();
-            if (resp.ok && j && j.success) {
-              try { if (typeof displayTopToast === 'function') displayTopToast('Verification submitted — pending review'); } catch(e){}
-              // Update UI badge to pending
-              const statusBadge = document.getElementById('verification-badge');
-              const statusMessage = document.getElementById('verification-message');
-              if (statusBadge && statusMessage) {
-                statusBadge.textContent = 'Pending Review';
-                statusBadge.style.background = 'rgba(255, 193, 7, 0.1)';
-                statusBadge.style.color = '#ffc107';
-                statusMessage.textContent = 'Documents submitted - Awaiting admin verification';
-              }
-              // Refresh user info
-              try { populateUserInfo(); } catch(e){}
-              modal.remove();
-            } else {
-              errorDiv.textContent = (j && j.message) ? j.message : 'Upload failed. Please try again.';
-              errorDiv.classList.remove('hidden');
-            }
-          } catch (err) {
-            console.error('Verification submit error', err);
-            errorDiv.textContent = 'Network error. Please try again.';
-            errorDiv.classList.remove('hidden');
-          } finally {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Submit';
-          }
-        });
-      });
-    }
     const pushNotificationsCheckbox = document.getElementById('push-notifications');
     const emailNotificationsCheckbox = document.getElementById('email-notifications');
     const smsNotificationsCheckbox = document.getElementById('sms-notifications');
@@ -6908,8 +6801,6 @@
         
         // Update collateral display (use BTC value when provided)
         updateCollateralDisplay(user.collateralBalanceUSD || 0, user.collateralBalanceBTC || 0);
-        // Render admin verification controls when appropriate
-        try { renderAdminVerificationControls(user); } catch (e) { console.debug('renderAdminVerificationControls failed', e); }
         
         // Update active savings if any
         // Note: active savings might need separate handling
@@ -7116,134 +7007,6 @@
           loanBadge.title = hasLoan ? 'You have an active loan' : 'Account active';
         }
       } catch (e) { console.debug('updateActiveBadges failed', e); }
-    }
-
-    // Admin: render a button to review pending identity verifications
-    function renderAdminVerificationControls(user) {
-      try {
-        if (!user || String(user.role || '').toLowerCase() !== 'admin') return;
-        const container = document.getElementById('verification-status');
-        if (!container) return;
-        // Avoid duplicate button
-        if (document.getElementById('admin-review-verifications-btn')) return;
-        const btn = document.createElement('button');
-        btn.id = 'admin-review-verifications-btn';
-        btn.className = 'ml-4 px-3 py-2 rounded-md text-sm font-semibold';
-        btn.style.background = '#0b1220';
-        btn.style.border = '1px solid #2a2a2a';
-        btn.style.color = '#ffffff';
-        btn.textContent = 'Review Pending Verifications';
-        btn.addEventListener('click', openAdminVerificationsModal);
-        // Place button to the right of the status badge
-        container.appendChild(btn);
-      } catch (e) { console.debug('renderAdminVerificationControls error', e); }
-    }
-
-    // Open modal and fetch pending verifications
-    async function openAdminVerificationsModal() {
-      const token = localStorage.getItem('token');
-      if (!token) { window.location.href = 'signin.html'; return; }
-      const modal = document.createElement('div');
-      modal.className = 'fixed inset-0 z-[120] flex items-start justify-center overflow-y-auto p-6';
-      modal.style.background = 'rgba(0,0,0,0.85)';
-      modal.innerHTML = `<div class="rounded-2xl p-4 max-w-3xl w-full mx-4" style="background:#0f0f0f;border:1px solid #2a2a2a;min-height:200px;">
-        <h3 class="text-white font-bold text-lg mb-3">Pending Identity Verifications</h3>
-        <div id="admin-verifications-list" class="space-y-3 text-sm text-gray-200"></div>
-        <div class="mt-4"><button id="admin-verifications-close" class="py-2 px-3 rounded bg-[#111] text-white">Close</button></div>
-      </div>`;
-      document.body.appendChild(modal);
-
-      modal.querySelector('#admin-verifications-close').addEventListener('click', () => modal.remove());
-
-      const listEl = modal.querySelector('#admin-verifications-list');
-      listEl.textContent = 'Loading...';
-      try {
-        const res = await fetch(window.API_BASE + '/api/admin/users/loan-pending', { headers: { 'Authorization': 'Bearer ' + token } });
-        const j = await res.json();
-        if (!res.ok || !j || !j.ok) {
-          listEl.textContent = 'Failed to load pending verifications.';
-          return;
-        }
-        const users = Array.isArray(j.data) ? j.data : [];
-        if (users.length === 0) { listEl.textContent = 'No pending verifications.'; return; }
-        listEl.innerHTML = '';
-        users.forEach(u => {
-          const line = document.createElement('div');
-          line.className = 'p-3 rounded border border-[#222]';
-          const uploadedAt = u.idUploadedAt ? (new Date(u.idUploadedAt)).toLocaleString() : 'unknown';
-          const files = [];
-          if (u.nationalIdPath) files.push({ label: 'National ID', url: window.API_BASE + '/uploads/' + u.nationalIdPath });
-          if (u.passportPath) files.push({ label: 'Passport', url: window.API_BASE + '/uploads/' + u.passportPath });
-          if (u.livePhotoPath) files.push({ label: 'Selfie/Media', url: window.API_BASE + '/uploads/' + u.livePhotoPath });
-
-          line.innerHTML = `<div class="flex items-start justify-between gap-4">
-            <div class="flex-1">
-              <div class="font-semibold text-white">${escapeHtml(u.name || 'Unknown')}</div>
-              <div class="text-gray-400 text-xs">${escapeHtml(u.email || '')} — Uploaded: ${escapeHtml(uploadedAt)}</div>
-              <div class="mt-2 text-xs text-gray-300">${files.map(f => `<a class=\"text-blue-400 underline mr-2\" target=\"_blank\" href=\"${f.url}\">${f.label}</a>`).join('')}</div>
-            </div>
-            <div class="flex flex-col gap-2">
-              <button class="approve-btn py-2 px-3 rounded text-white" data-id="${u._id}">Approve</button>
-              <button class="reject-btn py-2 px-3 rounded text-gray-200" data-id="${u._id}">Reject</button>
-            </div>
-          </div>`;
-          // style buttons
-          const approveBtn = line.querySelector('.approve-btn');
-          const rejectBtn = line.querySelector('.reject-btn');
-          approveBtn.style.background = 'linear-gradient(135deg,#16a34a 0%,#059669 100%)';
-          rejectBtn.style.background = '#111';
-
-          listEl.appendChild(line);
-        });
-
-        // wire approve/reject
-        listEl.querySelectorAll('.approve-btn').forEach(b => b.addEventListener('click', async (e) => {
-          const id = e.currentTarget.getAttribute('data-id');
-          if (!confirm('Approve verification for this user?')) return;
-          await adminVerifyAction(id, 'approve', e.currentTarget.closest('div[p]'));
-          // refresh list
-          openAdminVerificationsModal();
-          modal.remove();
-        }));
-        listEl.querySelectorAll('.reject-btn').forEach(b => b.addEventListener('click', async (e) => {
-          const id = e.currentTarget.getAttribute('data-id');
-          if (!confirm('Reject verification for this user?')) return;
-          await adminVerifyAction(id, 'reject');
-          openAdminVerificationsModal();
-          modal.remove();
-        }));
-
-      } catch (err) {
-        console.error('Failed loading pending verifications', err);
-        listEl.textContent = 'Failed to load pending verifications.';
-      }
-    }
-
-    // perform approve/reject action via admin endpoint
-    async function adminVerifyAction(userId, action) {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) { window.location.href = 'signin.html'; return; }
-        const res = await fetch(window.API_BASE + '/api/admin/user/' + encodeURIComponent(userId) + '/loan', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-          body: JSON.stringify({ action })
-        });
-        const j = await res.json();
-        if (!res.ok || !j || !j.ok) {
-          alert('Action failed: ' + (j && j.error ? j.error : 'unknown'));
-          return false;
-        }
-        // Refresh local user info (admin might want to see updates elsewhere)
-        try { populateUserInfo(); } catch (e) {}
-        return true;
-      } catch (e) { console.error('adminVerifyAction error', e); alert('Network error'); return false; }
-    }
-
-    // Small helper to escape HTML in inserted strings
-    function escapeHtml(str) {
-      if (typeof str !== 'string') return str || '';
-      return str.replace(/[&<>\"']/g, function (m) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[m]; });
     }
 
         // Transaction functions
@@ -7901,98 +7664,6 @@
         const totalAvailable = btcBalanceUsd + collateralBalanceUsd;
         return totalAvailable >= requiredUsd;
       }
-    }
-
-    // Get available funds breakdown
-    function getAvailableFunds() {
-      try {
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
-        const btc = (typeof user.btcBalance !== 'undefined' && user.btcBalance !== null)
-          ? Number(user.btcBalance)
-          : (Number(user.savingsBalanceUSD || 0) / (cryptoPrices.BTC || 42000));
-        const btcUsd = (btc || 0) * (cryptoPrices.BTC || 42000);
-        const collateralUsd = Number(user.collateralBalanceUSD || 0);
-        const totalAvailable = btcUsd + collateralUsd;
-        return { totalAvailable, btcUsd, collateralUsd };
-      } catch (e) {
-        console.debug('getAvailableFunds fallback to DOM due to', e && e.message);
-        let btcUsd = 0;
-        const btcBalanceElement = document.querySelector('h2.balance-value');
-        if (btcBalanceElement) {
-          const currentBtc = parseFloat(btcBalanceElement.textContent) || 0;
-          btcUsd = currentBtc * cryptoPrices.BTC;
-        }
-        let collateralUsd = 0;
-        const collateralElements = document.querySelectorAll('p.text-white.text-lg.sm\\:text-xl.font-bold');
-        if (collateralElements.length >= 2) {
-          const collateralElement = collateralElements[1];
-          const usdElement = collateralElement.nextElementSibling;
-          if (usdElement) {
-            const usdText = usdElement.textContent.replace('$', '').replace(/,/g, '');
-            collateralUsd = parseFloat(usdText) || 0;
-          }
-        }
-        const totalAvailable = btcUsd + collateralUsd;
-        return { totalAvailable, btcUsd, collateralUsd };
-      }
-    }
-
-    // Show styled insufficient funds modal with breakdown
-    function showInsufficientFundsModal(requiredUsd, totalAvailable, btcUsd, collateralUsd, title) {
-      const shortfallUsd = Math.max(0, requiredUsd - totalAvailable);
-      const modal = document.createElement('div');
-      modal.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto';
-      modal.style.background = 'rgba(0, 0, 0, 0.85)';
-      modal.innerHTML = `
-        <div class="rounded-2xl p-8 max-w-md w-full mx-4 text-center" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
-          <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style="background: rgba(239, 68, 68, 0.1);">
-            <svg width="40" height="40" fill="none" stroke="#ef4444" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-          </div>
-          <h3 class="text-white font-bold text-2xl mb-3">${title || 'Insufficient Balance'}</h3>
-          <p class="text-gray-300 text-base mb-6">You need more funds to complete this action.</p>
-          
-          <div class="rounded-lg p-4 mb-6" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
-            <div class="mb-3 pb-3" style="border-bottom: 1px solid #2a2a2a;">
-              <p class="text-gray-400 text-xs mb-1">Amount Required</p>
-              <p class="text-white font-bold text-lg" style="color: #ff6b35;">$${requiredUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-            </div>
-            <div class="mb-3 pb-3" style="border-bottom: 1px solid #2a2a2a;">
-              <p class="text-gray-400 text-xs mb-1">Your Available Balance</p>
-              <p class="text-white font-bold text-lg">$${totalAvailable.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
-            </div>
-            <div>
-              <p class="text-gray-400 text-xs mb-2">Breakdown:</p>
-              <div class="text-left text-sm space-y-1">
-                <div class="flex justify-between">
-                  <span class="text-gray-400">BTC Balance:</span>
-                  <span class="text-gray-300">$${btcUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-400">Collateral:</span>
-                  <span class="text-gray-300">$${collateralUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="rounded-lg p-3 mb-6" style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2);">
-            <p class="text-xs" style="color: #ef4444;">
-              <svg width="14" height="14" class="inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 0H9m3 0h3"></path>
-              </svg>
-              Shortfall: $${shortfallUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
-          </div>
-
-          <button onclick="this.closest('.fixed').remove();" class="w-full py-3 text-white font-bold text-base rounded-xl transition-all" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%); hover: opacity-90;">OK, Got It</button>
-        </div>
-      `;
-      document.body.appendChild(modal);
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.remove();
-      });
     }
 
     // Override window.alert for legacy insufficient-funds messages so they show styled modal instead
