@@ -3048,7 +3048,8 @@
     if (exchangeBtn) {
       exchangeBtn.addEventListener('click', () => {
         hideAllPages();
-        document.getElementById('exchange-page').classList.remove('hidden');
+        const exchangePage = document.getElementById('exchange-page');
+        if (exchangePage) exchangePage.classList.remove('hidden');
         setActiveNavButton('home-nav-btn');
         initializeExchangePage();
       });
@@ -3991,7 +3992,8 @@
     if (savingsBtn) {
       savingsBtn.addEventListener('click', () => {
         hideAllPages();
-        document.getElementById('savings-page').classList.remove('hidden');
+        const savingsPage = document.getElementById('savings-page');
+        if (savingsPage) savingsPage.classList.remove('hidden');
         setActiveNavButton('home-nav-btn'); // Keep home active since savings is accessed from home
       });
     }
@@ -4250,7 +4252,8 @@
     if (membershipBtn) {
       membershipBtn.addEventListener('click', () => {
         hideAllPages();
-        document.getElementById('membership-page').classList.remove('hidden');
+        const membershipPage = document.getElementById('membership-page');
+        if (membershipPage) membershipPage.classList.remove('hidden');
         setActiveNavButton('membership-btn');
       });
     }
@@ -4834,15 +4837,11 @@
 
     // Navigation Management System
     function hideAllPages() {
-      document.getElementById('home-page').classList.add('hidden');
-      document.getElementById('exchange-page').classList.add('hidden');
-      document.getElementById('savings-page').classList.add('hidden');
-      document.getElementById('membership-page').classList.add('hidden');
-      document.getElementById('settings-page').classList.add('hidden');
-      document.getElementById('card-page').classList.add('hidden');
-      document.getElementById('loans-page').classList.add('hidden');
-      document.getElementById('stocks-page').classList.add('hidden');
-      document.getElementById('transactions-page').classList.add('hidden');
+      const pageIds = ['home-page', 'exchange-page', 'savings-page', 'membership-page', 'settings-page', 'card-page', 'loans-page', 'stocks-page', 'transactions-page'];
+      pageIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
     }
 
     function setActiveNavButton(buttonId) {
@@ -4866,7 +4865,8 @@
     if (cardBtn) {
       cardBtn.addEventListener('click', () => {
         hideAllPages();
-        document.getElementById('card-page').classList.remove('hidden');
+        const cardPage = document.getElementById('card-page');
+        if (cardPage) cardPage.classList.remove('hidden');
         setActiveNavButton('card-btn');
       });
     }
@@ -4989,7 +4989,8 @@
     if (loansBtn) {
       loansBtn.addEventListener('click', () => {
         hideAllPages();
-        document.getElementById('loans-page').classList.remove('hidden');
+        const loansPage = document.getElementById('loans-page');
+        if (loansPage) loansPage.classList.remove('hidden');
         setActiveNavButton('loans-btn');
       });
     }
@@ -5291,7 +5292,8 @@
     if (stocksBtn) {
       stocksBtn.addEventListener('click', () => {
         hideAllPages();
-        document.getElementById('stocks-page').classList.remove('hidden');
+        const stocksPage = document.getElementById('stocks-page');
+        if (stocksPage) stocksPage.classList.remove('hidden');
         setActiveNavButton('home-nav-btn');
         // Render portfolio and load live stocks data when entering stocks page
         renderPortfolio();
@@ -5304,7 +5306,8 @@
     if (transactionsBtn) {
       transactionsBtn.addEventListener('click', () => {
         hideAllPages();
-        document.getElementById('transactions-page').classList.remove('hidden');
+        const transactionsPage = document.getElementById('transactions-page');
+        if (transactionsPage) transactionsPage.classList.remove('hidden');
         setActiveNavButton('home-nav-btn');
       });
     }
