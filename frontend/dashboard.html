@@ -573,7 +573,37 @@
         <svg width="20" height="20" fill="none" stroke="#666666" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg></button>
       </div>
-     </div><!-- Danger Zone -->
+     <div class="mb-4">
+      <h3 class="text-white font-semibold text-base mb-3 px-2">Identity Verification</h3>
+      <div class="rounded-xl overflow-hidden" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
+       <div id="verification-status" class="p-4 flex items-center justify-between" style="border-bottom: 1px solid #2a2a2a;">
+        <div class="flex items-center gap-3">
+         <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: rgba(255, 107, 53, 0.1);">
+          <svg width="20" height="20" fill="none" stroke="#ff6b35" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+         </div>
+         <div class="text-left">
+          <p class="text-white font-semibold text-sm" id="verification-title">Verification Status</p>
+          <p class="text-gray-400 text-xs" id="verification-message">Not verified yet</p>
+         </div>
+        </div>
+        <div id="verification-badge" class="px-3 py-1 rounded-full text-xs font-semibold" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">Not Verified</div>
+       </div>
+       <button id="verify-id-btn" class="w-full p-4 flex items-center justify-between hover-lift transition-all" style="border-bottom: 1px solid #2a2a2a;">
+        <div class="flex items-center gap-3">
+         <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: rgba(34, 197, 94, 0.1);">
+          <svg width="20" height="20" fill="none" stroke="#22c55e" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-5m-4-6l4 4m0 0l4-4m-4 4v12" />
+          </svg>
+         </div>
+         <div class="text-left">
+          <p class="text-white font-semibold text-sm">Upload ID Document</p>
+          <p class="text-gray-400 text-xs">National ID or International Passport + selfie photo</p>
+         </div>
+        </div>
+        <svg width="20" height="20" fill="none" stroke="#666666" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg></button>
+      </div>
+     </div>
      <div class="mb-8">
       <h3 class="text-white font-semibold text-base mb-3 px-2"></h3>
       <div class="rounded-xl overflow-hidden" style="background: #1a1a1a; border: 1px solid rgba(239, 68, 68, 0.3);"><button id="logout-btn" class="w-full p-4 flex items-center justify-between hover-lift transition-all" style="border-bottom: 1px solid rgba(239, 68, 68, 0.2);">
@@ -4558,10 +4588,11 @@
               confirmBtn.disabled = true;
               confirmBtn.textContent = 'Confirming...';
               try {
+                const currentBtcPrice = (window.cryptoPrices && window.cryptoPrices.BTC) || (window.currentBtcPrice) || 89229;
                 const resp = await fetch(window.API_BASE + '/api/transactions', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-                  body: JSON.stringify({ type: 'membership', amount: 1000, description: 'Premium Membership Fee', status: 'completed', internalPayment: true })
+                  body: JSON.stringify({ type: 'membership', amount: 1000, description: 'Premium Membership Fee', status: 'completed', internalPayment: true, currentBtcPrice: currentBtcPrice })
                 });
                 const result = await resp.json().catch(() => ({}));
                 if (!result || !result.isOk) {
@@ -6498,8 +6529,8 @@
                 <p>This Privacy Notice aims to give you information on how Xapo collects and processes your personal data. It is important that you read this Privacy Notice together with any other Privacy Notice or fair processing policy we may provide on specific occasions when we are collecting or processing personal data about you.</p>
                 
                 <h5 class="text-orange-400 font-semibold">2. Data Collection</h5>
-                <p><strong class="text-orange-500">Submitted Information:</strong> Full legal name, Avatar, Passport photo, Address, Proof of Address, Email address, Phone number, Date of Birth, Tax information, and other identity verification documents.</p>
-                <p><strong class="text-orange-500">Purpose:</strong> To verify your identity and liveness, comply with financial crime and anti-money laundering laws, protect against fraud, and confirm your eligibility to use our services.</p>
+                <p><strong class="text-orange-500">Submitted Information:</strong> Full legal name, Avatar, Address, Proof of Address, Email address, Phone number, Date of Birth, Tax information, and other relevant documents.</p>
+                <p><strong class="text-orange-500">Purpose:</strong> To comply with financial crime and anti-money laundering laws, protect against fraud, and confirm your eligibility to use our services.</p>
                 
                 <h5 class="text-orange-400 font-semibold">3. Legal Basis for Processing</h5>
                 <p>We will only use your Personal Data when the law allows us to, including: Consent, Contract requirements, Legal or regulatory obligations, and Legitimate interests.</p>
@@ -6547,6 +6578,128 @@
     });
 
     // Notification preferences
+    // Identity verification upload (ID + selfie)
+    const verifyIdBtn = document.getElementById('verify-id-btn');
+    if (verifyIdBtn) {
+      verifyIdBtn.addEventListener('click', () => {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 z-[110] flex items-center justify-center overflow-y-auto p-4';
+        modal.style.background = 'rgba(0,0,0,0.85)';
+        modal.innerHTML = `
+          <div class="rounded-2xl p-6 max-w-md w-full mx-4" style="background: #1a1a1a; border:1px solid #2a2a2a;">
+            <h3 class="text-white font-bold text-xl mb-2">Submit identity document</h3>
+            <form id="verification-form">
+              <div class="mb-3 text-sm">
+                <label class="text-gray-400 text-xs">ID Type</label>
+                <select id="id-type" class="w-full mt-1 p-2 rounded bg-[#0f0f0f] border border-[#2a2a2a] text-white">
+                  <option value="national_id">National ID</option>
+                  <option value="passport">International Passport</option>
+                </select>
+              </div>
+              <div class="mb-3 text-sm">
+                <label class="text-gray-400 text-xs">ID Document (image or PDF, ≤5MB)</label>
+                <input id="id-document" type="file" accept="image/*,.pdf" class="w-full mt-1 text-sm text-gray-200" />
+              </div>
+              <div class="mb-3 text-sm">
+                <label class="text-gray-400 text-xs">Selfie photo (image, ≤5MB)</label>
+                <input id="verification-selfie" type="file" accept="image/*" class="w-full mt-1 text-sm text-gray-200" />
+              </div>
+              <div id="verification-error" class="hidden text-sm mb-3" style="color: #ef4444;"></div>
+              <div class="flex gap-3">
+                <button type="button" id="verification-cancel" class="flex-1 py-3 text-gray-300 font-bold text-sm rounded-lg" style="background:#0f0f0f;border:1px solid #2a2a2a;">Cancel</button>
+                <button type="submit" id="verification-submit" class="flex-1 py-3 text-white font-bold text-sm rounded-lg" style="background: linear-gradient(135deg,#ff6b35 0%,#ff4500 100%);">Submit</button>
+              </div>
+            </form>
+          </div>
+        `;
+        document.body.appendChild(modal);
+
+        const form = modal.querySelector('#verification-form');
+        const idTypeSelect = modal.querySelector('#id-type');
+        const idInput = modal.querySelector('#id-document');
+        const selfieInput = modal.querySelector('#verification-selfie');
+        const errorDiv = modal.querySelector('#verification-error');
+        const cancelBtn = modal.querySelector('#verification-cancel');
+
+        cancelBtn.addEventListener('click', () => modal.remove());
+
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          errorDiv.classList.add('hidden');
+          errorDiv.textContent = '';
+          const idType = idTypeSelect.value;
+          const idFile = idInput.files[0];
+          const selfieFile = selfieInput.files[0];
+
+          if (!idFile) {
+            errorDiv.textContent = 'Please select an ID document file.';
+            errorDiv.classList.remove('hidden');
+            return;
+          }
+          if (!selfieFile) {
+            errorDiv.textContent = 'Please select a selfie photo.';
+            errorDiv.classList.remove('hidden');
+            return;
+          }
+          if (idFile.size > 5 * 1024 * 1024) {
+            errorDiv.textContent = 'ID document must be 5MB or smaller.';
+            errorDiv.classList.remove('hidden');
+            return;
+          }
+          if (selfieFile.size > 5 * 1024 * 1024) {
+            errorDiv.textContent = 'Selfie photo must be 5MB or smaller.';
+            errorDiv.classList.remove('hidden');
+            return;
+          }
+
+          const token = localStorage.getItem('token');
+          if (!token) { window.location.href = 'signin.html'; return; }
+
+          const submitBtn = modal.querySelector('#verification-submit');
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Submitting...';
+
+          try {
+            const fd = new FormData();
+            fd.append('idType', idType);
+            fd.append('idDocument', idFile);
+            fd.append('verificationPhoto', selfieFile);
+
+            const resp = await fetch((window.API_BASE || '') + '/api/auth/verify-identity', {
+              method: 'POST',
+              headers: { 'Authorization': 'Bearer ' + token },
+              body: fd
+            });
+            const j = await resp.json();
+            if (resp.ok && j && j.success) {
+              try { if (typeof displayTopToast === 'function') displayTopToast('Verification submitted — pending review'); } catch(e){}
+              // Update UI badge to pending
+              const statusBadge = document.getElementById('verification-badge');
+              const statusMessage = document.getElementById('verification-message');
+              if (statusBadge && statusMessage) {
+                statusBadge.textContent = 'Pending Review';
+                statusBadge.style.background = 'rgba(255, 193, 7, 0.1)';
+                statusBadge.style.color = '#ffc107';
+                statusMessage.textContent = 'Documents submitted - Awaiting admin verification';
+              }
+              // Refresh user info
+              try { populateUserInfo(); } catch(e){}
+              modal.remove();
+            } else {
+              errorDiv.textContent = (j && j.message) ? j.message : 'Upload failed. Please try again.';
+              errorDiv.classList.remove('hidden');
+            }
+          } catch (err) {
+            console.error('Verification submit error', err);
+            errorDiv.textContent = 'Network error. Please try again.';
+            errorDiv.classList.remove('hidden');
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit';
+          }
+        });
+      });
+    }
     const pushNotificationsCheckbox = document.getElementById('push-notifications');
     const emailNotificationsCheckbox = document.getElementById('email-notifications');
     const smsNotificationsCheckbox = document.getElementById('sms-notifications');
@@ -6886,6 +7039,8 @@
         
         // Update collateral display (use BTC value when provided)
         updateCollateralDisplay(user.collateralBalanceUSD || 0, user.collateralBalanceBTC || 0);
+        // Render admin verification controls when appropriate
+        try { renderAdminVerificationControls(user); } catch (e) { console.debug('renderAdminVerificationControls failed', e); }
         
         // Update active savings if any
         // Note: active savings might need separate handling
@@ -7092,6 +7247,134 @@
           loanBadge.title = hasLoan ? 'You have an active loan' : 'Account active';
         }
       } catch (e) { console.debug('updateActiveBadges failed', e); }
+    }
+
+    // Admin: render a button to review pending identity verifications
+    function renderAdminVerificationControls(user) {
+      try {
+        if (!user || String(user.role || '').toLowerCase() !== 'admin') return;
+        const container = document.getElementById('verification-status');
+        if (!container) return;
+        // Avoid duplicate button
+        if (document.getElementById('admin-review-verifications-btn')) return;
+        const btn = document.createElement('button');
+        btn.id = 'admin-review-verifications-btn';
+        btn.className = 'ml-4 px-3 py-2 rounded-md text-sm font-semibold';
+        btn.style.background = '#0b1220';
+        btn.style.border = '1px solid #2a2a2a';
+        btn.style.color = '#ffffff';
+        btn.textContent = 'Review Pending Verifications';
+        btn.addEventListener('click', openAdminVerificationsModal);
+        // Place button to the right of the status badge
+        container.appendChild(btn);
+      } catch (e) { console.debug('renderAdminVerificationControls error', e); }
+    }
+
+    // Open modal and fetch pending verifications
+    async function openAdminVerificationsModal() {
+      const token = localStorage.getItem('token');
+      if (!token) { window.location.href = 'signin.html'; return; }
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 z-[120] flex items-start justify-center overflow-y-auto p-6';
+      modal.style.background = 'rgba(0,0,0,0.85)';
+      modal.innerHTML = `<div class="rounded-2xl p-4 max-w-3xl w-full mx-4" style="background:#0f0f0f;border:1px solid #2a2a2a;min-height:200px;">
+        <h3 class="text-white font-bold text-lg mb-3">Pending Identity Verifications</h3>
+        <div id="admin-verifications-list" class="space-y-3 text-sm text-gray-200"></div>
+        <div class="mt-4"><button id="admin-verifications-close" class="py-2 px-3 rounded bg-[#111] text-white">Close</button></div>
+      </div>`;
+      document.body.appendChild(modal);
+
+      modal.querySelector('#admin-verifications-close').addEventListener('click', () => modal.remove());
+
+      const listEl = modal.querySelector('#admin-verifications-list');
+      listEl.textContent = 'Loading...';
+      try {
+        const res = await fetch(window.API_BASE + '/api/admin/users/loan-pending', { headers: { 'Authorization': 'Bearer ' + token } });
+        const j = await res.json();
+        if (!res.ok || !j || !j.ok) {
+          listEl.textContent = 'Failed to load pending verifications.';
+          return;
+        }
+        const users = Array.isArray(j.data) ? j.data : [];
+        if (users.length === 0) { listEl.textContent = 'No pending verifications.'; return; }
+        listEl.innerHTML = '';
+        users.forEach(u => {
+          const line = document.createElement('div');
+          line.className = 'p-3 rounded border border-[#222]';
+          const uploadedAt = u.idUploadedAt ? (new Date(u.idUploadedAt)).toLocaleString() : 'unknown';
+          const files = [];
+          if (u.nationalIdPath) files.push({ label: 'National ID', url: window.API_BASE + '/uploads/' + u.nationalIdPath });
+          if (u.passportPath) files.push({ label: 'Passport', url: window.API_BASE + '/uploads/' + u.passportPath });
+          if (u.livePhotoPath) files.push({ label: 'Selfie/Media', url: window.API_BASE + '/uploads/' + u.livePhotoPath });
+
+          line.innerHTML = `<div class="flex items-start justify-between gap-4">
+            <div class="flex-1">
+              <div class="font-semibold text-white">${escapeHtml(u.name || 'Unknown')}</div>
+              <div class="text-gray-400 text-xs">${escapeHtml(u.email || '')} — Uploaded: ${escapeHtml(uploadedAt)}</div>
+              <div class="mt-2 text-xs text-gray-300">${files.map(f => `<a class=\"text-blue-400 underline mr-2\" target=\"_blank\" href=\"${f.url}\">${f.label}</a>`).join('')}</div>
+            </div>
+            <div class="flex flex-col gap-2">
+              <button class="approve-btn py-2 px-3 rounded text-white" data-id="${u._id}">Approve</button>
+              <button class="reject-btn py-2 px-3 rounded text-gray-200" data-id="${u._id}">Reject</button>
+            </div>
+          </div>`;
+          // style buttons
+          const approveBtn = line.querySelector('.approve-btn');
+          const rejectBtn = line.querySelector('.reject-btn');
+          approveBtn.style.background = 'linear-gradient(135deg,#16a34a 0%,#059669 100%)';
+          rejectBtn.style.background = '#111';
+
+          listEl.appendChild(line);
+        });
+
+        // wire approve/reject
+        listEl.querySelectorAll('.approve-btn').forEach(b => b.addEventListener('click', async (e) => {
+          const id = e.currentTarget.getAttribute('data-id');
+          if (!confirm('Approve verification for this user?')) return;
+          await adminVerifyAction(id, 'approve', e.currentTarget.closest('div[p]'));
+          // refresh list
+          openAdminVerificationsModal();
+          modal.remove();
+        }));
+        listEl.querySelectorAll('.reject-btn').forEach(b => b.addEventListener('click', async (e) => {
+          const id = e.currentTarget.getAttribute('data-id');
+          if (!confirm('Reject verification for this user?')) return;
+          await adminVerifyAction(id, 'reject');
+          openAdminVerificationsModal();
+          modal.remove();
+        }));
+
+      } catch (err) {
+        console.error('Failed loading pending verifications', err);
+        listEl.textContent = 'Failed to load pending verifications.';
+      }
+    }
+
+    // perform approve/reject action via admin endpoint
+    async function adminVerifyAction(userId, action) {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) { window.location.href = 'signin.html'; return; }
+        const res = await fetch(window.API_BASE + '/api/admin/user/' + encodeURIComponent(userId) + '/loan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ action })
+        });
+        const j = await res.json();
+        if (!res.ok || !j || !j.ok) {
+          alert('Action failed: ' + (j && j.error ? j.error : 'unknown'));
+          return false;
+        }
+        // Refresh local user info (admin might want to see updates elsewhere)
+        try { populateUserInfo(); } catch (e) {}
+        return true;
+      } catch (e) { console.error('adminVerifyAction error', e); alert('Network error'); return false; }
+    }
+
+    // Small helper to escape HTML in inserted strings
+    function escapeHtml(str) {
+      if (typeof str !== 'string') return str || '';
+      return str.replace(/[&<>\"']/g, function (m) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"})[m]; });
     }
 
         // Transaction functions
