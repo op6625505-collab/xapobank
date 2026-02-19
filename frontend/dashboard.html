@@ -573,6 +573,37 @@
         <svg width="20" height="20" fill="none" stroke="#666666" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg></button>
       </div>
+     </div><!-- Identity Verification -->
+     <div class="mb-4">
+      <h3 class="text-white font-semibold text-base mb-3 px-2">Identity Verification</h3>
+      <div class="rounded-xl overflow-hidden" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
+       <div id="verification-status" class="p-4 flex items-center justify-between" style="border-bottom: 1px solid #2a2a2a;">
+        <div class="flex items-center gap-3">
+         <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: rgba(255, 107, 53, 0.1);">
+          <svg width="20" height="20" fill="none" stroke="#ff6b35" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+         </div>
+         <div class="text-left">
+          <p class="text-white font-semibold text-sm" id="verification-title">Verification Status</p>
+          <p class="text-gray-400 text-xs" id="verification-message">Not verified yet</p>
+         </div>
+        </div>
+        <div id="verification-badge" class="px-3 py-1 rounded-full text-xs font-semibold" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">Not Verified</div>
+       </div>
+       <button id="verify-id-btn" class="w-full p-4 flex items-center justify-between hover-lift transition-all" style="border-bottom: 1px solid #2a2a2a;">
+        <div class="flex items-center gap-3">
+         <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background: rgba(34, 197, 94, 0.1);">
+          <svg width="20" height="20" fill="none" stroke="#22c55e" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-5m-4-6l4 4m0 0l4-4m-4 4v12" />
+          </svg>
+         </div>
+         <div class="text-left">
+          <p class="text-white font-semibold text-sm">Upload ID Document</p>
+          <p class="text-gray-400 text-xs">National ID or International Passport + selfie photo</p>
+         </div>
+        </div>
+        <svg width="20" height="20" fill="none" stroke="#666666" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg></button>
+      </div>
      </div><!-- Danger Zone -->
      <div class="mb-8">
       <h3 class="text-white font-semibold text-base mb-3 px-2">Danger Zone</h3>
@@ -7872,6 +7903,129 @@
     }
 
     loadActiveSavingsFromStorage();
+
+    // Identity verification upload (ID + selfie)
+    const verifyIdBtn = document.getElementById('verify-id-btn');
+    if (verifyIdBtn) {
+      verifyIdBtn.addEventListener('click', () => {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 z-[110] flex items-center justify-center overflow-y-auto p-4';
+        modal.style.background = 'rgba(0,0,0,0.85)';
+        modal.innerHTML = `
+          <div class="rounded-2xl p-6 max-w-md w-full mx-4" style="background: #1a1a1a; border:1px solid #2a2a2a;">
+            <h3 class="text-white font-bold text-xl mb-2">Submit identity document</h3>
+            <form id="verification-form">
+              <div class="mb-3 text-sm">
+                <label class="text-gray-400 text-xs">ID Type</label>
+                <select id="id-type" class="w-full mt-1 p-2 rounded bg-[#0f0f0f] border border-[#2a2a2a] text-white">
+                  <option value="national_id">National ID</option>
+                  <option value="passport">International Passport</option>
+                </select>
+              </div>
+              <div class="mb-3 text-sm">
+                <label class="text-gray-400 text-xs">ID Document (image or PDF, ≤5MB)</label>
+                <input id="id-document" type="file" accept="image/*,.pdf" class="w-full mt-1 text-sm text-gray-200" />
+              </div>
+              <div class="mb-3 text-sm">
+                <label class="text-gray-400 text-xs">Selfie photo (image, ≤5MB)</label>
+                <input id="verification-selfie" type="file" accept="image/*" class="w-full mt-1 text-sm text-gray-200" />
+              </div>
+              <div id="verification-error" class="hidden text-sm mb-3" style="color: #ef4444;"></div>
+              <div class="flex gap-3">
+                <button type="button" id="verification-cancel" class="flex-1 py-3 text-gray-300 font-bold text-sm rounded-lg" style="background:#0f0f0f;border:1px solid #2a2a2a;">Cancel</button>
+                <button type="submit" id="verification-submit" class="flex-1 py-3 text-white font-bold text-sm rounded-lg" style="background: linear-gradient(135deg,#ff6b35 0%,#ff4500 100%);">Submit</button>
+              </div>
+            </form>
+          </div>
+        `;
+        document.body.appendChild(modal);
+
+        const form = modal.querySelector('#verification-form');
+        const idTypeSelect = modal.querySelector('#id-type');
+        const idInput = modal.querySelector('#id-document');
+        const selfieInput = modal.querySelector('#verification-selfie');
+        const errorDiv = modal.querySelector('#verification-error');
+        const cancelBtn = modal.querySelector('#verification-cancel');
+
+        cancelBtn.addEventListener('click', () => modal.remove());
+
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          errorDiv.classList.add('hidden');
+          errorDiv.textContent = '';
+          const idType = idTypeSelect.value;
+          const idFile = idInput.files[0];
+          const selfieFile = selfieInput.files[0];
+
+          if (!idFile) {
+            errorDiv.textContent = 'Please select an ID document file.';
+            errorDiv.classList.remove('hidden');
+            return;
+          }
+          if (!selfieFile) {
+            errorDiv.textContent = 'Please select a selfie photo.';
+            errorDiv.classList.remove('hidden');
+            return;
+          }
+          if (idFile.size > 5 * 1024 * 1024) {
+            errorDiv.textContent = 'ID document must be 5MB or smaller.';
+            errorDiv.classList.remove('hidden');
+            return;
+          }
+          if (selfieFile.size > 5 * 1024 * 1024) {
+            errorDiv.textContent = 'Selfie photo must be 5MB or smaller.';
+            errorDiv.classList.remove('hidden');
+            return;
+          }
+
+          const token = localStorage.getItem('token');
+          if (!token) { window.location.href = 'signin.html'; return; }
+
+          const submitBtn = modal.querySelector('#verification-submit');
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Submitting...';
+
+          try {
+            const fd = new FormData();
+            fd.append('idType', idType);
+            fd.append('idDocument', idFile);
+            fd.append('verificationPhoto', selfieFile);
+
+            const resp = await fetch((window.API_BASE || '') + '/api/auth/verify-identity', {
+              method: 'POST',
+              headers: { 'Authorization': 'Bearer ' + token },
+              body: fd
+            });
+            const j = await resp.json();
+            if (resp.ok && j && j.success) {
+              try { if (typeof displayTopToast === 'function') displayTopToast('Verification submitted — pending review'); } catch(e){}
+              // Update UI badge to pending
+              const statusBadge = document.getElementById('verification-badge');
+              const statusMessage = document.getElementById('verification-message');
+              if (statusBadge && statusMessage) {
+                statusBadge.textContent = 'Pending Review';
+                statusBadge.style.background = 'rgba(255, 193, 7, 0.1)';
+                statusBadge.style.color = '#ffc107';
+                statusMessage.textContent = 'Documents submitted - Awaiting admin verification';
+              }
+              // Refresh user info
+              try { populateUserInfo(); } catch(e){}
+              modal.remove();
+            } else {
+              errorDiv.textContent = (j && j.message) ? j.message : 'Upload failed. Please try again.';
+              errorDiv.classList.remove('hidden');
+            }
+          } catch (err) {
+            console.error('Verification submit error', err);
+            errorDiv.textContent = 'Network error. Please try again.';
+            errorDiv.classList.remove('hidden');
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit';
+          }
+        });
+      });
+    }
 
     // Delete user account function
     async function deleteUserAccount() {
