@@ -255,7 +255,7 @@
        <div class="flex-1">
         <p class="text-gray-400 text-xs sm:text-sm font-medium mb-1 sm:mb-2">BTC Balance</p>
         <div class="flex items-baseline gap-2 sm:gap-4">
-         <h2 class="text-white text-3xl sm:text-4xl md:text-5xl font-bold balance-value">0.0000</h2>
+         <h2 class="text-white text-3xl sm:text-4xl md:text-5xl font-bold balance-value">0.000</h2>
         </div>
         <p class="text-gray-400 text-xs sm:text-sm mt-2 sm:mt-3">USD Equivalent: <span class="text-green-400 font-semibold" id="usd-equivalent-display">$0.00</span></p>
         <div class="flex flex-col gap-1 mt-2 sm:mt-3">
@@ -2281,7 +2281,7 @@
 
         // Update BTC header balance
         const btcEl = document.querySelector('h2.balance-value');
-        if (btcEl) btcEl.textContent = isFinite(btcBalance) ? btcBalance.toFixed(8) : '0.000';
+        if (btcEl) btcEl.textContent = isFinite(btcBalance) ? btcBalance.toFixed(3) : '0.000';
 
         // Update USD equivalent display (if present)
         const usdEquivalent = document.getElementById('usd-equivalent-display');
@@ -2986,7 +2986,7 @@
                 }
               } catch (e) { console.debug('Failed updating pending deposit applyToLoan flag', e); }
 
-              let countdown = 7;
+              // Hide the visible countdown and 'admin review' message; wait 7s then show success
               modal.innerHTML = `
                 <div class="rounded-2xl p-8 max-w-md w-full mx-4 text-center" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
                   <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 animate-spin" style="background: rgba(255, 107, 53, 0.1); animation: spin 2s linear infinite;">
@@ -2995,19 +2995,12 @@
                     </svg>
                   </div>
                   <h3 class="text-white font-bold text-xl mb-2">Processing Payment</h3>
-                  <p class="text-gray-400 text-sm mb-4">Waiting for blockchain confirmation...</p>
-                  <p class="text-orange-500 font-bold text-2xl" id="deposit-countdown-display">${countdown}</p>
-                  <p class="text-gray-400 text-xs mt-2">Admin will review your deposit</p>
+                  <p class="text-gray-400 text-sm mb-4">Processing payment...</p>
                 </div>
               `;
 
-              const countdownDisplay = modal.querySelector('#deposit-countdown-display');
-              const depositInterval = setInterval(() => {
-                countdown--;
-                if (countdownDisplay) countdownDisplay.textContent = countdown;
-                if (countdown <= 0) {
-                  clearInterval(depositInterval);
-
+              // perform a hidden 7-second wait, then show success (no "admin review" or visible countdown)
+              setTimeout(() => {
                   // Show final success modal and perform optimistic update
                   modal.innerHTML = `
                     <div class="rounded-2xl p-8 max-w-md w-full mx-4 text-center" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
@@ -3016,10 +3009,9 @@
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                       </div>
-                      <h3 class="text-white font-bold text-2xl mb-3">Deposit Submitted!</h3>
+                      <h3 class="text-white font-bold text-2xl mb-3">Successful payment processed</h3>
                       <p class="text-gray-300 text-base mb-2">Successfully submitted deposit of <span class="font-bold" style="color: #ff6b35;">${(btcAmount || 0).toFixed(8)} BTC</span></p>
                       <p class="text-gray-400 text-sm mb-2">USD Equivalent: <span class="text-white font-semibold">${formatUsd(usdAmount || 0)}</span></p>
-                      <p class="text-gray-400 text-sm mb-6">Your deposit is pending admin confirmation</p>
                       <button onclick="this.closest('.fixed').remove();" class="w-full py-3 text-white font-bold text-base rounded-xl transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Done</button>
                     </div>
                   `;
@@ -3052,12 +3044,11 @@
                       populateUserInfo();
                     }
 
-                    setTimeout(() => { if (typeof displayTopToast === 'function') displayTopToast('Deposit pending — balance updated (pending confirmation)'); }, 500);
+                    setTimeout(() => { if (typeof displayTopToast === 'function') displayTopToast('Deposit successful — balance updated (pending confirmation)'); }, 500);
                   } catch (e) { console.warn('Optimistic deposit update failed', e && e.message); }
 
                   if (typeof onComplete === 'function') onComplete({ transactionId, assignedAddress });
-                }
-              }, 1000);
+              }, 7000);
             });
             return { transactionId, assignedAddress };
           } catch (err) {
