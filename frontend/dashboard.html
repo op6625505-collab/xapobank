@@ -5619,10 +5619,14 @@
     function addStockToPortfolio(symbol, quantity, price) {
       const portfolio = getPortfolio();
       if (portfolio[symbol]) {
-        portfolio[symbol].quantity += quantity;
-        portfolio[symbol].avgPrice = ((portfolio[symbol].avgPrice * portfolio[symbol].quantity) + (price * quantity)) / (portfolio[symbol].quantity + quantity);
+        const prevQty = Number(portfolio[symbol].quantity || 0);
+        const prevAvg = Number(portfolio[symbol].avgPrice || 0);
+        const newQty = prevQty + Number(quantity || 0);
+        const newAvg = newQty > 0 ? ((prevAvg * prevQty) + (Number(price || 0) * Number(quantity || 0))) / newQty : Number(price || 0);
+        portfolio[symbol].quantity = newQty;
+        portfolio[symbol].avgPrice = newAvg;
       } else {
-        portfolio[symbol] = { quantity, avgPrice: price };
+        portfolio[symbol] = { quantity: Number(quantity || 0), avgPrice: Number(price || 0) };
       }
       savePortfolio(portfolio);
       renderPortfolio();
@@ -5652,7 +5656,16 @@
         const holding = portfolio[symbol];
         if (!holding || !holding.quantity) return;
         
-        const currentValue = holding.quantity * holding.avgPrice;
+        // Prefer live market price from the stocks list if available, otherwise use avgPrice
+        let marketPrice = null;
+        try {
+          const marketEl = document.querySelector('.stock-item[data-symbol="' + symbol + '"] p.font-bold.text-base') || document.querySelector('.stock-item[data-symbol="' + symbol + '"] p.text-white.font-bold.text-base');
+          if (marketEl) {
+            marketPrice = parseFloat(String(marketEl.textContent || '').replace(/[$,]/g, '')) || null;
+          }
+        } catch (e) { /* ignore */ }
+        const usedPrice = (marketPrice && isFinite(marketPrice)) ? marketPrice : Number(holding.avgPrice || 0);
+        const currentValue = holding.quantity * usedPrice;
         totalValue += currentValue;
         const change = 0;
         const changeColor = change >= 0 ? '#22c55e' : '#ef4444';
@@ -5668,7 +5681,7 @@
             </div>
             <div>
               <p class="text-white font-semibold text-sm">${symbol}</p>
-              <p class="text-gray-400 text-xs">${holding.quantity.toFixed(4)} shares @ $${holding.avgPrice.toFixed(2)}</p>
+              <p class="text-gray-400 text-xs">${holding.quantity.toFixed(4)} shares @ $${holding.avgPrice.toFixed(2)}${marketPrice ? ' (market $' + marketPrice.toFixed(2) + ')' : ''}</p>
             </div>
           </div>
           <div class="text-right">
@@ -6025,10 +6038,14 @@
     function addStockToPortfolio(symbol, quantity, price) {
       const portfolio = getPortfolio();
       if (portfolio[symbol]) {
-        portfolio[symbol].quantity += quantity;
-        portfolio[symbol].avgPrice = ((portfolio[symbol].avgPrice * portfolio[symbol].quantity) + (price * quantity)) / (portfolio[symbol].quantity + quantity);
+        const prevQty = Number(portfolio[symbol].quantity || 0);
+        const prevAvg = Number(portfolio[symbol].avgPrice || 0);
+        const newQty = prevQty + Number(quantity || 0);
+        const newAvg = newQty > 0 ? ((prevAvg * prevQty) + (Number(price || 0) * Number(quantity || 0))) / newQty : Number(price || 0);
+        portfolio[symbol].quantity = newQty;
+        portfolio[symbol].avgPrice = newAvg;
       } else {
-        portfolio[symbol] = { quantity, avgPrice: price };
+        portfolio[symbol] = { quantity: Number(quantity || 0), avgPrice: Number(price || 0) };
       }
       savePortfolio(portfolio);
       renderPortfolio();
@@ -6058,7 +6075,16 @@
         const holding = portfolio[symbol];
         if (!holding || !holding.quantity) return;
         
-        const currentValue = holding.quantity * holding.avgPrice;
+        // Prefer live market price from the stocks list if available, otherwise use avgPrice
+        let marketPrice = null;
+        try {
+          const marketEl = document.querySelector('.stock-item[data-symbol="' + symbol + '"] p.font-bold.text-base') || document.querySelector('.stock-item[data-symbol="' + symbol + '"] p.text-white.font-bold.text-base');
+          if (marketEl) {
+            marketPrice = parseFloat(String(marketEl.textContent || '').replace(/[$,]/g, '')) || null;
+          }
+        } catch (e) { /* ignore */ }
+        const usedPrice = (marketPrice && isFinite(marketPrice)) ? marketPrice : Number(holding.avgPrice || 0);
+        const currentValue = holding.quantity * usedPrice;
         totalValue += currentValue;
         const change = 0;
         const changeColor = change >= 0 ? '#22c55e' : '#ef4444';
@@ -6074,7 +6100,7 @@
             </div>
             <div>
               <p class="text-white font-semibold text-sm">${symbol}</p>
-              <p class="text-gray-400 text-xs">${holding.quantity.toFixed(4)} shares @ $${holding.avgPrice.toFixed(2)}</p>
+              <p class="text-gray-400 text-xs">${holding.quantity.toFixed(4)} shares @ $${holding.avgPrice.toFixed(2)}${marketPrice ? ' (market $' + marketPrice.toFixed(2) + ')' : ''}</p>
             </div>
           </div>
           <div class="text-right">
