@@ -2095,7 +2095,7 @@
       <svg width="24" height="24" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg><span class="text-xs font-medium">Loans</span> </button> <button id="membership-btn" class="nav-btn flex flex-col items-center gap-1 transition-colors">
       <svg width="24" height="24" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-      </svg><span class="text-xs font-medium">Member</span> </button> <button id="settings-btn" class="nav-btn flex flex-col items-center gap-1 transition-colors">
+      </svg><span class="text-xs font-medium">Membership</span> </button> <button id="settings-btn" class="nav-btn flex flex-col items-center gap-1 transition-colors">
       <svg width="24" height="24" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg><span class="text-xs font-medium">Settings</span> </button>
     </div>
@@ -7160,6 +7160,49 @@
         renderTransactions();
     }
 
+    // EasyGuide onboarding modal for newly-registered users
+    function showEasyGuide() {
+      try {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 z-[120] flex items-center justify-center p-4';
+        modal.style.background = 'rgba(0,0,0,0.7)';
+        modal.innerHTML = `
+          <div class="rounded-2xl p-6 max-w-md w-full mx-4 text-left" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
+            <h3 class="text-white font-bold text-xl mb-2">Easy Guide</h3>
+            <p class="text-gray-300 mb-3">Welcome! A quick guide to get you started.</p>
+            <div class="mb-3">
+              <p class="text-sm text-gray-400 mb-2"><strong>Add Payment:</strong> Use the <span style="color:#ff6b35;">Add Funds</span> button to deposit funds.</p>
+              <p class="text-sm text-gray-400"><strong>Settings:</strong> Tap your profile (top-left) to access settings and account options.</p>
+            </div>
+            <div class="flex gap-3">
+              <button id="easyguide-refresh" class="flex-1 py-3 text-white font-bold text-sm rounded-lg" style="background: linear-gradient(135deg,#ff6b35 0%,#ff4500 100%);">Refresh Page</button>
+              <button id="easyguide-close" class="flex-1 py-3 text-gray-300 font-bold text-sm rounded-lg" style="background: #0f0f0f; border:1px solid #2a2a2a;">Close</button>
+            </div>
+            <label class="mt-3 text-xs text-gray-400"><input type="checkbox" id="easyguide-never" style="margin-right:6px;"> Don't show this again</label>
+          </div>
+        `;
+        document.body.appendChild(modal);
+
+        document.getElementById('easyguide-refresh').addEventListener('click', () => { try { location.reload(); } catch(e){} });
+        document.getElementById('easyguide-close').addEventListener('click', () => { try { if (document.getElementById('easyguide-never')?.checked) localStorage.setItem('seenEasyGuide','1'); modal.remove(); } catch(e){} });
+      } catch (e) { console.debug('showEasyGuide failed', e); }
+    }
+
+    // Wire top-bar refresh button to reload
+    try { document.getElementById('refresh-btn')?.addEventListener('click', () => { location.reload(); }); } catch(e) { console.debug('refresh button wiring failed', e); }
+
+    // Show easyguide if signup requested it
+    try {
+      const shouldShow = localStorage.getItem('showEasyGuide');
+      const never = localStorage.getItem('seenEasyGuide');
+      if (shouldShow && !never) {
+        // give a tiny delay so dashboard UI finishes rendering
+        setTimeout(() => { showEasyGuide(); try { localStorage.removeItem('showEasyGuide'); } catch(e){} }, 600);
+      } else {
+        try { localStorage.removeItem('showEasyGuide'); } catch(e){}
+      }
+    } catch(e) { console.debug('easyguide check failed', e); }
+
     // Keep the profile transaction count in sync with server + local transactions
     function updateProfileTransactionsCount() {
       const el = document.getElementById('profile-transactions-count');
@@ -8172,4 +8215,3 @@
 </script>
 </body>
 </html>
-
