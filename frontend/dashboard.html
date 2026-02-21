@@ -7092,7 +7092,12 @@
           const statusBadge = document.getElementById('verification-badge');
           const statusMessage = document.getElementById('verification-message');
           const verifyBtn = document.getElementById('verify-id-btn');
-          if (user.idVerified) {
+          // If admin explicitly rejected the documents, show rejection reason
+          if (user.idRejectedAt) {
+            if (statusBadge) { statusBadge.textContent = 'Rejected'; statusBadge.style.background = 'rgba(239,68,68,0.12)'; statusBadge.style.color = '#ef4444'; }
+            if (statusMessage) statusMessage.textContent = user.idRejectedReason || 'Document not clear or not valid';
+            if (verifyBtn) { verifyBtn.disabled = false; verifyBtn.classList.remove('cursor-not-allowed'); verifyBtn.style.opacity = ''; verifyBtn.title = 'Upload ID Document'; }
+          } else if (user.idVerified) {
             if (statusBadge) { statusBadge.textContent = 'Verified'; statusBadge.style.background = 'rgba(34,197,94,0.1)'; statusBadge.style.color = '#22c55e'; }
             if (statusMessage) statusMessage.textContent = 'Identity verified';
             if (verifyBtn) { verifyBtn.disabled = true; verifyBtn.classList.add('cursor-not-allowed'); verifyBtn.style.opacity = '0.6'; verifyBtn.title = 'Identity already verified'; }
