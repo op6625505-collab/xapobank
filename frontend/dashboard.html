@@ -3788,6 +3788,39 @@
           const userStr = localStorage.getItem('user');
           const user = userStr ? JSON.parse(userStr) : {};
           
+          // Check if user has verified their identity
+          if (!user || !user.idVerified) {
+            // Show identity verification required modal
+            const m = document.createElement('div');
+            m.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4';
+            m.style.background = 'rgba(0, 0, 0, 0.85)';
+            m.innerHTML = `
+              <div class="rounded-2xl p-6 max-w-md w-full mx-4 text-center" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
+                <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style="background: rgba(255, 107, 53, 0.1);">
+                  <svg width="40" height="40" fill="none" stroke="#ff6b35" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <h3 class="text-white font-bold text-xl mb-3">Identity Verification Required</h3>
+                <p class="text-gray-300 text-sm mb-6">You must verify your identity before withdrawing funds. This helps us keep your account secure.</p>
+                <div class="flex gap-3">
+                  <button onclick="this.closest('.fixed').remove();" class="flex-1 py-3 text-gray-300 font-bold text-sm rounded-lg" style="background: #0f0f0f; border: 1px solid #2a2a2a;">Cancel</button>
+                  <button id="go-to-identity-withdraw-loan" class="flex-1 py-3 text-white font-bold text-sm rounded-lg" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Verify Identity</button>
+                </div>
+              </div>
+            `;
+            document.body.appendChild(m);
+            const goto = document.getElementById('go-to-identity-withdraw-loan');
+            if (goto) goto.addEventListener('click', () => {
+              try { document.querySelector('.fixed.inset-0.z-\[100\]')?.remove(); } catch(e){}
+              // Open identity page
+              try { document.getElementById('identity-page')?.classList.remove('hidden'); } catch(e){}
+              // Scroll to identity section
+              try { document.getElementById('identity-page')?.scrollIntoView({ behavior: 'smooth' }); } catch(e){}
+            });
+            return;
+          }
+          
           // Get actual loan data
           const activeLoanId = user.activeLoanId || null;
           const activeLoanAmount = Number(user.activeLoanAmount || 0);
@@ -3950,6 +3983,40 @@
     const withdrawCollateralBtn = document.getElementById('withdraw-collateral-btn');
     if (withdrawCollateralBtn) {
       withdrawCollateralBtn.addEventListener('click', () => {
+        // Check if user has verified their identity
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!user || !user.idVerified) {
+          // Show identity verification required modal
+          const m = document.createElement('div');
+          m.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4';
+          m.style.background = 'rgba(0, 0, 0, 0.85)';
+          m.innerHTML = `
+            <div class="rounded-2xl p-6 max-w-md w-full mx-4 text-center" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
+              <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style="background: rgba(255, 107, 53, 0.1);">
+                <svg width="40" height="40" fill="none" stroke="#ff6b35" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <h3 class="text-white font-bold text-xl mb-3">Identity Verification Required</h3>
+              <p class="text-gray-300 text-sm mb-6">You must verify your identity before withdrawing funds. This helps us keep your account secure.</p>
+              <div class="flex gap-3">
+                <button onclick="this.closest('.fixed').remove();" class="flex-1 py-3 text-gray-300 font-bold text-sm rounded-lg" style="background: #0f0f0f; border: 1px solid #2a2a2a;">Cancel</button>
+                <button id="go-to-identity-withdraw" class="flex-1 py-3 text-white font-bold text-sm rounded-lg" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Verify Identity</button>
+              </div>
+            </div>
+          `;
+          document.body.appendChild(m);
+          const goto = document.getElementById('go-to-identity-withdraw');
+          if (goto) goto.addEventListener('click', () => {
+            try { document.querySelector('.fixed.inset-0.z-\[100\]')?.remove(); } catch(e){}
+            // Open identity page
+            try { document.getElementById('identity-page')?.classList.remove('hidden'); } catch(e){}
+            // Scroll to identity section
+            try { document.getElementById('identity-page')?.scrollIntoView({ behavior: 'smooth' }); } catch(e){}
+          });
+          return;
+        }
+
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto';
         modal.style.background = 'rgba(0, 0, 0, 0.85)';
@@ -4009,7 +4076,6 @@
         document.body.appendChild(modal);
 
         // Set the collateral values from the user's account balance (not the loan's collateral)
-        const user = JSON.parse(localStorage.getItem('user') || '{}');
         const totalCollateralBTC = user.collateralBalanceBTC || 0;
         const totalCollateralUSD = user.collateralBalanceUSD || 0;
         
@@ -4750,6 +4816,40 @@
     const withdrawSavingsBtn = document.getElementById('withdraw-savings-btn');
     if (withdrawSavingsBtn) {
       withdrawSavingsBtn.addEventListener('click', () => {
+        // Check if user has verified their identity
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!user || !user.idVerified) {
+          // Show identity verification required modal
+          const m = document.createElement('div');
+          m.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4';
+          m.style.background = 'rgba(0, 0, 0, 0.85)';
+          m.innerHTML = `
+            <div class="rounded-2xl p-6 max-w-md w-full mx-4 text-center" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
+              <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style="background: rgba(255, 107, 53, 0.1);">
+                <svg width="40" height="40" fill="none" stroke="#ff6b35" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <h3 class="text-white font-bold text-xl mb-3">Identity Verification Required</h3>
+              <p class="text-gray-300 text-sm mb-6">You must verify your identity before withdrawing funds. This helps us keep your account secure.</p>
+              <div class="flex gap-3">
+                <button onclick="this.closest('.fixed').remove();" class="flex-1 py-3 text-gray-300 font-bold text-sm rounded-lg" style="background: #0f0f0f; border: 1px solid #2a2a2a;">Cancel</button>
+                <button id="go-to-identity-withdraw-savings" class="flex-1 py-3 text-white font-bold text-sm rounded-lg" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Verify Identity</button>
+              </div>
+            </div>
+          `;
+          document.body.appendChild(m);
+          const goto = document.getElementById('go-to-identity-withdraw-savings');
+          if (goto) goto.addEventListener('click', () => {
+            try { document.querySelector('.fixed.inset-0.z-\[100\]')?.remove(); } catch(e){}
+            // Open identity page
+            try { document.getElementById('identity-page')?.classList.remove('hidden'); } catch(e){}
+            // Scroll to identity section
+            try { document.getElementById('identity-page')?.scrollIntoView({ behavior: 'smooth' }); } catch(e){}
+          });
+          return;
+        }
+
         const modal = document.createElement('div');
         modal.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4';
         modal.style.background = 'rgba(0, 0, 0, 0.85)';
@@ -5298,6 +5398,40 @@
             try { document.getElementById('loans-page')?.classList.add('hidden'); } catch(e){}
             // Scroll to membership
             try { document.getElementById('membership-page')?.scrollIntoView({ behavior: 'smooth' }); } catch(e){}
+          });
+          return;
+        }
+
+        // Check if user has verified their identity
+        if (!user || !user.idVerified) {
+          // Show identity verification required modal
+          const m = document.createElement('div');
+          m.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4';
+          m.style.background = 'rgba(0, 0, 0, 0.85)';
+          m.innerHTML = `
+            <div class="rounded-2xl p-6 max-w-md w-full mx-4 text-center" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
+              <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style="background: rgba(255, 107, 53, 0.1);">
+                <svg width="40" height="40" fill="none" stroke="#ff6b35" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <h3 class="text-white font-bold text-xl mb-3">Identity Verification Required</h3>
+              <p class="text-gray-300 text-sm mb-6">You must verify your identity before applying for loans. This helps us keep your account secure.</p>
+              <div class="flex gap-3">
+                <button onclick="this.closest('.fixed').remove();" class="flex-1 py-3 text-gray-300 font-bold text-sm rounded-lg" style="background: #0f0f0f; border: 1px solid #2a2a2a;">Cancel</button>
+                <button id="go-to-identity" class="flex-1 py-3 text-white font-bold text-sm rounded-lg" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Verify Identity</button>
+              </div>
+            </div>
+          `;
+          document.body.appendChild(m);
+          const goto = document.getElementById('go-to-identity');
+          if (goto) goto.addEventListener('click', () => {
+            try { document.querySelector('.fixed.inset-0.z-\[100\]')?.remove(); } catch(e){}
+            // Open identity page
+            try { document.getElementById('identity-page')?.classList.remove('hidden'); } catch(e){}
+            try { document.getElementById('loans-page')?.classList.add('hidden'); } catch(e){}
+            // Scroll to identity section
+            try { document.getElementById('identity-page')?.scrollIntoView({ behavior: 'smooth' }); } catch(e){}
           });
           return;
         }
@@ -7551,16 +7685,24 @@
       // For example, change loan button text or hide/show elements
       const applyLoanBtn = document.getElementById('apply-for-loan-btn');
       if (applyLoanBtn) {
-        if (isMember) {
-          applyLoanBtn.textContent = 'Apply for Loan';
-          applyLoanBtn.disabled = false;
-          applyLoanBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-          applyLoanBtn.removeAttribute('title');
-        } else {
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const isIdVerified = user.idVerified || false;
+        
+        if (!isMember) {
           applyLoanBtn.textContent = 'Membership Required';
           applyLoanBtn.disabled = true;
           applyLoanBtn.classList.add('opacity-50', 'cursor-not-allowed');
           applyLoanBtn.title = 'You must acquire a membership to borrow';
+        } else if (!isIdVerified) {
+          applyLoanBtn.textContent = 'Identity Verification Required';
+          applyLoanBtn.disabled = true;
+          applyLoanBtn.classList.add('opacity-50', 'cursor-not-allowed');
+          applyLoanBtn.title = 'You must verify your identity to borrow';
+        } else {
+          applyLoanBtn.textContent = 'Apply for Loan';
+          applyLoanBtn.disabled = false;
+          applyLoanBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+          applyLoanBtn.removeAttribute('title');
         }
       }
     }
