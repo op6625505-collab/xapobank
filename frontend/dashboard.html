@@ -6962,6 +6962,25 @@
           profileUserEmail.textContent = user.email || 'No email';
           console.log('Updated profile user email to:', user.email);
         }
+        // Update verification badge and upload button state
+        try {
+          const statusBadge = document.getElementById('verification-badge');
+          const statusMessage = document.getElementById('verification-message');
+          const verifyBtn = document.getElementById('verify-id-btn');
+          if (user.idVerified) {
+            if (statusBadge) { statusBadge.textContent = 'Verified'; statusBadge.style.background = 'rgba(34,197,94,0.1)'; statusBadge.style.color = '#22c55e'; }
+            if (statusMessage) statusMessage.textContent = 'Identity verified';
+            if (verifyBtn) { verifyBtn.disabled = true; verifyBtn.classList.add('cursor-not-allowed'); verifyBtn.style.opacity = '0.6'; verifyBtn.title = 'Identity already verified'; }
+          } else if (user.idUploadedAt) {
+            if (statusBadge) { statusBadge.textContent = 'Pending Review'; statusBadge.style.background = 'rgba(255,193,7,0.1)'; statusBadge.style.color = '#ffc107'; }
+            if (statusMessage) statusMessage.textContent = 'Documents submitted - Awaiting admin verification';
+            if (verifyBtn) { verifyBtn.disabled = false; verifyBtn.classList.remove('cursor-not-allowed'); verifyBtn.style.opacity = ''; verifyBtn.title = 'Upload ID Document'; }
+          } else {
+            if (statusBadge) { statusBadge.textContent = 'Not Verified'; statusBadge.style.background = 'rgba(239,68,68,0.1)'; statusBadge.style.color = '#ef4444'; }
+            if (statusMessage) statusMessage.textContent = 'Not verified yet';
+            if (verifyBtn) { verifyBtn.disabled = false; verifyBtn.classList.remove('cursor-not-allowed'); verifyBtn.style.opacity = ''; verifyBtn.title = 'Upload ID Document'; }
+          }
+        } catch(e) { console.debug('Update verification UI failed', e); }
           
           // Update settings modal user name
           const settingsUserName = document.querySelector('p.text-white.font-semibold.text-sm.mb-1');
