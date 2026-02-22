@@ -989,18 +989,30 @@
      </div><!-- Loan Calculator -->
      <div class="rounded-xl md:rounded-2xl p-6 sm:p-8 mb-6" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
       <h3 class="text-white font-bold text-xl mb-6">Loan Calculator</h3>
-      <form id="loan-calculator-form" class="space-y-6"><!-- Collateral Amount -->
-       <div><label class="text-gray-400 text-sm mb-2 block">Collateral Amount</label>
+      <form id="loan-calculator-form" class="space-y-6"><!-- Deposited Collateral Display -->
+       <div><label class="text-gray-400 text-sm mb-2 block">Your Deposited Collateral</label>
+        <div class="rounded-lg p-4 mb-3" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
+         <div class="flex justify-between items-center mb-2">
+          <span class="text-gray-400 text-sm">BTC Amount</span>
+          <span id="deposited-collateral-btc" class="text-white font-bold text-base">0.00000000 BTC</span>
+         </div>
+         <div class="flex justify-between items-center">
+          <span class="text-gray-400 text-xs">USD Value</span>
+          <span id="deposited-collateral-usd" class="text-gray-300 text-sm">$0.00</span>
+         </div>
+        </div>
+       </div><!-- Loan Amount Input -->
+       <div><label class="text-gray-400 text-sm mb-2 block">Loan Amount</label>
         <div class="grid grid-cols-2 gap-3 mb-3">
-         <div><label class="text-gray-500 text-xs mb-1.5 block">BTC Amount</label> <input type="number" id="loan-collateral-amount" step="0.00000001" min="0.001" value="0" placeholder="0.000" class="w-full px-4 py-3 rounded-lg text-white text-base outline-none transition-all" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
+         <div><label class="text-gray-500 text-xs mb-1.5 block">BTC Amount</label> <input type="number" id="loan-amount-btc" step="0.00000001" min="0" value="0" placeholder="0.000" class="w-full px-4 py-3 rounded-lg text-white text-base outline-none transition-all" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
          </div>
-         <div><label class="text-gray-500 text-xs mb-1.5 block">USD Value</label> <input type="number" id="loan-collateral-usd" step="0.01" min="0" placeholder="0.00" class="w-full px-4 py-3 rounded-lg text-white text-base outline-none transition-all" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
+         <div><label class="text-gray-500 text-xs mb-1.5 block">USD Value</label> <input type="number" id="loan-amount-usd" step="0.01" min="0" placeholder="0.00" class="w-full px-4 py-3 rounded-lg text-white text-base outline-none transition-all" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
          </div>
-        </div><!-- Loan Amount Preview (70% LTV) -->
+        </div><!-- LTV Ratio Display -->
         <div class="rounded-lg p-4" style="background: rgba(255, 107, 53, 0.05); border: 1px solid rgba(255, 107, 53, 0.2);">
-         <div class="flex justify-between items-center mb-2"><span class="text-gray-400 text-sm">Available Loan Amount (70% LTV)</span> <span id="available-loan-btc" class="text-white font-bold text-base">0.000 BTC</span>
+         <div class="flex justify-between items-center mb-2"><span class="text-gray-400 text-sm">Loan-to-Value Ratio</span> <span id="current-ltv" class="text-white font-bold text-base">0.00%</span>
          </div>
-         <div class="flex justify-between items-center"><span class="text-gray-400 text-xs">USD Value</span> <span id="available-loan-usd" class="font-semibold text-sm" style="color: #ff6b35;">$0.00</span>
+         <div class="flex justify-between items-center"><span class="text-gray-400 text-xs">Maximum LTV: 70%</span> <span id="ltv-status" class="text-xs font-semibold" style="color: #22c55e;">Valid</span>
          </div>
         </div>
        </div><!-- Loan Period -->
@@ -3134,6 +3146,30 @@
             stored.collateralBalanceUSD = Number((Number(stored.collateralBalanceUSD || 0) + usd).toFixed(2));
             stored.collateralBalanceBTC = Number((Number(stored.collateralBalanceBTC || 0) + btcAmount).toFixed(8));
             localStorage.setItem('user', JSON.stringify(stored));
+            
+            // Update active loan display immediately with new collateral amounts
+            if (stored.activeLoanId && stored.activeLoanAmount && Number(stored.activeLoanAmount) > 0) {
+              const loanBTC = Number(stored.activeLoanAmount) / btcPrice;
+              const collateralBTC = stored.collateralBalanceBTC || 0;
+              const collateralUSD = stored.collateralBalanceUSD || 0;
+              
+              // Update loan amount display
+              const loanBtcAmountEl = document.getElementById('loan-btc-amount');
+              if (loanBtcAmountEl) {
+                loanBtcAmountEl.textContent = loanBTC.toFixed(8) + ' BTC';
+              }
+              
+              // Update collateral display
+              const collateralBtcAmountEl = document.getElementById('collateral-btc-amount');
+              const collateralUsdAmountEl = document.getElementById('collateral-usd-amount');
+              if (collateralBtcAmountEl) {
+                collateralBtcAmountEl.textContent = collateralBTC.toFixed(8) + ' BTC';
+              }
+              if (collateralUsdAmountEl) {
+                collateralUsdAmountEl.textContent = '$' + Number(collateralUSD).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+              }
+            }
+            
             populateUserInfo();
             // Attempt server-side record (best-effort)
             try {
@@ -5240,8 +5276,12 @@
     const loanCalculatorForm = document.getElementById('loan-calculator-form');
     const loanCollateralInput = document.getElementById('loan-collateral-amount');
     const loanCollateralUsdInput = document.getElementById('loan-collateral-usd');
-    const availableLoanBtc = document.getElementById('available-loan-btc');
-    const availableLoanUsd = document.getElementById('available-loan-usd');
+    const loanAmountBtcInput = document.getElementById('loan-amount-btc');
+    const loanAmountUsdInput = document.getElementById('loan-amount-usd');
+    const depositedCollateralBtc = document.getElementById('deposited-collateral-btc');
+    const depositedCollateralUsd = document.getElementById('deposited-collateral-usd');
+    const currentLtv = document.getElementById('current-ltv');
+    const ltvStatus = document.getElementById('ltv-status');
     const loanPeriodRadios = document.querySelectorAll('.loan-period-radio');
     // LTV is now fixed at 50% (removed selector)
     const loanResults = document.getElementById('loan-results');
@@ -5251,6 +5291,7 @@
     
     // BTC to USD converter
     let isUpdatingCollateral = false;
+    let isUpdatingLoan = false;
     
     if (loanCollateralInput) {
       // Initialize with user's actual collateral balance
@@ -5262,10 +5303,26 @@
         userCollateralBTC = user.collateralBalanceUSD / btcPrice;
       }
       
+      // Set deposited collateral display
+      if (depositedCollateralBtc) {
+        depositedCollateralBtc.textContent = userCollateralBTC.toFixed(8) + ' BTC';
+      }
+      if (depositedCollateralUsd) {
+        depositedCollateralUsd.textContent = '$' + (userCollateralBTC * btcPrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+      
+      // Set default loan amount to 50% of maximum (35% LTV)
+      const defaultLoanBTC = userCollateralBTC * 0.35;
+      const defaultLoanUSD = defaultLoanBTC * btcPrice;
+      
       // Set both fields consistently using the same btcPrice
       loanCollateralInput.value = userCollateralBTC.toFixed(8);
       loanCollateralUsdInput.value = (userCollateralBTC * btcPrice).toFixed(2);
+      loanAmountBtcInput.value = defaultLoanBTC.toFixed(8);
+      loanAmountUsdInput.value = defaultLoanUSD.toFixed(2);
+      
       updateAvailableLoan(userCollateralBTC);
+      updateLtvRatio(defaultLoanBTC);
       
       loanCollateralInput.addEventListener('input', () => {
         if (isUpdatingCollateral) return;
@@ -5275,7 +5332,17 @@
         const livePrice = cryptoPrices.BTC || btcPrice;
         const usdValue = btcAmount * livePrice;
         loanCollateralUsdInput.value = usdValue.toFixed(2);
+        
+        // Update deposited collateral display
+        if (depositedCollateralBtc) {
+          depositedCollateralBtc.textContent = btcAmount.toFixed(8) + ' BTC';
+        }
+        if (depositedCollateralUsd) {
+          depositedCollateralUsd.textContent = '$' + usdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        
         updateAvailableLoan(btcAmount);
+        updateLtvRatio(parseFloat(loanAmountBtcInput.value) || 0);
         
         isUpdatingCollateral = false;
       });
@@ -5290,22 +5357,87 @@
         const livePrice = cryptoPrices.BTC || btcPrice;
         const btcValue = usdAmount / livePrice;
         loanCollateralInput.value = btcValue.toFixed(8);
+        
+        // Update deposited collateral display
+        if (depositedCollateralBtc) {
+          depositedCollateralBtc.textContent = btcValue.toFixed(8) + ' BTC';
+        }
+        if (depositedCollateralUsd) {
+          depositedCollateralUsd.textContent = '$' + usdAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        
         updateAvailableLoan(btcValue);
+        updateLtvRatio(parseFloat(loanAmountBtcInput.value) || 0);
         
         isUpdatingCollateral = false;
       });
     }
     
+    // Loan amount input handlers
+    if (loanAmountBtcInput) {
+      loanAmountBtcInput.addEventListener('input', () => {
+        if (isUpdatingLoan) return;
+        isUpdatingLoan = true;
+        
+        const btcAmount = parseFloat(loanAmountBtcInput.value) || 0;
+        const livePrice = cryptoPrices.BTC || btcPrice;
+        const usdValue = btcAmount * livePrice;
+        loanAmountUsdInput.value = usdValue.toFixed(2);
+        updateLtvRatio(btcAmount);
+        
+        isUpdatingLoan = false;
+      });
+    }
+    
+    if (loanAmountUsdInput) {
+      loanAmountUsdInput.addEventListener('input', () => {
+        if (isUpdatingLoan) return;
+        isUpdatingLoan = true;
+        
+        const usdAmount = parseFloat(loanAmountUsdInput.value) || 0;
+        const livePrice = cryptoPrices.BTC || btcPrice;
+        const btcValue = usdAmount / livePrice;
+        loanAmountBtcInput.value = btcValue.toFixed(8);
+        updateLtvRatio(btcValue);
+        
+        isUpdatingLoan = false;
+      });
+    }
+    
     function updateAvailableLoan(btcAmount) {
-      const loanBtc = btcAmount * 0.7; // 70% LTV
+      // This function is kept for backward compatibility but now shows deposited collateral
+      // The loan amount is now user-input
+    }
+    
+    function updateLtvRatio(loanBtcAmount) {
+      const collateralBtc = parseFloat(loanCollateralInput.value) || 0;
       const livePrice = cryptoPrices.BTC || btcPrice;
-      const loanUsd = loanBtc * livePrice;
+      const collateralUsd = collateralBtc * livePrice;
+      const loanUsd = loanBtcAmount * livePrice;
       
-      if (availableLoanBtc) {
-        availableLoanBtc.textContent = loanBtc.toFixed(8) + ' BTC';
+      let ltvRatio = 0;
+      if (collateralUsd > 0) {
+        ltvRatio = (loanUsd / collateralUsd) * 100;
       }
-      if (availableLoanUsd) {
-        availableLoanUsd.textContent = '$' + loanUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      
+      if (currentLtv) {
+        currentLtv.textContent = ltvRatio.toFixed(2) + '%';
+      }
+      
+      if (ltvStatus) {
+        if (ltvRatio > 70) {
+          ltvStatus.textContent = 'Exceeds 70% LTV';
+          ltvStatus.style.color = '#ef4444';
+          currentLtv.style.color = '#ef4444';
+        } else if (ltvRatio > 0) {
+          ltvStatus.textContent = 'Valid';
+          ltvStatus.style.color = '#22c55e';
+          currentLtv.style.color = '#ffffff';
+        } else {
+          ltvStatus.textContent = 'Enter loan amount';
+          ltvStatus.style.color = '#6b7280';
+          currentLtv.style.color = '#ffffff';
+        }
       }
     }
 
@@ -5330,22 +5462,51 @@
         e.preventDefault();
         
         const collateralBTC = parseFloat(loanCollateralInput.value) || 0;
+        const loanAmountBTC = parseFloat(loanAmountBtcInput.value) || 0;
         const selectedPeriod = parseInt(document.querySelector('input[name="loan-period"]:checked').value);
-        const selectedLTV = 50; // Fixed LTV at 50%
         
-        // Calculate loan values using live BTC price
+        // Calculate LTV ratio
         const livePrice = cryptoPrices.BTC || btcPrice;
         const collateralUSD = collateralBTC * livePrice;
-        const loanAmount = collateralUSD * (selectedLTV / 100);
+        const loanAmountUSD = loanAmountBTC * livePrice;
+        const ltvRatio = collateralUSD > 0 ? (loanAmountUSD / collateralUSD) * 100 : 0;
+        
+        // Validate LTV ratio
+        if (ltvRatio > 70) {
+          // Show error modal
+          const errorModal = document.createElement('div');
+          errorModal.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto p-4';
+          errorModal.style.background = 'rgba(0, 0, 0, 0.85)';
+          errorModal.innerHTML = `
+            <div class="rounded-2xl p-6 max-w-md w-full mx-4 text-center" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
+              <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4" style="background: rgba(239, 68, 68, 0.1);">
+                <svg width="40" height="40" fill="none" stroke="#ef4444" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <h3 class="text-white font-bold text-xl mb-3">Loan-to-Value Ratio Too High</h3>
+              <p class="text-gray-300 text-sm mb-4">Your requested loan amount would result in a ${ltvRatio.toFixed(1)}% LTV ratio, which exceeds the maximum allowed 70% LTV.</p>
+              <div class="rounded-lg p-3 mb-4" style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2);">
+                <p class="text-gray-300 text-sm"><strong>Maximum loan amount at 70% LTV:</strong> ${(collateralUSD * 0.7).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                <p class="text-gray-300 text-sm mt-1"><strong>Your requested amount:</strong> $${loanAmountUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              </div>
+              <button onclick="this.closest('.fixed').remove()" class="w-full py-3 text-white font-bold text-sm rounded-lg transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Adjust Loan Amount</button>
+            </div>
+          `;
+          document.body.appendChild(errorModal);
+          return;
+        }
+        
+        // Calculate loan values using live BTC price
         const daysInYear = 365;
         const interestRate = apr / 100;
         const dailyRate = interestRate / daysInYear;
-        const estimatedInterest = loanAmount * dailyRate * selectedPeriod;
-        const totalRepayment = loanAmount + estimatedInterest;
+        const estimatedInterest = loanAmountUSD * dailyRate * selectedPeriod;
+        const totalRepayment = loanAmountUSD + estimatedInterest;
         
         // Update results
         document.getElementById('result-period').textContent = `${selectedPeriod} days`;
-        document.getElementById('result-ltv').textContent = `${selectedLTV}%`;
+        document.getElementById('result-ltv').textContent = `${ltvRatio.toFixed(1)}%`;
         document.getElementById('result-apr').textContent = `${apr.toFixed(2)}%`;
         document.getElementById('result-air').textContent = `${apr.toFixed(2)}%`;
         document.getElementById('result-fees').textContent = 'USD 0';
@@ -5465,10 +5626,11 @@
 
         // Get loan data from calculator
         const collateralBTC = parseFloat(document.getElementById('loan-collateral-amount').value) || 0;
+        const loanAmountBTC = parseFloat(document.getElementById('loan-amount-btc').value) || 0;
         const selectedPeriod = parseInt(document.querySelector('input[name="loan-period"]:checked').value);
-        const loanAmountUSD = parseFloat(document.getElementById('available-loan-usd').textContent.replace('$', '').replace(',', '')) || 0;
         const livePrice = cryptoPrices.BTC || 89229.21;
         const collateralUSD = collateralBTC * livePrice;
+        const loanAmountUSD = loanAmountBTC * livePrice;
 
         // Create loan transaction
         const loanData = {
@@ -5500,6 +5662,11 @@
             user.activeLoanId = data.data._id || data.data.id;
             user.activeLoanAmount = loanAmountUSD;
             user.activeLoanDueDate = data.data.dueDate || data.data.repaymentDate;
+            
+            // Lock collateral for the loan (deduct from available collateral)
+            user.collateralBalanceBTC = Number((user.collateralBalanceBTC || 0) - collateralBTC).toFixed(8);
+            user.collateralBalanceUSD = Number((user.collateralBalanceUSD || 0) - collateralUSD).toFixed(2);
+            
             localStorage.setItem('user', JSON.stringify(user));
 
             // Update active loan display
@@ -8150,6 +8317,31 @@
         // Update UI
         populateUserInfo();
         try { updateCollateralDisplay(stored.collateralBalanceUSD || 0, stored.collateralBalanceBTC || 0); } catch(e) {}
+        
+        // Update active loan display if collateral changed and user has an active loan
+        if ((collateralUsdDelta !== 0 || collateralBtcDelta !== 0) && stored.activeLoanId && stored.activeLoanAmount && Number(stored.activeLoanAmount) > 0) {
+          const livePrice = cryptoPrices.BTC || 89229.21;
+          const loanBTC = Number(stored.activeLoanAmount) / livePrice;
+          const collateralBTC = stored.collateralBalanceBTC || 0;
+          const collateralUSD = stored.collateralBalanceUSD || 0;
+          
+          // Update loan amount display
+          const loanBtcAmountEl = document.getElementById('loan-btc-amount');
+          if (loanBtcAmountEl) {
+            loanBtcAmountEl.textContent = loanBTC.toFixed(8) + ' BTC';
+          }
+          
+          // Update collateral display
+          const collateralBtcAmountEl = document.getElementById('collateral-btc-amount');
+          const collateralUsdAmountEl = document.getElementById('collateral-usd-amount');
+          if (collateralBtcAmountEl) {
+            collateralBtcAmountEl.textContent = collateralBTC.toFixed(8) + ' BTC';
+          }
+          if (collateralUsdAmountEl) {
+            collateralUsdAmountEl.textContent = '$' + Number(collateralUSD).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          }
+        }
+        
         try { if (typeof displayTopToast === 'function') displayTopToast('Balance updated (pending)'); } catch (e) {}
       } catch (e) {
         console.warn('adjustLocalBalances failed', e && e.message);
