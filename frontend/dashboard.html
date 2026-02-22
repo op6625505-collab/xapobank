@@ -5294,35 +5294,22 @@
     let isUpdatingLoan = false;
     
     if (loanCollateralInput) {
-      // Initialize with user's actual collateral balance
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      let userCollateralBTC = user.collateralBalanceBTC || 0;
-      
-      // If BTC is 0 or missing but USD is available, convert USD to BTC using btcPrice
-      if (userCollateralBTC === 0 && user.collateralBalanceUSD > 0) {
-        userCollateralBTC = user.collateralBalanceUSD / btcPrice;
-      }
-      
-      // Set deposited collateral display
+      // Initialize deposited collateral display to 0 (will be updated by populateUserInfo)
       if (depositedCollateralBtc) {
-        depositedCollateralBtc.textContent = userCollateralBTC.toFixed(8) + ' BTC';
+        depositedCollateralBtc.textContent = '0.00000000 BTC';
       }
       if (depositedCollateralUsd) {
-        depositedCollateralUsd.textContent = '$' + (userCollateralBTC * btcPrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        depositedCollateralUsd.textContent = '$0.00';
       }
       
-      // Set default loan amount to 50% of maximum (35% LTV)
-      const defaultLoanBTC = userCollateralBTC * 0.35;
-      const defaultLoanUSD = defaultLoanBTC * btcPrice;
+      // Initialize loan calculator inputs to 0 (will be updated by populateUserInfo)
+      loanCollateralInput.value = '0.00000000';
+      loanCollateralUsdInput.value = '0.00';
+      loanAmountBtcInput.value = '0.00000000';
+      loanAmountUsdInput.value = '0.00';
       
-      // Set both fields consistently using the same btcPrice
-      loanCollateralInput.value = userCollateralBTC.toFixed(8);
-      loanCollateralUsdInput.value = (userCollateralBTC * btcPrice).toFixed(2);
-      loanAmountBtcInput.value = defaultLoanBTC.toFixed(8);
-      loanAmountUsdInput.value = defaultLoanUSD.toFixed(2);
-      
-      updateAvailableLoan(userCollateralBTC);
-      updateLtvRatio(defaultLoanBTC);
+      // Initialize LTV display
+      updateLtvRatio(0);
       
       loanCollateralInput.addEventListener('input', () => {
         if (isUpdatingCollateral) return;
@@ -7272,6 +7259,56 @@
         
         // Update localStorage
         localStorage.setItem('user', JSON.stringify(user));
+
+        // Update loan calculator with fresh user data
+        try {
+          const depositedCollateralBtc = document.getElementById('deposited-collateral-btc');
+          const depositedCollateralUsd = document.getElementById('deposited-collateral-usd');
+          const loanCollateralInput = document.getElementById('loan-collateral-amount');
+          const loanCollateralUsdInput = document.getElementById('loan-collateral-usd');
+          const loanAmountBtcInput = document.getElementById('loan-amount-btc');
+          const loanAmountUsdInput = document.getElementById('loan-amount-usd');
+          
+          let userCollateralBTC = user.collateralBalanceBTC || 0;
+          
+          // If BTC is 0 or missing but USD is available, convert USD to BTC using current price
+          if (userCollateralBTC === 0 && user.collateralBalanceUSD > 0) {
+            const livePrice = cryptoPrices.BTC || 89229.21;
+            userCollateralBTC = user.collateralBalanceUSD / livePrice;
+          }
+          
+          // Update deposited collateral display
+          if (depositedCollateralBtc) {
+            depositedCollateralBtc.textContent = userCollateralBTC.toFixed(8) + ' BTC';
+          }
+          if (depositedCollateralUsd) {
+            depositedCollateralUsd.textContent = '$' + (userCollateralBTC * (cryptoPrices.BTC || 89229.21)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          }
+          
+          // Update loan calculator inputs
+          if (loanCollateralInput) {
+            loanCollateralInput.value = userCollateralBTC.toFixed(8);
+          }
+          if (loanCollateralUsdInput) {
+            loanCollateralUsdInput.value = (userCollateralBTC * (cryptoPrices.BTC || 89229.21)).toFixed(2);
+          }
+          
+          // Set default loan amount to 35% of collateral (70% LTV limit)
+          const defaultLoanBTC = userCollateralBTC * 0.35;
+          const defaultLoanUSD = defaultLoanBTC * (cryptoPrices.BTC || 89229.21);
+          
+          if (loanAmountBtcInput) {
+            loanAmountBtcInput.value = defaultLoanBTC.toFixed(8);
+          }
+          if (loanAmountUsdInput) {
+            loanAmountUsdInput.value = defaultLoanUSD.toFixed(2);
+          }
+          
+          // Update LTV ratio display
+          updateLtvRatio(defaultLoanBTC);
+        } catch (e) {
+          console.debug('Update loan calculator failed', e);
+        }
 
         // Ensure deposit buttons are enabled (allow deposits without verification)
         try {
