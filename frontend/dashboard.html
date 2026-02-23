@@ -375,8 +375,9 @@
       </div>
       <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-4">
        <div class="rounded-lg p-3 sm:p-4" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
-        <p class="text-gray-400 text-xs mb-1.5">Loan Amount</p>
+        <p class="text-gray-400 text-xs mb-1.5">Loan Balance</p>
         <p id="loan-btc-amount" class="text-white text-lg sm:text-xl font-bold">0.0350 BTC</p>
+        <p id="loan-usd-amount" class="text-gray-300 text-xs mt-0.5">$1,500.00</p>
        </div>
        <div class="rounded-lg p-3 sm:p-4" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
         <p class="text-gray-400 text-xs mb-1.5">Collateral</p>
@@ -388,7 +389,7 @@
        <div class="rounded-lg p-3 sm:p-4" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
         <p class="text-gray-400 text-xs mb-1.5">Days Until Due</p>
         <p id="days-until-due" class="text-white text-lg sm:text-xl font-bold">0 Days</p>
-        <p id="due-date-display" class="text-gray-300 text-xs mt-0.5">Due: Jan 2, 2025</p>
+        <p id="due-date-display" class="text-gray-300 text-xs mt-0.5">Due: N/A</p>
        </div>
        <div class="rounded-lg p-3 sm:p-4" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
         <p class="text-gray-400 text-xs mb-1.5">Loan-to-Value</p>
@@ -2339,15 +2340,7 @@
     }
 
     function networkRetryNow() {
-      const btn = document.getElementById('network-retry-btn');
-      if (btn) btn.disabled = true;
-      // Try immediately
-      (async () => {
-        try {
-          await fetchLiveBtcPrice();
-        } catch (e) {}
-        if (btn) btn.disabled = false;
-      })();
+      location.reload();
     }
 
     function startAutoRetry() {
@@ -5131,6 +5124,7 @@
             if (savings >= usdValue) {
               // Deduct from savings USD and apply to loan locally
               stored.savingsBalanceUSD = Number((savings - usdValue).toFixed(2));
+              stored.activeLoanAmount = Number((stored.activeLoanAmount || 0) - usdValue).toFixed(2);
               localStorage.setItem('user', JSON.stringify(stored));
               populateUserInfo();
 
@@ -5155,7 +5149,7 @@
                   <p class="text-gray-300 text-base mb-2">You paid <span class="font-bold" style="color: #ff6b35;">${amount.toFixed(8)} BTC</span></p>
                   <p class="text-gray-400 text-sm mb-6">($${usdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</p>
                   <p class="text-gray-300 text-sm mb-6">Your loan balance has been updated.</p>
-                  <button onclick="this.closest('.fixed').remove(); location.reload();" class="w-full py-3 text-white font-bold text-base rounded-xl transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Done</button>
+                  <button onclick="this.closest('.fixed').remove();" class="w-full py-3 text-white font-bold text-base rounded-xl transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Done</button>
                 </div>
               `;
               return;
@@ -5164,6 +5158,7 @@
             if (btcBal >= amount) {
               // Deduct BTC wallet and apply to loan locally
               stored.btcBalance = Number((btcBal - amount).toFixed(8));
+              stored.activeLoanAmount = Number((stored.activeLoanAmount || 0) - usdValue).toFixed(2);
               localStorage.setItem('user', JSON.stringify(stored));
               populateUserInfo();
 
@@ -5187,7 +5182,7 @@
                   <p class="text-gray-300 text-base mb-2">You paid <span class="font-bold" style="color: #ff6b35;">${amount.toFixed(8)} BTC</span></p>
                   <p class="text-gray-400 text-sm mb-6">($${usdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</p>
                   <p class="text-gray-300 text-sm mb-6">Your loan balance has been updated.</p>
-                  <button onclick="this.closest('.fixed').remove(); location.reload();" class="w-full py-3 text-white font-bold text-base rounded-xl transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Done</button>
+                  <button onclick="this.closest('.fixed').remove();" class="w-full py-3 text-white font-bold text-base rounded-xl transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Done</button>
                 </div>
               `;
               return;
@@ -5785,7 +5780,14 @@
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             user.activeLoanId = data.data._id || data.data.id;
             user.activeLoanAmount = loanAmountUSD;
-            user.activeLoanDueDate = data.data.dueDate || data.data.repaymentDate;
+            // Calculate due date in frontend: current time + selectedPeriod days
+            const dueDate = new Date();
+            dueDate.setDate(dueDate.getDate() + selectedPeriod);
+            user.activeLoanDueDate = dueDate.toISOString();
+            
+            // Add loan amount to user's BTC balance
+            const loanAmountBTC = loanAmountUSD / livePrice;
+            user.btcBalance = (Number(user.btcBalance || 0) + loanAmountBTC).toFixed(8);
             
             // Lock collateral for the loan (deduct from available collateral)
             user.collateralBalanceBTC = Number((user.collateralBalanceBTC || 0) - collateralBTC).toFixed(8);
@@ -7155,23 +7157,31 @@
         // No active loan - show defaults
         daysElement.textContent = '0 Days';
         daysElement.style.color = '#ffffff';
-        dueDateElement.textContent = 'Due: Jan 2, 2025';
+        dueDateElement.textContent = 'Due: N/A';
         return;
       }
       
       // Parse loan data to get due date
       try {
         const loan = JSON.parse(loanData);
-        if (!loan.dueDate) {
-          daysElement.textContent = '0 Days';
-          daysElement.style.color = '#ffffff';
-          dueDateElement.textContent = 'Due: Jan 2, 2025';
-          return;
-        }
-        
-        const dueDate = new Date(loan.dueDate);
+        let dueDate = new Date(loan.dueDate);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
+        
+        // If dueDate is invalid or in the past, recalculate from appliedAt + periodDays
+        if (isNaN(dueDate.getTime()) || dueDate < today) {
+          if (loan.appliedAt && loan.periodDays) {
+            const appliedAt = new Date(loan.appliedAt);
+            dueDate = new Date(appliedAt.getTime() + loan.periodDays * 24 * 60 * 60 * 1000);
+            // Update the stored dueDate
+            loan.dueDate = dueDate.toISOString();
+            localStorage.setItem('activeLoan', JSON.stringify(loan));
+          } else {
+            // Fallback: assume 30 days from now
+            dueDate = new Date();
+            dueDate.setDate(dueDate.getDate() + 30);
+          }
+        }
         dueDate.setHours(0, 0, 0, 0);
         
         const timeDifference = dueDate - today;
@@ -7192,7 +7202,7 @@
       } catch (e) {
         daysElement.textContent = '0 Days';
         daysElement.style.color = '#ffffff';
-        dueDateElement.textContent = 'Due: Jan 2, 2025';
+        dueDateElement.textContent = 'Due: N/A';
       }
     }
     
@@ -7202,10 +7212,14 @@
     function updateActiveLoanDisplay(loanAmountUSD, collateralBTC, collateralUSD, periodDays) {
       // Update loan amount
       const loanBtcAmountEl = document.getElementById('loan-btc-amount');
+      const loanUsdAmountEl = document.getElementById('loan-usd-amount');
       if (loanBtcAmountEl) {
         const livePrice = cryptoPrices.BTC || 89229.21;
         const loanBTC = loanAmountUSD / livePrice;
         loanBtcAmountEl.textContent = loanBTC.toFixed(8) + ' BTC';
+      }
+      if (loanUsdAmountEl) {
+        loanUsdAmountEl.textContent = '$' + loanAmountUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
       }
 
       // Update collateral amount
@@ -7566,8 +7580,12 @@
             
             // Update loan amount display
             const loanBtcAmountEl = document.getElementById('loan-btc-amount');
+            const loanUsdAmountEl = document.getElementById('loan-usd-amount');
             if (loanBtcAmountEl) {
               loanBtcAmountEl.textContent = loanBTC.toFixed(8) + ' BTC';
+            }
+            if (loanUsdAmountEl) {
+              loanUsdAmountEl.textContent = '$' + Number(user.activeLoanAmount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             }
             
             // Update collateral display
@@ -7580,26 +7598,8 @@
               collateralUsdAmountEl.textContent = '$' + Number(collateralUSD).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             }
             
-            // Update due date if available
-            if (user.activeLoanDueDate) {
-              const dueDate = new Date(user.activeLoanDueDate);
-              const dueDateDisplayEl = document.getElementById('due-date-display');
-              if (dueDateDisplayEl) {
-                const options = { month: 'short', day: 'numeric', year: 'numeric' };
-                const formattedDate = dueDate.toLocaleDateString('en-US', options);
-                dueDateDisplayEl.textContent = 'Due: ' + formattedDate;
-              }
-              
-              // Store loan data in localStorage for updateDaysUntilDue function
-              const loanData = {
-                appliedAt: new Date().toISOString(),
-                dueDate: user.activeLoanDueDate,
-                loanAmount: user.activeLoanAmount,
-                collateralBTC: collateralBTC,
-                periodDays: 365 // Default, could be calculated if needed
-              };
-              localStorage.setItem('activeLoan', JSON.stringify(loanData));
-            }
+            // Update days until due and due date display
+            updateDaysUntilDue();
           }
         } catch (e) { console.debug('Update active loan display failed', e); }
 
