@@ -549,101 +549,11 @@
       });
     }
 
-    // Terms and Privacy Policy modal handlers
-    function setupPolicyModal() {
-      const modal = document.getElementById('policy-modal');
-      const modalTitle = document.getElementById('policy-modal-title');
-      const modalContent = document.getElementById('policy-modal-content');
-      const closeModal = document.getElementById('close-policy-modal');
-
-      // Find the terms and privacy links in the agreement text
-      const agreementSpan = document.querySelector('span.text-gray-400.text-xs.sm\\:text-xs');
-      if (agreementSpan) {
-        const links = agreementSpan.querySelectorAll('a[href="#"]');
-        links.forEach(link => {
-          if (link.textContent.includes('Terms of Service')) {
-            link.addEventListener('click', (e) => {
-              e.preventDefault();
-              modalTitle.textContent = 'Terms of Service';
-              modalContent.innerHTML = `
-                <h4 class="text-orange-500 font-bold text-lg mb-3">Xapo Loan Terms and Services</h4>
-                <p class="text-gray-300 text-sm text-left mb-3">Xapo Bank's Bitcoin-backed loan service offers a unique way for Bitcoin holders to access loans up to $1 million while keeping their BTC holdings intact. The service is designed to provide flexible repayment terms, emphasizing security and transparency.</p>
-                <div class="text-left text-xs text-gray-400 space-y-2 mb-4 max-h-96 overflow-y-auto">
-                  <div><strong class="text-orange-500">Loan Amount:</strong> Borrow up to $1 million, providing significant financial flexibility.</div>
-                  <div><strong class="text-orange-500">Loan Terms:</strong> Loans are offered with terms lasting up to 12 months, offering a reasonable repayment timeframe.</div>
-                  <div><strong class="text-orange-500">Geographical Availability:</strong> Currently, this service is available to Xapo Bank members globally, excluding clients in the UK and Australia.</div>
-                  <div><strong class="text-orange-500">Centralized Approach:</strong> Unlike decentralized finance (DeFi) lending platforms, Xapo Bank operates within a regulated banking framework, offering a more traditional and potentially secure lending experience.</div>
-                  <div><strong class="text-orange-500">Security:</strong> Xapo Bank does not engage in rehypothecation, ensuring the secure handling of user Bitcoin collateral.</div>
-                  <div><strong class="text-orange-500">Interest Rates:</strong> The annual interest rate is variable, with interest accruing daily based on this rate.</div>
-                  <div><strong class="text-orange-500">Fees:</strong> No hidden fees, no arrangement, closure, margin call, or liquidation fees.</div>
-                  <div><strong class="text-orange-500">Repayment:</strong> Pay only the principal and accrued interest to date, with no penalties for early repayment.</div>
-                  <div><strong class="text-orange-500">Collateral:</strong> Bitcoin as collateral, with the BTC held in a secure vault until repayment.</div>
-                  <div><strong class="text-orange-500">Liquidation:</strong> If Bitcoin's price falls below the loan-to-value (LTV) threshold, additional collateral is required to prevent liquidation.</div>
-                </div>
-                <p class="text-gray-400 text-xs mb-4">Xapo Bank's Bitcoin-backed loan service is a testament to the company's commitment to providing a secure and accessible borrowing solution for individuals and institutions holding substantial Bitcoin reserves.</p>
-              `;
-              modal.classList.remove('hidden');
-            });
-          } else if (link.textContent.includes('Privacy Policy')) {
-            link.addEventListener('click', (e) => {
-              e.preventDefault();
-              modalTitle.textContent = 'Privacy Policy';
-              modalContent.innerHTML = `
-                <h4 class="text-orange-500 font-bold text-lg mb-3">Privacy Policy</h4>
-                <div class="text-left text-xs text-gray-400 space-y-3 mb-4 max-h-96 overflow-y-auto">
-                  <h5 class="text-orange-400 font-semibold">1. Purpose of this Privacy Notice</h5>
-                  <p>This Privacy Notice aims to give you information on how Xapo collects and processes your personal data. It is important that you read this Privacy Notice together with any other Privacy Notice or fair processing policy we may provide on specific occasions when we are collecting or processing personal data about you.</p>
-                  
-                  <h5 class="text-orange-400 font-semibold">2. Data Collection</h5>
-                  <p><strong class="text-orange-500">Submitted Information:</strong> Full legal name, Avatar, Passport photo, Address, Proof of Address, Email address, Phone number, Date of Birth, Tax information, and other identity verification documents.</p>
-                  <p><strong class="text-orange-500">Purpose:</strong> To verify your identity and liveness, comply with financial crime and anti-money laundering laws, protect against fraud, and confirm your eligibility to use our services.</p>
-                  
-                  <h5 class="text-orange-400 font-semibold">3. Legal Basis for Processing</h5>
-                  <p>We will only use your Personal Data when the law allows us to, including: Consent, Contract requirements, Legal or regulatory obligations, and Legitimate interests.</p>
-                  
-                  <h5 class="text-orange-400 font-semibold">4. Data Sharing</h5>
-                  <p>We do not sell your Personal Data. We only share it with: Companies within the Xapo group, Service providers, Marketing partners (with your consent), Regulators and authorities when required, Professional advisers, and when required by law.</p>
-                  
-                  <h5 class="text-orange-400 font-semibold">5. Security Measures</h5>
-                  <p>We have implemented appropriate security measures to prevent your Personal Data from being accidentally lost, used or accessed in an unauthorised way. We use encrypted transmission (TLS) and limit access to employees on a need-to-know basis.</p>
-                  
-                  <h5 class="text-orange-400 font-semibold">6. Data Retention</h5>
-                  <p>We retain information for as long as your account is active or as reasonably needed to fulfil the purposes we collected it for, and as required by applicable laws. Retention periods vary by jurisdiction and purpose.</p>
-                  
-                  <h5 class="text-orange-400 font-semibold">7. Your Rights</h5>
-                  <p><strong class="text-orange-500">Right to Access:</strong> You have the right to access information we hold about you.</p>
-                  <p><strong class="text-orange-500">Right to Rectification:</strong> You have the right to have inaccurate personal data corrected.</p>
-                  <p><strong class="text-orange-500">Right to Erasure:</strong> You have the general right to request erasure of your personal data in certain circumstances.</p>
-                  <p><strong class="text-orange-500">Right to Restrict Processing:</strong> You have the right to request restriction of processing of your personal data.</p>
-                  <p><strong class="text-orange-500">Right to Data Portability:</strong> You have the right to request transfer of your personal data in certain circumstances.</p>
-                  <p><strong class="text-orange-500">Right to Object:</strong> You have the right to object to processing of your personal data in certain circumstances.</p>
-                </div>
-              `;
-              modal.classList.remove('hidden');
-            });
-          }
-        });
-      }
-
-      // Close modal
-      closeModal.addEventListener('click', () => {
-        modal.classList.add('hidden');
-      });
-
-      // Close modal when clicking outside
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          modal.classList.add('hidden');
-        }
-      });
-    }
-
     // Wait for config.js to load
     function waitForConfig() {
       if (typeof window.API_BASE !== 'undefined') {
         initializeSignUp();
         setupPasswordToggle();
-        setupPolicyModal();
       } else {
         setTimeout(waitForConfig, 100);
       }
@@ -655,18 +565,5 @@
       waitForConfig();
     }
   </script>
-
-  <!-- Terms and Privacy Modal -->
-  <div id="policy-modal" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex items-center justify-center p-4">
-   <div class="bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-hidden">
-    <div class="flex items-center justify-between p-4 border-b border-gray-700">
-     <h3 id="policy-modal-title" class="text-white text-lg font-bold">Terms of Service</h3>
-     <button id="close-policy-modal" class="text-gray-400 hover:text-white text-2xl">&times;</button>
-    </div>
-    <div id="policy-modal-content" class="p-4 overflow-y-auto max-h-[70vh] text-sm text-gray-300">
-     <!-- Content will be populated by JavaScript -->
-    </div>
-   </div>
-  </div>
  </body>
 </html>
