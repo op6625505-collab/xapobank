@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Xapo Bank - Sign Up</title>
+  <title>CloudFlow - Sign Up</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <style>
         * {
@@ -44,6 +44,7 @@
 
         input, select {
             transition: border-color 0.2s, box-shadow 0.2s;
+            font-size: 16px !important;
         }
 
         input:focus, select:focus {
@@ -194,6 +195,9 @@
         <div class="error-message" id="error-terms" style="margin-top: 0.5rem;"></div>
        </div>
        <div class="error-message" id="error-submit" style="margin-top: 1rem;"></div>
+       <div id="retryContainer" class="hidden mt-4">
+        <button type="button" id="retryBtn" class="btn-primary text-white py-3 px-6 rounded-lg font-semibold">Retry Now</button>
+       </div>
        <div class="bg-black rounded-lg p-3 sm:p-4 mb-6">
         <p class="text-xs sm:text-sm text-gray-300 font-semibold mb-3">Account Summary</p>
         <div class="space-y-2 text-xs sm:text-sm">
@@ -435,6 +439,10 @@
             e.preventDefault();
             if (!validateStage(currentStage)) return;
 
+            // Hide retry container on new attempt
+            document.getElementById('retryContainer').classList.add('hidden');
+            clearErrors();
+
             // Collect form data
             const formData = {
                 name: `${document.getElementById('firstName').value.trim()} ${document.getElementById('lastName').value.trim()}`,
@@ -480,7 +488,13 @@
                 showError('submit', 'Network error. Please try again.');
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Create Account';
+                document.getElementById('retryContainer').classList.remove('hidden');
             }
+        });
+
+        // Retry button handler
+        document.getElementById('retryBtn').addEventListener('click', () => {
+            form.dispatchEvent(new Event('submit'));
         });
 
         // Password visibility toggle
