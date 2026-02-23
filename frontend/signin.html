@@ -120,7 +120,7 @@
        <input type="checkbox" class="mr-2 accent-orange-500">
        <span class="text-gray-400 text-xs sm:text-sm">Remember me</span>
       </label>
-      <a href="#" id="forgot-password-link" class="text-orange-500 hover:text-orange-400 text-xs sm:text-sm transition-colors">Forgot password?</a>
+      <a href="reset-password.html" class="text-orange-500 hover:text-orange-400 text-xs sm:text-sm transition-colors">Forgot password?</a>
      </div>
      <button type="submit" class="w-full py-2.5 sm:py-3 text-white font-bold text-xs sm:text-sm transition-all hover-lift rounded-full" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">
       Sign In
@@ -167,30 +167,6 @@
    </div>
   </div>
 
-  <!-- Forgot Password Modal -->
-  <div id="forgot-password-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
-   <div class="bg-gray-800 rounded-lg p-6 max-w-sm w-full mx-4">
-    <div class="text-center mb-6">
-     <h2 class="text-white text-xl font-bold mb-2">Reset Password</h2>
-     <p class="text-gray-400 text-sm">Enter your email address and we'll send you a link to reset your password.</p>
-    </div>
-    
-    <form id="forgot-password-form">
-     <div class="mb-4">
-      <label class="text-gray-400 text-sm mb-2 block">Email Address</label>
-      <input type="email" name="email" required class="form-input w-full px-4 py-3 text-sm" placeholder="Enter your email">
-     </div>
-     
-     <div class="flex space-x-3">
-      <button type="button" id="cancel-forgot" class="flex-1 py-2.5 text-gray-400 text-sm border border-gray-600 rounded-lg hover:bg-gray-700 transition-colors">Cancel</button>
-      <button type="submit" class="flex-1 py-2.5 text-white font-bold text-sm transition-all rounded-lg" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Send Reset Link</button>
-     </div>
-    </form>
-
-    <div id="forgot-message" class="mt-4 text-sm text-center hidden"></div>
-   </div>
-  </div>
-
   <script>
     function initializeSignIn() {
       const modal = document.getElementById('signin-modal');
@@ -231,71 +207,6 @@
       }
 
       closeModal.addEventListener('click', hideModal);
-
-      // Forgot password functionality
-      const forgotModal = document.getElementById('forgot-password-modal');
-      const forgotLink = document.getElementById('forgot-password-link');
-      const cancelForgot = document.getElementById('cancel-forgot');
-      const forgotForm = document.getElementById('forgot-password-form');
-      const forgotMessage = document.getElementById('forgot-message');
-
-      function showForgotModal() {
-        forgotModal.classList.remove('hidden');
-      }
-
-      function hideForgotModal() {
-        forgotModal.classList.add('hidden');
-        forgotForm.reset();
-        forgotMessage.classList.add('hidden');
-      }
-
-      forgotLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        showForgotModal();
-      });
-
-      cancelForgot.addEventListener('click', hideForgotModal);
-
-      forgotForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const data = Object.fromEntries(formData);
-
-        try {
-          if (typeof window.API_BASE === 'undefined') {
-            throw new Error('API configuration not loaded');
-          }
-
-          forgotMessage.className = 'mt-4 text-sm text-center text-blue-400';
-          forgotMessage.textContent = 'Sending reset link...';
-          forgotMessage.classList.remove('hidden');
-
-          const response = await fetch(window.API_BASE + '/api/auth/forgot', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-          });
-
-          const result = await response.json();
-
-          if (result.success) {
-            forgotMessage.className = 'mt-4 text-sm text-center text-green-400';
-            forgotMessage.textContent = 'Reset link sent! Check your email.';
-            setTimeout(() => {
-              hideForgotModal();
-            }, 2000);
-          } else {
-            forgotMessage.className = 'mt-4 text-sm text-center text-red-400';
-            forgotMessage.textContent = result.message || 'Failed to send reset link';
-          }
-        } catch (error) {
-          console.error('Forgot password error:', error);
-          forgotMessage.className = 'mt-4 text-sm text-center text-red-400';
-          forgotMessage.textContent = 'Network error. Please try again.';
-        }
-      });
 
       document.getElementById('signin-form').addEventListener('submit', async (e) => {
         e.preventDefault();
