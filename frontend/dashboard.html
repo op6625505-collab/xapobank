@@ -330,7 +330,7 @@
        <div class="rounded-lg p-3 sm:p-4" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
         <p class="text-gray-400 text-xs mb-1.5">Loan Balance</p>
         <p id="loan-btc-amount" class="text-white text-lg sm:text-xl font-bold">0.0350 BTC</p>
-        <p id="loan-usd-amount" class="text-gray-300 text-xs mt-0.5">$1,500.00</p>
+        <p id="loan-usd-amount" class="text-gray-300 text-xs mt-0.5">$0.00</p>
        </div>
        <div class="rounded-lg p-3 sm:p-4" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
         <p class="text-gray-400 text-xs mb-1.5">Collateral</p>
@@ -3049,22 +3049,26 @@
                     if (thisPending.applyToLoan) {
                       // Apply deposit as loan repayment locally
                       applyPendingDepositToLoan(transactionId, Number(usdAmount || 0), Number(btcAmount || 0));
-                    } else if (depositMethod === 'onchain') {
                       // On-chain BTC deposit: update BTC wallet only (USD will be reflected when server confirms)
                       stored.btcBalance = (stored.btcBalance || 0) + Number(btcAmount || 0);
                       localStorage.setItem('user', JSON.stringify(stored));
-                      populateUserInfo();
+                      // Update UI directly
+                      const btcBalanceElement = document.querySelector('h2.balance-value');
+                      if (btcBalanceElement) {
+                        btcBalanceElement.textContent = Number(stored.btcBalance).toFixed(8);
+                      }
                     } else if (depositMethod === 'collateral') {
                       // Collateral deposit optimistic: reflect collateral balances
                       stored.collateralBalanceUSD = (stored.collateralBalanceUSD || 0) + Number(usdAmount || 0);
                       stored.collateralBalanceBTC = (stored.collateralBalanceBTC || 0) + Number(btcAmount || 0);
                       localStorage.setItem('user', JSON.stringify(stored));
-                      populateUserInfo();
+                      // Update UI directly
+                      updateCollateralDisplay(stored.collateralBalanceUSD || 0, stored.collateralBalanceBTC || 0);
                     } else {
                       // Fallback: treat as savings USD deposit
                       stored.savingsBalanceUSD = (stored.savingsBalanceUSD || 0) + Number(usdAmount || 0);
                       localStorage.setItem('user', JSON.stringify(stored));
-                      populateUserInfo();
+                      // Update UI directly (savings balance display would need to be implemented)
                     }
 
                     setTimeout(() => { if (typeof displayTopToast === 'function') displayTopToast('Deposit successful — balance updated (pending confirmation)'); }, 500);
@@ -3181,7 +3185,13 @@
               }
             }
             
-            populateUserInfo();
+            // Update UI directly instead of calling populateUserInfo (which fetches from server and overwrites optimistic updates)
+            const btcBalanceElement = document.querySelector('h2.balance-value');
+            if (btcBalanceElement) {
+              btcBalanceElement.textContent = stored.btcBalance.toFixed(8);
+            }
+            updateCollateralDisplay(stored.collateralBalanceUSD || 0, stored.collateralBalanceBTC || 0);
+            
             // Attempt server-side record (best-effort)
             try {
               await fetch(window.API_BASE + '/api/transactions', {
@@ -5007,7 +5017,12 @@
               stored.savingsBalanceUSD = Number((savings - usdValue).toFixed(2));
               stored.activeLoanAmount = Number((stored.activeLoanAmount || 0) - usdValue).toFixed(2);
               localStorage.setItem('user', JSON.stringify(stored));
-              populateUserInfo();
+              
+              // Update UI directly instead of calling populateUserInfo
+              const btcBalanceElement = document.querySelector('h2.balance-value');
+              if (btcBalanceElement && typeof stored.btcBalance !== 'undefined') {
+                btcBalanceElement.textContent = Number(stored.btcBalance).toFixed(8);
+              }
 
               // Update local activeLoan paid amount
               try {
@@ -5041,7 +5056,12 @@
               stored.btcBalance = Number((btcBal - amount).toFixed(8));
               stored.activeLoanAmount = Number((stored.activeLoanAmount || 0) - usdValue).toFixed(2);
               localStorage.setItem('user', JSON.stringify(stored));
-              populateUserInfo();
+              
+              // Update UI directly instead of calling populateUserInfo
+              const btcBalanceElement = document.querySelector('h2.balance-value');
+              if (btcBalanceElement) {
+                btcBalanceElement.textContent = stored.btcBalance.toFixed(8);
+              }
 
               try {
                 let loan = JSON.parse(localStorage.getItem('activeLoan') || '{}') || {};
@@ -8369,8 +8389,12 @@
 
         localStorage.setItem('user', JSON.stringify(stored));
 
-        // Update UI
-        populateUserInfo();
+        // Update UI directly (don't call populateUserInfo as it fetches from server and overwrites optimistic updates)
+        const btcBalanceElement = document.querySelector('h2.balance-value');
+        if (btcBalanceElement && typeof stored.btcBalance !== 'undefined') {
+          btcBalanceElement.textContent = Number(stored.btcBalance).toFixed(8);
+        }
+        
         try { updateCollateralDisplay(stored.collateralBalanceUSD || 0, stored.collateralBalanceBTC || 0); } catch(e) {}
         
         // Update active loan display if collateral changed and user has an active loan
