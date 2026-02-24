@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CloudFlow - Sign Up</title>
+  <title>Xapo Bank Sign Up</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -186,7 +186,7 @@
           </svg></button>
         </div>
         <div class="error-message" id="error-password"></div>
-        <p class="text-xs text-gray-400 mt-2">At least 8 characters, with uppercase and numbers</p>
+        <p class="text-xs text-gray-400 mt-2">At least 6 characters</p>
        </div>
        <div class="mb-6"><label class="block text-xs sm:text-sm font-semibold text-gray-400 mb-2">Confirm Password</label>
         <div class="relative"><input type="password" id="confirmPassword" placeholder="••••••••" class="w-full px-3 sm:px-4 py-2 sm:py-3 pr-10 border border-gray-600 rounded-lg bg-white text-gray-900 focus:border-orange-500 text-sm sm:text-base" required> <button type="button" class="absolute right-3 top-2.5 sm:top-3 text-gray-500 hover:text-gray-700 toggle-password" data-target="confirmPassword">
@@ -199,7 +199,7 @@
       <div id="stage5" class="stage-container hidden">
        <h2 class="text-xl sm:text-2xl font-bold text-white mb-6">Almost there!</h2>
        <div class="bg-black border border-gray-700 rounded-lg p-3 sm:p-4 mb-6">
-        <div class="flex items-start gap-2 sm:gap-3"><input type="checkbox" id="termsCheckbox" class="checkbox-custom mt-1" required> <label for="termsCheckbox" class="text-xs sm:text-sm text-gray-300"> I agree to CloudFlow's <a href="#" class="text-yellow-700 font-semibold hover:underline" target="_blank">Terms of Service</a> and <a href="#" class="text-yellow-700 font-semibold hover:underline" target="_blank">Privacy Policy</a> </label>
+        <div class="flex items-start gap-2 sm:gap-3"><input type="checkbox" id="termsCheckbox" name="termsCheckbox" class="checkbox-custom mt-1" required> <label for="termsCheckbox" class="text-xs sm:text-sm text-gray-300"> I agree to CloudFlow's <a href="#" class="text-yellow-700 font-semibold hover:underline" target="_blank">Terms of Service</a> and <a href="#" class="text-yellow-700 font-semibold hover:underline" target="_blank">Privacy Policy</a> </label>
         </div>
         <div class="error-message" id="error-terms" style="margin-top: 0.5rem;"></div>
        </div>
@@ -215,10 +215,9 @@
          <p><span class="text-gray-400">Contact:</span> <span id="summaryContact" class="font-semibold text-white"></span></p>
         </div>
        </div>
-      </div><!-- Navigation Buttons -->
-      <div class="flex gap-3 mt-8"><button type="button" id="prevBtn" class="btn-secondary flex-1 py-3 rounded-lg font-semibold transition hidden">Back</button> <button type="button" id="nextBtn" class="btn-primary text-white flex-1 py-3 rounded-lg font-semibold">Continue</button> <button type="submit" id="submitBtn" class="btn-primary text-white flex-1 py-3 rounded-lg font-semibold transition hidden">Create Account</button>
-      </div>
-     </form><!-- Success Message -->
+     </form><!-- Navigation Buttons -->
+     <div class="flex gap-3 mt-8"><button type="button" id="prevBtn" class="btn-secondary flex-1 py-3 rounded-lg font-semibold transition hidden">Back</button> <button type="button" id="nextBtn" class="btn-primary text-white flex-1 py-3 rounded-lg font-semibold">Continue</button> <button type="button" id="submitBtn" class="btn-primary text-white flex-1 py-3 rounded-lg font-semibold transition hidden">Create Account</button>
+     </div><!-- Success Message -->
      <div id="successMessage" class="hidden text-center">
       <div class="mb-4">
        <svg class="w-12 sm:w-16 h-12 sm:h-16 text-green-500 mx-auto" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -232,6 +231,7 @@
    </div>
   </div>
   <script>
+        console.log('Signup script loaded');
         const form = document.getElementById('signupForm');
         const nextBtn = document.getElementById('nextBtn');
         const prevBtn = document.getElementById('prevBtn');
@@ -258,9 +258,7 @@
             phone: (val) => val.replace(/\D/g, '').length >= 10 ? true : 'Phone number must be at least 10 digits',
             email: (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val) ? true : 'Please enter a valid email address',
             password: (val) => {
-                if (val.length < 8) return 'Password must be at least 8 characters';
-                if (!/[A-Z]/.test(val)) return 'Password must contain at least one uppercase letter';
-                if (!/[0-9]/.test(val)) return 'Password must contain at least one number';
+                if (val.length < 6) return 'Password must be at least 6 characters';
                 return true;
             },
             confirmPassword: (val) => {
@@ -383,6 +381,7 @@
         }
 
         function goToStage(stage) {
+            console.log('Going to stage:', stage, 'visibleStages:', visibleStages);
             if (stage < 1 || stage > totalStages) return;
 
             // Hide all stages
@@ -403,9 +402,12 @@
             document.getElementById('stageName').textContent = stageNames[stage - 1];
 
             // Update button visibility
+            const shouldHideNext = stage === visibleStages;
+            const shouldHideSubmit = stage !== visibleStages;
+            console.log('Button visibility - nextBtn hidden:', shouldHideNext, 'submitBtn hidden:', shouldHideSubmit);
             prevBtn.classList.toggle('hidden', stage === 1);
-            nextBtn.classList.toggle('hidden', stage === visibleStages);
-            submitBtn.classList.toggle('hidden', stage !== visibleStages);
+            nextBtn.classList.toggle('hidden', shouldHideNext);
+            submitBtn.classList.toggle('hidden', shouldHideSubmit);
 
             // Update summary on final stage
             if (stage === visibleStages && visibleStages === 5) {
@@ -435,18 +437,30 @@
 
         nextBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            if (validateStage(currentStage)) {
+            console.log('Continue button clicked, current stage:', currentStage);
+            const isValid = validateStage(currentStage);
+            console.log('Stage validation result:', isValid);
+            if (isValid) {
                 // If we're on stage 4 and trying to go to stage 5, reveal stage 5
                 if (currentStage === 4 && visibleStages === 4) {
                     visibleStages = 5;
+                    console.log('Revealing stage 5');
                 }
                 goToStage(currentStage + 1);
+            } else {
+                console.log('Validation failed, not proceeding');
             }
         });
 
         prevBtn.addEventListener('click', (e) => {
             e.preventDefault();
             goToStage(currentStage - 1);
+        });
+
+        submitBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Trigger form submission
+            form.dispatchEvent(new Event('submit'));
         });
 
         form.addEventListener('submit', async (e) => {
