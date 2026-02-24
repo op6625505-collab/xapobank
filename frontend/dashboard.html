@@ -2177,9 +2177,13 @@
         // Binance has no rate limiting on free tier and instant response times
         const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT', {
           method: 'GET',
-          headers: { 'Accept': 'application/json' }
+          headers: { 'Accept': 'application/json' },
+          // Add timeout to prevent hanging
+          signal: AbortSignal.timeout(5000)
         });
-        if (!res.ok) return;
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
         const data = await res.json();
         if (data && data.price) {
           cryptoPrices.BTC = Number(data.price);
@@ -2208,9 +2212,31 @@
             usdEquivalent.textContent = '$' + usdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
           }
           // Successful fetch: reset failure counter and hide overlay
+        } else {
+          throw new Error('Invalid response data from Binance API');
         }
       } catch (e) {
         console.error('BTC price fetch error', e);
+        
+        // Use fallback price if API fails
+        if (!cryptoPrices.BTC || cryptoPrices.BTC === 0) {
+          console.warn('Using fallback BTC price due to API failure');
+          cryptoPrices.BTC = 89229.21; // Fallback price
+          
+          // Update displays with fallback price
+          const priceDisplay = document.getElementById('btc-price-display');
+          const updateTime = document.getElementById('btc-update-time');
+          
+          if (priceDisplay) {
+            priceDisplay.textContent = 'BTC: $' + cryptoPrices.BTC.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' (offline)';
+          }
+          if (updateTime) {
+            updateTime.textContent = 'Updated: Using cached price';
+          }
+          
+          updateBtcUsdDisplays();
+          try { updateActiveSavingsValue(); } catch(e) {}
+        }
       }
     }
 
@@ -2937,7 +2963,14 @@
             try {
               const pending = JSON.parse(localStorage.getItem('pendingDeposits') || '{}');
               // default: not applying to loan unless user opts in
-              pending[transactionId] = { assignedAddress, usdAmount, btcAmount, applyToLoan: false, createdAt: Date.now() };
+              pending[transactionId] = { 
+                assignedAddress, 
+                usdAmount, 
+                btcAmount, 
+                applyToLoan: false, 
+                depositMethod: depositMethod || 'collateral',
+                createdAt: Date.now() 
+              };
               localStorage.setItem('pendingDeposits', JSON.stringify(pending));
               console.debug('Saved pending deposit', transactionId, pending[transactionId]);
             } catch (e) { console.debug('Failed to save pending deposit', e); }
@@ -7308,6 +7341,29 @@
         }
         const user = result.data;
         console.log('Fetched user data:', user);
+        
+        // Apply pending deposits that haven't been confirmed by server yet
+        try {
+          const pendingDeposits = JSON.parse(localStorage.getItem('pendingDeposits') || '{}');
+          console.log('Found pending deposits:', Object.keys(pendingDeposits).length);
+          
+          // Apply pending collateral deposits
+          for (const [txId, pending] of Object.entries(pendingDeposits)) {
+            if (pending.applyToLoan) {
+              // Skip loan repayments for now - they have different logic
+              continue;
+            }
+            
+            // Only apply collateral deposits
+            if (pending.depositMethod === 'collateral' && pending.usdAmount && pending.btcAmount) {
+              console.log('Applying pending collateral deposit:', txId, pending);
+              user.collateralBalanceUSD = (user.collateralBalanceUSD || 0) + Number(pending.usdAmount);
+              user.collateralBalanceBTC = (user.collateralBalanceBTC || 0) + Number(pending.btcAmount);
+            }
+          }
+        } catch (e) {
+          console.debug('Failed to apply pending deposits:', e);
+        }
         
         // Update localStorage
         localStorage.setItem('user', JSON.stringify(user));
