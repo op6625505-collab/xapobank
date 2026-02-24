@@ -3,7 +3,7 @@
  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CloudFlow - Sign Up</title>
+  <title>xapo Bank - Sign Up</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -193,6 +193,7 @@
           <svg class="w-5 h-5 eye-icon" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
           </svg></button>
         </div>
+        
         <div class="error-message" id="error-confirmPassword"></div>
        </div>
       </div><!-- Stage 5: Terms & Create Account -->
@@ -215,9 +216,10 @@
          <p><span class="text-gray-400">Contact:</span> <span id="summaryContact" class="font-semibold text-white"></span></p>
         </div>
        </div>
-     </form><!-- Navigation Buttons -->
-     <div class="flex gap-3 mt-8"><button type="button" id="prevBtn" class="btn-secondary flex-1 py-3 rounded-lg font-semibold transition hidden">Back</button> <button type="button" id="nextBtn" class="btn-primary text-white flex-1 py-3 rounded-lg font-semibold">Continue</button> <button type="button" id="submitBtn" class="btn-primary text-white flex-1 py-3 rounded-lg font-semibold transition hidden">Create Account</button>
-     </div><!-- Success Message -->
+      </div><!-- Navigation Buttons (moved outside stages) -->
+      <div class="flex gap-3 mt-8"><button type="button" id="prevBtn" class="btn-secondary flex-1 py-3 rounded-lg font-semibold transition hidden">Back</button> <button type="button" id="nextBtn" class="btn-primary text-white flex-1 py-3 rounded-lg font-semibold">Continue</button> <button type="submit" id="submitBtn" class="btn-primary text-white flex-1 py-3 rounded-lg font-semibold transition hidden">Create Account</button>
+      </div>
+     </form><!-- Success Message -->
      <div id="successMessage" class="hidden text-center">
       <div class="mb-4">
        <svg class="w-12 sm:w-16 h-12 sm:h-16 text-green-500 mx-auto" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -404,7 +406,6 @@
             // Update button visibility
             const shouldHideNext = stage === visibleStages;
             const shouldHideSubmit = stage !== visibleStages;
-            console.log('Button visibility - nextBtn hidden:', shouldHideNext, 'submitBtn hidden:', shouldHideSubmit);
             prevBtn.classList.toggle('hidden', stage === 1);
             nextBtn.classList.toggle('hidden', shouldHideNext);
             submitBtn.classList.toggle('hidden', shouldHideSubmit);
