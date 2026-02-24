@@ -1,574 +1,318 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#0ea5e9">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>Sign In - Xapo Bank</title>
-  <link rel="icon" href="/xapo_logo.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="/xapo_logo.svg">
-  <script src="https://cdn.tailwindcss.com"></script>
-  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xapo Bank - Sign In</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
   <style>
-    /* Minor overrides for better touch targets on small devices */
-    input[type="email"], input[type="password"] { font-size: 1rem; }
-    /* Ensure the sign-in card uses comfortable spacing on larger screens */
-    @media (min-width: 768px) {
-      .card { padding: 2.5rem; }
+    * { font-family: 'Outfit', sans-serif; }
+    
+    .gradient-bg {
+      background: #000000;
     }
-    /* Toast notifications (centered, responsive) */
-    #toast-container { position: fixed; left: 50%; top: 12%; transform: translateX(-50%); z-index: 9999; display:flex; flex-direction:column; gap:0.5rem; align-items:center; width: 100%; pointer-events: none; }
-    #toast-container .toast { pointer-events: auto; max-width: 90vw; width: auto; }
-    .toast { background: rgba(30,30,30,0.95); color: #e6e6e6; padding: 0.75rem 1rem; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,0.4); min-width: 220px; max-width: 420px; font-size:0.95rem; display:flex; align-items:center; justify-content:space-between; gap:0.5rem; box-sizing:border-box; }
-    .toast.info { border-left: 4px solid #0ea5e9; }
-    .toast.success { border-left: 4px solid #10b981; }
-    .toast.error { border-left: 4px solid #ef4444; }
-    .toast .toast-actions { margin-left: 0.5rem; display:flex; gap:0.5rem; }
-    .toast .btn { background:transparent; border:1px solid rgba(255,255,255,0.06); color:inherit; padding:6px 10px; border-radius:6px; cursor:pointer; }
-    .toast .btn.primary { background:#0ea5e9; color:#051124; border:none; }
+    
+    .glass-card {
+      background: #000000;
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .input-field {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: all 0.3s ease;
+    }
+    
+    .input-field:focus {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #ff4d00 0%, #ff4d00 100%);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(255, 77, 0, 0.4);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    
+    .floating-shape {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.4;
+      animation: float 8s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(5deg); }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.6s ease-out forwards;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
-</head>
-<body class="bg-black text-slate-300 min-h-screen flex items-center justify-center py-8">
-  <main class="w-full max-w-md px-4">
-    <section class="bg-black rounded-2xl shadow-lg card mx-auto border border-black">
-      <div class="p-6 sm:p-8">
-        <header class="mb-6 text-center">
-          <img src="./xapo_logo.svg" alt="Xapo Bank" class="mx-auto h-10 w-auto mb-3" onerror="this.style.display='none'">
-          <h1 class="text-2xl font-semibold text-slate-100">Sign in to your account</h1>
-        
-        </header>
-
-        <div id="signin-error" class="hidden mb-4 text-sm text-red-400"></div>
-        <div id="open-external-wrap" class="hidden mb-4 text-sm text-center">
-          <button id="open-external-btn" class="px-3 py-2 bg-slate-700 text-white rounded">Open in external browser</button>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  
+  <div class="gradient-bg h-full w-full overflow-auto relative"><!-- Floating background shapes -->
+   <div class="floating-shape w-64 h-64 bg-indigo-500" style="top: 10%; left: -10%; animation-delay: 0s; display: none;"></div>
+   <div class="floating-shape w-48 h-48 bg-purple-500" style="bottom: 20%; right: -5%; animation-delay: 2s; display: none;"></div>
+   <div class="floating-shape w-32 h-32 bg-blue-500" style="top: 60%; left: 20%; animation-delay: 4s; display: none;"></div>
+   <div class="relative z-10 min-h-full flex items-center justify-center p-6">
+    <div class="w-full max-w-sm"><!-- Logo/Brand -->
+     <div class="text-center mb-8 fade-in" style="animation-delay: 0.1s;">
+      <img src="xapo_logo.svg" alt="Xapo Logo" class="w-40 h-40 mx-auto mb-4">
+      <h1 id="welcome-title" class="text-2xl font-bold text-white mb-2">Welcome back</h1>
+      <p id="subtitle-text" class="text-gray-400 text-sm">Sign in to continue to your account</p>
+     </img><!-- Sign In Card -->
+     <div class="glass-card rounded-3xl p-8 fade-in" style="animation-delay: 0.2s;">
+      <form id="signin-form" class="space-y-5">
+       <div><label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email address</label> <input type="email" id="email" name="email" class="input-field w-full px-4 py-3.5 rounded-xl text-white placeholder-gray-500 outline-none" placeholder="Enter your email" required>
+       </div>
+       <div><label for="password" class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+        <div class="relative"><input type="password" id="password" name="password" class="input-field w-full px-4 py-3.5 rounded-xl text-white placeholder-gray-500 outline-none pr-12" placeholder="Enter your password" required> <button type="button" id="toggle-password" class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors" aria-label="Toggle password visibility">
+          <svg id="eye-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          </svg></button>
         </div>
-        <form id="signin-form" class="space-y-4" autocomplete="on">
-          <div>
-                     <label for="email" class="block text-sm font-medium text-slate-300 mb-1">Email</label>
-                     <input inputmode="email" type="email" id="email" name="email" required
-                       class="block w-full rounded-lg border border-slate-600 bg-black text-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-slate-500">
-          </div>
-
-          <div>
-            <label for="password" class="block text-sm font-medium text-slate-300 mb-1">Password</label>
-            <div class="relative">
-              <input type="password" id="password" name="password" required
-                class="block w-full rounded-lg border border-slate-600 bg-black text-slate-300 px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-slate-500">
-              <button type="button" id="toggle-password" aria-label="Show password"
-                 class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-sm p-2 rounded-md hover:bg-slate-800">
-                Show
-              </button>
-            </div>
-          </div>
-
-          <div class="flex items-center justify-between text-sm">
-            <label class="inline-flex items-center gap-2">
-              <input type="checkbox" id="remember" class="h-4 w-4 rounded border-slate-600 bg-black">
-              <span class="text-slate-300">Remember me</span>
-            </label>
-            <a href="#" id="forgot-link" class="text-slate-400 hover:underline">Forgot password?</a>
-          </div>
-
-          <div>
-            <button type="submit" id="submit-btn" class="w-full bg-slate-600 text-slate-100 font-medium rounded-lg py-3 hover:bg-slate-700 active:scale-98">
-              <span id="submit-text">Sign In</span>
-              <span id="submit-loading" class="hidden">Signing in...</span>
-            </button>
-          </div>
-        </form>
-
-        <p class="mt-4 text-center text-sm text-slate-400">Don’t have an account? <a href="./signup.html" class="text-slate-400 hover:underline">Sign up</a></p>
+       </div>
+       <div class="flex items-center justify-between"><label class="flex items-center cursor-pointer group"> <input type="checkbox" class="sr-only peer" id="remember">
+         <div class="w-5 h-5 rounded-md border border-gray-600 peer-checked:bg-indigo-500 peer-checked:border-indigo-500 transition-all flex items-center justify-center">
+          <svg class="w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+          </svg>
+         </div><span class="ml-2 text-sm text-gray-400 group-hover:text-gray-300 transition-colors">Remember me</span> </label> <a href="#" class="text-sm text-red-500 hover:text-red-400 transition-colors">Forgot password?</a>
+       </div><button type="submit" id="submit-btn" class="btn-primary w-full py-3.5 rounded-xl text-white font-semibold text-base mt-6"> Sign in </button>
+      </form><!-- Success Message (hidden by default) -->
+      <div id="success-message" class="hidden text-center py-8">
+       <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-500/20 flex items-center justify-center">
+        <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+       </div>
+       <h3 class="text-xl font-semibold text-white mb-2">Welcome!</h3>
+       <p class="text-gray-400 text-sm">You've successfully signed in.</p>
       </div>
-    </section>
-  </main>
-
+     </div><!-- Sign Up Link -->
+     <p class="text-center mt-6 text-gray-400 text-sm fade-in" style="animation-delay: 0.3s;">Don't have an account? <a href="./signup.html" style="color: #ff4d00;" class="hover:text-orange-400 font-medium transition-colors">Sign up</a></p><!-- Demo Notice -->
+     <p class="text-center mt-4 text-gray-600 text-xs fade-in" style="animation-delay: 0.4s;"></p>
+    </div>
+   </div>
+  </div>
   <script>
-    // Development helper: when loaded from localhost, point API_BASE to local backend
-    try {
-      if ((!window.API_BASE || window.API_BASE === '') && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
-        window.API_BASE = location.protocol + '//' + location.hostname + ':' + (window.BACKEND_PORT || '10000');
-        console.debug('DEV: setting window.API_BASE to', window.API_BASE);
-      }
-    } catch (e) { /* ignore */ }
+    const defaultConfig = {
+      welcome_title: 'Welcome back',
+      subtitle_text: 'Sign in to continue to your account',
+      button_text: 'Sign in',
+      background_color: '#000000',
+      surface_color: '#000000',
+      text_color: '#ffffff',
+      primary_action_color: '#ff8c00',
+      secondary_action_color: '#ff0000',
+      font_family: 'Outfit',
+      font_size: 16
+    };
 
-    // Register service worker to proxy /api/* from static site to backend.
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').then(reg => {
-        console.debug('Service worker registered', reg);
-        // Send API base to the worker when active
-        const sendApiBase = (worker) => {
-                try { worker.postMessage({ type: 'setApiBase', value: window.API_BASE || window.API_URL || 'https://backend-xapobank-1.onrender.com' }); } catch (e) {}
-        };
-        if (reg.installing) reg.installing.addEventListener('statechange', () => {});
-        if (reg.waiting) sendApiBase(reg.waiting);
-        if (reg.active) sendApiBase(reg.active);
-      }).catch(err => console.warn('Service worker registration failed', err));
-    }
+    async function onConfigChange(config) {
+      // Update text content
+      document.getElementById('welcome-title').textContent = config.welcome_title || defaultConfig.welcome_title;
+      document.getElementById('subtitle-text').textContent = config.subtitle_text || defaultConfig.subtitle_text;
+      document.getElementById('submit-btn').textContent = config.button_text || defaultConfig.button_text;
 
-    // If running inside Telegram Web App or other in-app browsers, offer an
-    // explicit button to open the page in the external/system browser which
-    // often avoids storage and proxy restrictions imposed by the host app.
-    (function setupTelegramOpenExternal(){
-      function show() {
-        try {
-          const ua = (navigator && navigator.userAgent) ? navigator.userAgent : '';
-          const isTelegram = !!(window.Telegram && window.Telegram.WebApp) || /Telegram/i.test(ua);
-          const isIos = /iPhone|iPad|iPod/i.test(ua);
-          if (!isTelegram) return;
-          // Notify Telegram SDK the web app is ready (if available)
-          try { if (window.Telegram && window.Telegram.WebApp && typeof window.Telegram.WebApp.ready === 'function') window.Telegram.WebApp.ready(); } catch (e) {}
-          const wrap = document.getElementById('open-external-wrap');
-          if (!wrap) return;
-          wrap.classList.remove('hidden');
-          const btn = document.getElementById('open-external-btn');
-          if (!btn) return;
-          btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            try {
-              if (window.Telegram && window.Telegram.WebApp && typeof window.Telegram.WebApp.openTelegramLink === 'function') {
-                window.Telegram.WebApp.openTelegramLink(window.location.href);
-              } else {
-                window.open(window.location.href, '_blank');
-              }
-            } catch (err) {
-              try { window.open(window.location.href, '_blank'); } catch (_) { location.href = window.location.href; }
-            }
-          });
-          // If inside Telegram/iOS, unregister any service worker to avoid
-          // in-app proxying/misrouting of API calls during sign-in.
-          try {
-            if (isIos || isTelegram) {
-              if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(regs => {
-                  regs.forEach(r => {
-                    try { r.unregister().then(() => console.warn('Service worker unregistered for Telegram/iOS')); } catch(e) {}
-                  });
-                }).catch(() => {});
-              }
-            }
-          } catch (e) { console.warn('sw unregister failed', e); }
-        } catch (e) { console.warn('Telegram external open setup failed', e); }
-      }
-      // Run after DOMContentLoaded (script may be inserted before DOM ready)
-      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', show); else show();
-    })();
+      // Update colors
+      const bgColor = config.background_color || defaultConfig.background_color;
+      const surfaceColor = config.surface_color || defaultConfig.surface_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
+      const secondaryColor = config.secondary_action_color || defaultConfig.secondary_action_color;
 
-    // tryFetch: attempt to call backend, preferring explicit backend origin when
-    // inside Telegram or iOS in-app browsers to avoid HTML fallback pages.
-    async function tryFetch(path, opts){
-      const ua = (typeof navigator !== 'undefined' && navigator.userAgent) ? navigator.userAgent : '';
-      const isTelegram = (typeof window !== 'undefined') && ((window.Telegram && window.Telegram.WebApp) || /Telegram/i.test(ua));
-      const isIos = /iPhone|iPad|iPod/i.test(ua);
-      const API_BASE = (window.API_BASE || window.API_URL || '').replace(/\/$/, '');
+      document.documentElement.style.setProperty('--bg-color', bgColor);
+      
+      // Apply text color
+      document.getElementById('welcome-title').style.color = textColor;
+      document.getElementById('subtitle-text').style.color = '#999999';
+      document.querySelectorAll('.input-field').forEach(el => el.style.color = textColor);
 
-      const candidates = [];
-      if (isTelegram || isIos) {
-        if (API_BASE) candidates.push(API_BASE + path);
-        candidates.push(path);
-      } else {
-        candidates.push(path);
-        if (API_BASE) candidates.push(API_BASE + path);
-      }
+      // Apply primary action color to button
+      const submitBtn = document.getElementById('submit-btn');
+      submitBtn.style.background = `linear-gradient(135deg, ${primaryColor} 0%, ${adjustColor(primaryColor, 20)} 100%)`;
 
-      // Merge headers and prefer JSON
-      const defaultHeaders = new Headers({ 'Accept': 'application/json' });
-      if (opts && opts.headers) {
-        try {
-          const provided = new Headers(opts.headers);
-          for (const [k, v] of provided.entries()) defaultHeaders.set(k, v);
-        } catch (e) {
-          try { Object.entries(opts.headers).forEach(([k, v]) => defaultHeaders.set(k, v)); } catch(_) {}
-        }
-      }
-
-      let lastErr = null;
-      for (const url of candidates) {
-        try {
-          console.debug('tryFetch ->', url);
-          const init = Object.assign({}, opts, { headers: defaultHeaders });
-          const resp = await fetch(url, init);
-          // If response looks like HTML (static site) rather than JSON, try the explicit API_BASE
-          try {
-            const ct = resp && resp.headers && typeof resp.headers.get === 'function' ? (resp.headers.get('content-type') || '') : '';
-            const isHtml = ct && /html/i.test(ct);
-            // If we got HTML and we have an API_BASE candidate later, skip this response and try next
-            if (isHtml) {
-              console.warn('tryFetch: received HTML response, likely static host; will try next candidate', { url, contentType: ct });
-              lastErr = new Error('received HTML response');
-              // continue to next candidate (do not return this response)
-              continue;
-            }
-          } catch (e) { /* ignore header parse errors and fall back to returning the response */ }
-          return resp;
-        } catch (e) {
-          lastErr = e;
-        }
-      }
-      throw lastErr || new Error('fetch failed');
-    }
-    // Toggle password visibility (guard elements exist)
-    (function(){
-      const toggleBtn = document.getElementById('toggle-password');
-      const passwordInput = document.getElementById('password');
-      if (!toggleBtn || !passwordInput) {
-        console.warn('Password toggle elements not found; skipping listener');
-        return;
-      }
-      toggleBtn.addEventListener('click', () => {
-        if (passwordInput.type === 'password') {
-          passwordInput.type = 'text';
-          toggleBtn.textContent = 'Hide';
-          toggleBtn.setAttribute('aria-pressed', 'true');
-        } else {
-          passwordInput.type = 'password';
-          toggleBtn.textContent = 'Show';
-          toggleBtn.setAttribute('aria-pressed', 'false');
-        }
+      // Apply secondary action color to links
+      document.querySelectorAll('a').forEach(link => {
+        link.style.color = secondaryColor;
       });
-    })();
 
-    // Lightweight non-blocking toast UI
-    (function(){
-      const container = document.createElement('div');
-      container.id = 'toast-container';
-      document.body.appendChild(container);
+      // Update font
+      const fontFamily = config.font_family || defaultConfig.font_family;
+      const baseSize = config.font_size || defaultConfig.font_size;
+      
+      document.body.style.fontFamily = `${fontFamily}, Outfit, sans-serif`;
+      document.getElementById('welcome-title').style.fontSize = `${baseSize * 1.5}px`;
+      document.getElementById('subtitle-text').style.fontSize = `${baseSize * 0.875}px`;
+    }
 
-      window.showToast = function(message, opts = {}) {
-        const { type = 'info', duration = 4000, actions = [] } = opts;
-        return new Promise((resolve) => {
-              const t = document.createElement('div');
-              t.className = `toast ${type}`;
-              const text = document.createElement('div');
-              text.style.flex = '1';
-              text.textContent = message;
-              t.appendChild(text);
-              const actionsWrap = document.createElement('div');
-              actionsWrap.className = 'toast-actions';
-              if (Array.isArray(actions) && actions.length) {
-                actions.forEach(a => {
-                  const btn = document.createElement('button');
-                  btn.className = 'btn' + (a.primary ? ' primary' : '');
-                  btn.textContent = a.text || 'OK';
-                  btn.addEventListener('click', () => {
-                    clear();
-                    resolve(a.value || a.text || 'action');
-                  });
-                  actionsWrap.appendChild(btn);
-                });
-                t.appendChild(actionsWrap);
-              }
-              // close control
-              const closeBtn = document.createElement('button');
-              closeBtn.className = 'btn';
-              closeBtn.textContent = '×';
-              closeBtn.title = 'Close';
-              closeBtn.style.marginLeft = '8px';
-              closeBtn.addEventListener('click', () => { clear(); resolve('closed'); });
-              t.appendChild(closeBtn);
+    function adjustColor(hex, percent) {
+      const num = parseInt(hex.replace('#', ''), 16);
+      const amt = Math.round(2.55 * percent);
+      const R = Math.min(255, (num >> 16) + amt);
+      const G = Math.min(255, ((num >> 8) & 0x00FF) + amt);
+      const B = Math.min(255, (num & 0x0000FF) + amt);
+      return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
+    }
 
-          let timeout = null;
-          function clear() {
-            if (timeout) clearTimeout(timeout);
-            try { t.remove(); } catch (e) {}
+    function mapToCapabilities(config) {
+      return {
+        recolorables: [
+          {
+            get: () => config.background_color || defaultConfig.background_color,
+            set: (value) => { config.background_color = value; window.elementSdk.setConfig({ background_color: value }); }
+          },
+          {
+            get: () => config.surface_color || defaultConfig.surface_color,
+            set: (value) => { config.surface_color = value; window.elementSdk.setConfig({ surface_color: value }); }
+          },
+          {
+            get: () => config.text_color || defaultConfig.text_color,
+            set: (value) => { config.text_color = value; window.elementSdk.setConfig({ text_color: value }); }
+          },
+          {
+            get: () => config.primary_action_color || defaultConfig.primary_action_color,
+            set: (value) => { config.primary_action_color = value; window.elementSdk.setConfig({ primary_action_color: value }); }
+          },
+          {
+            get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+            set: (value) => { config.secondary_action_color = value; window.elementSdk.setConfig({ secondary_action_color: value }); }
           }
-
-          container.appendChild(t);
-          if (!actions.length) {
-            timeout = setTimeout(() => { clear(); resolve('timeout'); }, duration);
-          }
-        });
-      };
-    })();
-
-    // If running inside Telegram WebApp and initData is available, attempt
-    // to exchange it for an app token automatically (bypasses email/password).
-    (function tryTelegramAutoLogin(){
-      try {
-        const tg = (window && window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
-        const initData = tg && (tg.initData || tg.initDataUnsafe || window.initData) ? (tg.initData || tg.initDataUnsafe || window.initData) : null;
-        if (!initData) return;
-        // Show a friendly message while attempting Telegram login
-        try { window.showToast('Signing in with Telegram…', { type: 'info', duration: 3000 }); } catch (e) {}
-        (async function(){
-          try {
-            const res = await tryFetch('/api/auth/telegram', {
-              method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Bypass-SW': '1' },
-              body: JSON.stringify({ initData })
-            });
-            const json = await res.json().catch(() => null);
-            if (res && res.ok && json && json.token) {
-              try { localStorage.setItem('token', json.token); } catch (e) { document.cookie = 'token=' + encodeURIComponent(json.token) + '; path=/'; }
-              try { if (json.data) localStorage.setItem('user', JSON.stringify(json.data)); } catch (e) {}
-              window.location.href = '/';
-              return;
-            }
-            // If Telegram login failed, leave the page for manual login and show error
-            const errDiv = document.getElementById('signin-error');
-            const msg = (json && (json.message || json.error)) ? (json.message || json.error) : (res && res.statusText) || 'Telegram login failed';
-            if (errDiv) { errDiv.textContent = msg; errDiv.classList.remove('hidden'); } else { alert(msg); }
-          } catch (e) {
-            console.warn('Telegram auto-login failed', e && e.message ? e.message : e);
-          }
-        })();
-      } catch (e) { /* ignore */ }
-    })();
-
-    // Forgot password flow: non-blocking confirmation via toast
-    document.getElementById('forgot-link').addEventListener('click', async (e) => {
-      e.preventDefault();
-      const emailInput = document.getElementById('email');
-      let email = (emailInput.value && emailInput.value.trim()) || '';
-      if (!email) {
-        email = prompt('Enter your registered account email to receive password reset instructions:');
-        if (!email) return;
-      }
-
-      const choice = await window.showToast(`Send password reset instructions to ${email}?`, { type: 'info', duration: 0, actions: [ { text: 'Cancel', value: 'cancel' }, { text: 'Send', value: 'send', primary: true } ] });
-      if (choice !== 'send') return;
-
-      try {
-        const res = await tryFetch('/api/auth/forgot', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email })
-        });
-        if (res && res.ok) {
-          await window.showToast('Password reset instructions have been sent to your registered email address. Please check your inbox.', { type: 'success', duration: 5000 });
-        } else {
-          await window.showToast('If that email is registered with us, you will receive password reset instructions shortly.', { type: 'info', duration: 5000 });
+        ],
+        borderables: [],
+        fontEditable: {
+          get: () => config.font_family || defaultConfig.font_family,
+          set: (value) => { config.font_family = value; window.elementSdk.setConfig({ font_family: value }); }
+        },
+        fontSizeable: {
+          get: () => config.font_size || defaultConfig.font_size,
+          set: (value) => { config.font_size = value; window.elementSdk.setConfig({ font_size: value }); }
         }
-      } catch (err) {
-        console.error(err);
-        await window.showToast('Unable to send reset email — try again later', { type: 'error', duration: 5000 });
+      };
+    }
+
+    function mapToEditPanelValues(config) {
+      return new Map([
+        ['welcome_title', config.welcome_title || defaultConfig.welcome_title],
+        ['subtitle_text', config.subtitle_text || defaultConfig.subtitle_text],
+        ['button_text', config.button_text || defaultConfig.button_text]
+      ]);
+    }
+
+    // Initialize SDK
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+    }
+
+    // Password visibility toggle
+    const togglePassword = document.getElementById('toggle-password');
+    const passwordInput = document.getElementById('password');
+    const eyeIcon = document.getElementById('eye-icon');
+
+    togglePassword.addEventListener('click', () => {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      
+      if (type === 'text') {
+        eyeIcon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+        `;
+      } else {
+        eyeIcon.innerHTML = `
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+        `;
       }
     });
 
-    // Handle submit with loading state
-    document.getElementById('signin-form').addEventListener('submit', async (event) => {
-      event.preventDefault();
+    // Form submission
+    const form = document.getElementById('signin-form');
+    const successMessage = document.getElementById('success-message');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
       const submitBtn = document.getElementById('submit-btn');
-      const submitText = document.getElementById('submit-text');
-      const submitLoading = document.getElementById('submit-loading');
-
-      submitText.classList.add('hidden');
-      submitLoading.classList.remove('hidden');
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      
+      submitBtn.textContent = 'Signing in...';
       submitBtn.disabled = true;
-
-      const formData = {
-        email: document.getElementById('email').value,
-        password: document.getElementById('password').value
-      };
-
+      
       try {
-        // Use tryFetch to handle proxying via service worker if needed
-        const response = await tryFetch('/api/auth/login', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData),
+        const response = await fetch('https://backend-xapobank-1.onrender.com/api/auth/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
         });
-        if (!response) {
-          const errDiv = document.getElementById('signin-error');
-          const msg = 'Login request failed — no response from server (network/CORS/proxy issue).';
-          console.warn(msg);
-          if (errDiv) { errDiv.textContent = msg; errDiv.classList.remove('hidden'); }
-          throw new Error(msg);
-        }
-        try {
-          const ct = (response && response.headers && typeof response.headers.get === 'function') ? response.headers.get('content-type') : '';
-          console.debug('Login response url/content-type', response && response.url, ct);
-        } catch (e) {}
-        let data;
-        let rawText = null;
-        try {
-          data = await response.json();
-        } catch (e) {
-          // If server returned non-JSON, attempt to read the text and parse as JSON
-          try {
-            const txt = await response.text();
-            const txtStripped = txt.replace(/^\uFEFF/, '').trim();
-            rawText = txtStripped;
-            try {
-              data = JSON.parse(txtStripped);
-              console.warn('Parsed JSON from non-standard response body', data);
-            } catch (parseErr) {
-              console.warn('Login response not JSON:', txtStripped);
-              data = null;
-            }
-          } catch (_) {
-            data = null;
-          }
-        }
-        console.debug('Login response:', { status: response.status, ok: response.ok, body: data });
-        if (response.ok) {
-          const extractTokenFromResponse = (dataObj, resp) => {
-            try {
-              // common locations
-              if (!dataObj) dataObj = null;
-              const cand = (dataObj && (dataObj.token || dataObj.accessToken || dataObj.access_token))
-                || (dataObj && dataObj.data && (dataObj.data.token || dataObj.data.accessToken || dataObj.data.access_token))
-                || null;
-              if (cand) return String(cand);
-              // headers (e.g., x-auth-token or authorization)
-              if (resp && resp.headers && typeof resp.headers.get === 'function') {
-                const h = resp.headers.get('x-auth-token') || resp.headers.get('x-token') || resp.headers.get('authorization') || resp.headers.get('x-access-token');
-                if (h) return String(h).replace(/^Bearer\s+/i, '').trim();
-              }
-              // cookie fallback (server might set cookie instead of JSON)
-              try {
-                const m = (document && document.cookie) ? document.cookie.match(/(?:^|; )token=([^;]+)/) : null;
-                if (m && m[1]) return decodeURIComponent(m[1]);
-              } catch (e) {}
-            } catch (e) { console.warn('token extraction failed', e); }
-            return '';
-          };
-
-          const tokenVal = extractTokenFromResponse(data, response) || '';
-          if (!tokenVal) {
-            const msg = 'Login succeeded but server did not return a token.';
-            // Collect extra diagnostics: status, URL, and specific headers we add on the server
-            let respHeaders = {};
-            try {
-              respHeaders = {
-                'content-type': response.headers && typeof response.headers.get === 'function' ? response.headers.get('content-type') : '',
-                'x-token-present': response.headers && typeof response.headers.get === 'function' ? response.headers.get('x-token-present') : '',
-                'x-token-length': response.headers && typeof response.headers.get === 'function' ? response.headers.get('x-token-length') : ''
-              };
-            } catch (e) { respHeaders = {}; }
-            console.warn(msg, { status: response && response.status, url: response && response.url, ok: response && response.ok, headers: respHeaders, body: data, rawText });
-            const errDiv = document.getElementById('signin-error');
-            const detailText = rawText || (data ? JSON.stringify(data) : '');
-            const combined = `${msg} (status=${response && response.status}, x-token-present=${respHeaders['x-token-present'] || 'unknown'})` + (detailText ? ` — ${detailText}` : '');
-            if (errDiv) {
-              errDiv.textContent = combined;
-              errDiv.classList.remove('hidden');
-            } else {
-              alert(combined);
-            }
-            // If response appears opaque or empty (no headers/body), try detecting cookie/session auth
-            (async function tryDetectCookieSession() {
-              try {
-                const respType = response && response.type ? response.type : ''; // e.g., 'opaque'
-                const ctHeader = response && response.headers && typeof response.headers.get === 'function' ? response.headers.get('content-type') : '';
-                if (respType === 'opaque' || (!ctHeader && !rawText && !data)) {
-                  const API_BASE = (window.API_BASE || window.API_URL || '').replace(/\/$/, '');
-                  const hostsToTry = [];
-                  if (API_BASE) hostsToTry.push(API_BASE);
-                  try { hostsToTry.push(window.location.origin); } catch(_) {}
-                  for (const h of hostsToTry) {
-                    try {
-                      const meResp = await fetch(h + '/api/auth/me', { method: 'GET', credentials: 'include', headers: { 'Accept': 'application/json', 'X-Bypass-SW': '1' } });
-                      if (meResp && meResp.ok) {
-                        let meJson = null;
-                        try { meJson = await meResp.json(); } catch(_) { meJson = null; }
-                        if (meJson) {
-                          try { if (meJson && (meJson.data || meJson.user)) localStorage.setItem('user', JSON.stringify(meJson.data || meJson.user)); } catch (e) {}
-                          try { localStorage.setItem('__session', 'cookie'); } catch (e) {}
-                          window.location.href = '/';
-                          return;
-                        }
-                      }
-                    } catch (e) {
-                      console.warn('Cookie/session detection fetch failed for', h, e && e.message ? e.message : e);
-                    }
-                  }
-                }
-              } catch (e) { console.warn('tryDetectCookieSession failed', e); }
-            })();
-            try { if (data && data.data) localStorage.setItem('user', JSON.stringify(data.data)); } catch (e) { console.warn('Could not store user', e); }
-
-            // Diagnostic: try a direct fetch to the explicit backend origin to bypass
-            // service workers or in-app browser proxies which may alter responses.
-            (async function tryDirectLogin() {
-              try {
-                const API_BASE = (window.API_BASE || window.API_URL || '').replace(/\/$/, '');
-                if (!API_BASE) return;
-                const directResp = await fetch(API_BASE + '/api/auth/login', {
-                  method: 'POST', headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(formData), cache: 'no-store'
-                });
-                let directData = null;
-                let directText = null;
-                try { directData = await directResp.json(); } catch (e) { try { directText = await directResp.text(); } catch(_) { directText = String(directResp.status); } }
-                console.warn('Direct login attempt response:', directResp.status, directData || directText);
-                // If direct attempt yields a token, persist it and redirect
-                if (directData && directData.token) {
-                  try { localStorage.setItem('token', directData.token); } catch (e) {
-                    try {
-                      const cookieStr = 'token=' + encodeURIComponent(directData.token) + '; path=/; max-age=' + (7*24*60*60) + (location.protocol === 'https:' ? '; SameSite=None; Secure' : '');
-                      document.cookie = cookieStr;
-                    } catch (ee) { console.warn('Cookie set failed', ee); }
-                  }
-                  try { if (directData && directData.data) localStorage.setItem('user', JSON.stringify(directData.data)); } catch (e) {}
-                  window.location.href = '/';
-                  return;
-                }
-
-                // If direct attempt did not return a token, try detecting cookie/session-based auth
-                try {
-                  const meResp = await fetch(API_BASE + '/api/auth/me', { method: 'GET', credentials: 'include', headers: { 'Accept': 'application/json' } });
-                  let meJson = null;
-                  try { meJson = await meResp.json(); } catch (_) { meJson = null; }
-                  if (meResp && meResp.ok && meJson) {
-                    try { if (meJson && (meJson.data || meJson.user)) localStorage.setItem('user', JSON.stringify(meJson.data || meJson.user)); } catch (e) {}
-                    // mark that server uses cookie session (no token) so client can proceed
-                    try { localStorage.setItem('__session', 'cookie'); } catch (e) {}
-                    window.location.href = '/';
-                    return;
-                  }
-                } catch (e) {
-                  console.warn('Cookie/session detection attempt failed', e && e.message ? e.message : e);
-                }
-
-                // Show more details to the user so they can report it (useful for in-app browsers)
-                const directDetail = directData ? JSON.stringify(directData) : (directText || directResp.statusText || String(directResp.status));
-                if (errDiv) {
-                  errDiv.textContent = `${msg} (direct attempt): ${directDetail}`;
-                  errDiv.classList.remove('hidden');
-                } else {
-                  alert(`${msg} (direct attempt): ${directDetail}`);
-                }
-              } catch (e) {
-                console.warn('Direct login attempt failed', e && e.message ? e.message : e);
-              }
-            })();
-          } else {
-            console.debug('Received token from server (redacted):', typeof tokenVal === 'string' ? '[REDACTED]' : tokenVal);
-            // Attempt to persist token in localStorage, fall back to cookie if storage is blocked
-            try {
-              localStorage.setItem('token', tokenVal);
-            } catch (err) {
-              console.warn('localStorage.setItem failed — falling back to cookie', err && err.message ? err.message : err);
-              try {
-                const cookieStr = 'token=' + encodeURIComponent(tokenVal) + '; path=/; max-age=' + (7 * 24 * 60 * 60) + (location.protocol === 'https:' ? '; SameSite=None; Secure' : '');
-                document.cookie = cookieStr;
-              } catch (e) {
-                console.warn('Cookie fallback failed', e && e.message ? e.message : e);
-              }
-            }
-            try { if (data && data.data) localStorage.setItem('user', JSON.stringify(data.data)); } catch (e) { console.warn('Could not store user', e); }
-            console.debug('Token persisted (storage fallback attempted), redirecting to /');
-            window.location.href = '/';
-          }
+        
+        const data = await response.json();
+        
+        if (data.success && data.token) {
+          // Store token in localStorage
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.data));
+          
+          // Redirect to dashboard
+          window.location.href = 'dashboard.html';
         } else {
-          const msg = (data && (data.message || data.error)) ? (data.message || data.error) : (response.statusText || `Sign-in failed (${response.status})`);
-          const errDiv = document.getElementById('signin-error');
-          if (errDiv) {
-            errDiv.textContent = msg;
-            errDiv.classList.remove('hidden');
-          } else {
-            alert(msg);
-          }
+          // Show error message
+          alert(data.message || 'Login failed. Please check your credentials.');
+          submitBtn.textContent = 'Sign in';
+          submitBtn.disabled = false;
         }
-      } catch (err) {
-        console.error(err);
-        alert('Network error — please try again.');
-      } finally {
-        submitText.classList.remove('hidden');
-        submitLoading.classList.add('hidden');
+      } catch (error) {
+        console.error('Login error:', error);
+        alert('Network error. Please try again later.');
+        submitBtn.textContent = 'Sign in';
         submitBtn.disabled = false;
       }
     });
+
+    // Checkbox styling
+    const checkbox = document.getElementById('remember');
+    const checkboxContainer = checkbox.closest('label').querySelector('div');
+    const checkIcon = checkboxContainer.querySelector('svg');
+
+    checkbox.addEventListener('change', () => {
+      if (checkbox.checked) {
+        checkboxContainer.classList.add('bg-indigo-500', 'border-indigo-500');
+        checkIcon.style.opacity = '1';
+      } else {
+        checkboxContainer.classList.remove('bg-indigo-500', 'border-indigo-500');
+        checkIcon.style.opacity = '0';
+      }
+    });
   </script>
-</body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d2de6e4142c3f12',t:'MTc3MTkyNDk4Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
-
-
