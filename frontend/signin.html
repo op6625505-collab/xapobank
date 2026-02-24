@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Xapo Bank - Sign In</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-  <script src="/_sdk/element_sdk.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
@@ -71,7 +70,6 @@
     }
   </style>
   <style>body { box-sizing: border-box; }</style>
-  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
  <body class="h-full">
   
@@ -118,120 +116,6 @@
    </div>
   </div>
   <script>
-    const defaultConfig = {
-      welcome_title: 'Welcome back',
-      subtitle_text: 'Sign in to continue to your account',
-      button_text: 'Sign in',
-      background_color: '#000000',
-      surface_color: '#000000',
-      text_color: '#ffffff',
-      primary_action_color: '#ff8c00',
-      secondary_action_color: '#ff0000',
-      font_family: 'Outfit',
-      font_size: 16
-    };
-
-    async function onConfigChange(config) {
-      // Update text content
-      document.getElementById('welcome-title').textContent = config.welcome_title || defaultConfig.welcome_title;
-      document.getElementById('subtitle-text').textContent = config.subtitle_text || defaultConfig.subtitle_text;
-      document.getElementById('submit-btn').textContent = config.button_text || defaultConfig.button_text;
-
-      // Update colors
-      const bgColor = config.background_color || defaultConfig.background_color;
-      const surfaceColor = config.surface_color || defaultConfig.surface_color;
-      const textColor = config.text_color || defaultConfig.text_color;
-      const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
-      const secondaryColor = config.secondary_action_color || defaultConfig.secondary_action_color;
-
-      document.documentElement.style.setProperty('--bg-color', bgColor);
-      
-      // Apply text color
-      document.getElementById('welcome-title').style.color = textColor;
-      document.getElementById('subtitle-text').style.color = '#999999';
-      document.querySelectorAll('.input-field').forEach(el => el.style.color = textColor);
-
-      // Apply primary action color to button
-      const submitBtn = document.getElementById('submit-btn');
-      submitBtn.style.background = `linear-gradient(135deg, ${primaryColor} 0%, ${adjustColor(primaryColor, 20)} 100%)`;
-
-      // Apply secondary action color to links
-      document.querySelectorAll('a').forEach(link => {
-        link.style.color = secondaryColor;
-      });
-
-      // Update font
-      const fontFamily = config.font_family || defaultConfig.font_family;
-      const baseSize = config.font_size || defaultConfig.font_size;
-      
-      document.body.style.fontFamily = `${fontFamily}, Outfit, sans-serif`;
-      document.getElementById('welcome-title').style.fontSize = `${baseSize * 1.5}px`;
-      document.getElementById('subtitle-text').style.fontSize = `${baseSize * 0.875}px`;
-    }
-
-    function adjustColor(hex, percent) {
-      const num = parseInt(hex.replace('#', ''), 16);
-      const amt = Math.round(2.55 * percent);
-      const R = Math.min(255, (num >> 16) + amt);
-      const G = Math.min(255, ((num >> 8) & 0x00FF) + amt);
-      const B = Math.min(255, (num & 0x0000FF) + amt);
-      return '#' + (0x1000000 + R * 0x10000 + G * 0x100 + B).toString(16).slice(1);
-    }
-
-    function mapToCapabilities(config) {
-      return {
-        recolorables: [
-          {
-            get: () => config.background_color || defaultConfig.background_color,
-            set: (value) => { config.background_color = value; window.elementSdk.setConfig({ background_color: value }); }
-          },
-          {
-            get: () => config.surface_color || defaultConfig.surface_color,
-            set: (value) => { config.surface_color = value; window.elementSdk.setConfig({ surface_color: value }); }
-          },
-          {
-            get: () => config.text_color || defaultConfig.text_color,
-            set: (value) => { config.text_color = value; window.elementSdk.setConfig({ text_color: value }); }
-          },
-          {
-            get: () => config.primary_action_color || defaultConfig.primary_action_color,
-            set: (value) => { config.primary_action_color = value; window.elementSdk.setConfig({ primary_action_color: value }); }
-          },
-          {
-            get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
-            set: (value) => { config.secondary_action_color = value; window.elementSdk.setConfig({ secondary_action_color: value }); }
-          }
-        ],
-        borderables: [],
-        fontEditable: {
-          get: () => config.font_family || defaultConfig.font_family,
-          set: (value) => { config.font_family = value; window.elementSdk.setConfig({ font_family: value }); }
-        },
-        fontSizeable: {
-          get: () => config.font_size || defaultConfig.font_size,
-          set: (value) => { config.font_size = value; window.elementSdk.setConfig({ font_size: value }); }
-        }
-      };
-    }
-
-    function mapToEditPanelValues(config) {
-      return new Map([
-        ['welcome_title', config.welcome_title || defaultConfig.welcome_title],
-        ['subtitle_text', config.subtitle_text || defaultConfig.subtitle_text],
-        ['button_text', config.button_text || defaultConfig.button_text]
-      ]);
-    }
-
-    // Initialize SDK
-    if (window.elementSdk) {
-      window.elementSdk.init({
-        defaultConfig,
-        onConfigChange,
-        mapToCapabilities,
-        mapToEditPanelValues
-      });
-    }
-
     // Password visibility toggle
     const togglePassword = document.getElementById('toggle-password');
     const passwordInput = document.getElementById('password');
@@ -314,5 +198,5 @@
       }
     });
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9d2de6e4142c3f12',t:'MTc3MTkyNDk4Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ </body>
 </html>
