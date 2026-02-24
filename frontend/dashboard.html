@@ -8856,46 +8856,5 @@
 
 </script>
 </body>
-</html> catch (error) {
-          console.error('✗ Failed:', error.message);
-        }
-      }
-      
-      console.error('\n✗ All CDNs failed to load models');
-      console.log('=== End Debug ===');
-    };
-    
-    // Test camera access
-    window.testCamera = async function() {
-      console.log('Testing camera access...');
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
-          audio: false
-        });
-        
-        const tracks = stream.getTracks();
-        console.log('✓ Camera access granted');
-        console.log('Video tracks:', tracks.length);
-        tracks.forEach(track => {
-          console.log('  -', track.kind, ':', track.label);
-          track.stop();
-        });
-      } catch (error) {
-        console.error('✗ Camera access denied:', error.message);
-      }
-    };
-    
-    // Quick test for everything
-    window.quickTest = async function() {
-      console.log('=== QUICK TEST ===');
-      console.log('TensorFlow:', typeof tf !== 'undefined' ? '✓' : '✗');
-      console.log('Face-API:', typeof faceapi !== 'undefined' ? '✓' : '✗');
-      await window.testCamera();
-      console.log('\nRun window.debugFaceAPI() to test model loading');
-      console.log('=== END TEST ===');
-    };
-
-</script>
-</body>
+</html>
 </html>
