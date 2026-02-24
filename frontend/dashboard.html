@@ -7342,23 +7342,56 @@
         const user = result.data;
         console.log('Fetched user data:', user);
         
-        // Apply pending deposits that haven't been confirmed by server yet
+        // Apply pending collateral deposits that are still pending (not yet confirmed by server)
         try {
           const pendingDeposits = JSON.parse(localStorage.getItem('pendingDeposits') || '{}');
           console.log('Found pending deposits:', Object.keys(pendingDeposits).length);
           
-          // Apply pending collateral deposits
-          for (const [txId, pending] of Object.entries(pendingDeposits)) {
-            if (pending.applyToLoan) {
-              // Skip loan repayments for now - they have different logic
-              continue;
+          // Fetch all transactions to check which pending deposits have been confirmed
+          try {
+            const transactionsResponse = await fetch(window.API_BASE + '/api/transactions', {
+              headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              }
+            });
+            const txResult = await transactionsResponse.json();
+            const confirmedTxIds = new Set();
+            if (txResult.isOk && txResult.data && Array.isArray(txResult.data)) {
+              // Mark any confirmed transactions so we don't double-apply them
+              txResult.data.forEach(tx => {
+                const status = String(tx.status || '').toLowerCase();
+                if (status === 'completed' || status === 'confirmed' || status === 'complete') {
+                  confirmedTxIds.add(String(tx._id || tx.id || tx.transactionId || ''));
+                }
+              });
             }
             
-            // Only apply collateral deposits
-            if (pending.depositMethod === 'collateral' && pending.usdAmount && pending.btcAmount) {
-              console.log('Applying pending collateral deposit:', txId, pending);
-              user.collateralBalanceUSD = (user.collateralBalanceUSD || 0) + Number(pending.usdAmount);
-              user.collateralBalanceBTC = (user.collateralBalanceBTC || 0) + Number(pending.btcAmount);
+            // Only apply pending deposits that the backend hasn't confirmed yet
+            for (const [txId, pending] of Object.entries(pendingDeposits)) {
+              if (pending.applyToLoan) {
+                // Skip loan repayments for now - they have different logic
+                continue;
+              }
+              
+              const isConfirmed = confirmedTxIds.has(String(txId || ''));
+              
+              // Only apply collateral deposits that haven't been confirmed by server
+              if (pending.depositMethod === 'collateral' && pending.usdAmount && pending.btcAmount && !isConfirmed) {
+                console.log('Applying pending (unconfirmed) collateral deposit:', txId, pending);
+                user.collateralBalanceUSD = (user.collateralBalanceUSD || 0) + Number(pending.usdAmount);
+                user.collateralBalanceBTC = (user.collateralBalanceBTC || 0) + Number(pending.btcAmount);
+              }
+            }
+          } catch (e) {
+            console.warn('Could not verify confirmed transactions, applying all pending deposits conservatively:', e);
+            // Fallback: apply all pending deposits (may cause double-application but at least balances are visible)
+            for (const [txId, pending] of Object.entries(pendingDeposits)) {
+              if (pending.applyToLoan) continue;
+              if (pending.depositMethod === 'collateral' && pending.usdAmount && pending.btcAmount) {
+                console.log('Applying pending collateral deposit (fallback):', txId, pending);
+                user.collateralBalanceUSD = (user.collateralBalanceUSD || 0) + Number(pending.usdAmount);
+                user.collateralBalanceBTC = (user.collateralBalanceBTC || 0) + Number(pending.btcAmount);
+              }
             }
           }
         } catch (e) {
