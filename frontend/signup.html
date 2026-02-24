@@ -404,8 +404,8 @@
             document.getElementById('stageName').textContent = stageNames[stage - 1];
 
             // Update button visibility
-            const shouldHideNext = stage === visibleStages;
-            const shouldHideSubmit = stage !== visibleStages;
+            const shouldHideNext = stage === totalStages;
+            const shouldHideSubmit = stage !== totalStages;
             prevBtn.classList.toggle('hidden', stage === 1);
             nextBtn.classList.toggle('hidden', shouldHideNext);
             submitBtn.classList.toggle('hidden', shouldHideSubmit);
