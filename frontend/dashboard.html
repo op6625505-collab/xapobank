@@ -229,65 +229,11 @@
         to { height: 40px; }
       }
     }
-    /* Network status overlay for poor connectivity (reload indicator) */
-    .network-overlay {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0,0,0,0.6);
-      z-index: 9999;
-      transition: opacity 200ms ease;
-      opacity: 0;
-      pointer-events: none;
-    }
-    .network-overlay.visible {
-      opacity: 1;
-      pointer-events: auto;
-    }
-    .network-overlay .card {
-      background: #0b0b0b;
-      border: 1px solid rgba(255,255,255,0.06);
-      padding: 18px;
-      border-radius: 12px;
-      display: flex;
-      gap: 14px;
-      align-items: center;
-      color: #fff;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
-    }
-    .network-overlay img { width: 72px; height: 72px; object-fit: contain; }
-    .network-overlay .message { font-weight: 600; font-size: 16px; }
-    .network-overlay .actions { display: flex; gap: 10px; align-items: center; }
-    .network-overlay .btn {
-      background: linear-gradient(90deg,#ff6b35 0%,#ff4500 100%);
-      color: #fff;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .network-overlay .btn:disabled { opacity: 0.6; cursor: not-allowed; }
   </style>
   <style>@view-transition { navigation: auto; }</style>
  </head>
  <body class="h-full">
   <div id="app" class="h-full w-full overflow-y-auto" style="background: #0a0a0a;"><!-- Top Bar -->
-   <!-- Network status overlay (shows reload image when connectivity is poor) -->
-  <div id="network-overlay" class="network-overlay" aria-hidden="true">
-   <div class="card">
-    <img src="IMG_2730.PNG" alt="Reload indicator">
-    <div style="display:flex;flex-direction:column;gap:8px;">
-    <div class="message">Poor network detected — retrying…</div>
-    <div class="actions">
-     <button id="network-retry-btn" class="btn">Retry now</button>
-     <div style="color:#bbb;font-size:13px;">Auto-retry enabled</div>
-    </div>
-    </div>
-   </div>
-  </div>
    <header class="fixed top-0 left-0 right-0 border-b border-gray-800 px-3 sm:px-4 md:px-6 py-3 md:py-4 z-50 overflow-visible" style="background: #111111;">
     <div class="max-w-7xl mx-auto flex justify-between items-center"><button id="user-profile-btn" class="flex items-center gap-2 md:gap-3 hover:opacity-80 transition-opacity">
       <div class="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-white font-bold text-base md:text-lg overflow-hidden" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">
@@ -2262,20 +2208,9 @@
             usdEquivalent.textContent = '$' + usdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
           }
           // Successful fetch: reset failure counter and hide overlay
-          try {
-            window.networkFailCount = 0;
-            if (typeof hideNetworkOverlay === 'function') hideNetworkOverlay();
-          } catch (err){}
         }
       } catch (e) {
         console.error('BTC price fetch error', e);
-        try {
-          window.networkFailCount = (window.networkFailCount || 0) + 1;
-          // Show overlay after two consecutive failures
-          if (window.networkFailCount >= 2 && typeof showNetworkOverlay === 'function') {
-            showNetworkOverlay();
-          }
-        } catch (err) {}
       }
     }
 
@@ -2328,67 +2263,6 @@
     // initial fetch + polling (10 seconds - Binance is fast enough)
     fetchLiveBtcPrice();
     setInterval(fetchLiveBtcPrice, 10000);
-
-    // Network overlay helpers
-    window.networkFailCount = window.networkFailCount || 0;
-    window.networkRetryTimer = window.networkRetryTimer || null;
-    window.networkRetryAttempts = window.networkRetryAttempts || 0;
-    function showNetworkOverlay() {
-      const el = document.getElementById('network-overlay');
-      if (!el) return;
-      el.classList.add('visible');
-      el.setAttribute('aria-hidden', 'false');
-    }
-    function hideNetworkOverlay() {
-      const el = document.getElementById('network-overlay');
-      if (!el) return;
-      el.classList.remove('visible');
-      el.setAttribute('aria-hidden', 'true');
-    }
-
-    function networkRetryNow() {
-      location.reload();
-    }
-
-    function startAutoRetry() {
-      if (window.networkRetryTimer) return; // already retrying
-      window.networkRetryAttempts = window.networkRetryAttempts || 0;
-      const scheduleNext = () => {
-        window.networkRetryAttempts = (window.networkRetryAttempts || 0) + 1;
-        const delay = Math.min(30000, 2000 * Math.pow(2, window.networkRetryAttempts - 1));
-        window.networkRetryTimer = setTimeout(async () => {
-          try {
-            await fetchLiveBtcPrice();
-          } catch (e) {}
-          // If still failing, schedule another attempt
-          if ((window.networkFailCount || 0) >= 2) scheduleNext(); else stopAutoRetry();
-        }, delay);
-      };
-      scheduleNext();
-    }
-
-    function stopAutoRetry() {
-      if (window.networkRetryTimer) {
-        clearTimeout(window.networkRetryTimer);
-        window.networkRetryTimer = null;
-      }
-      window.networkRetryAttempts = 0;
-    }
-
-    // React to browser online/offline events
-    window.addEventListener('offline', () => { showNetworkOverlay(); startAutoRetry(); });
-    window.addEventListener('online', () => { window.networkFailCount = 0; hideNetworkOverlay(); stopAutoRetry(); fetchLiveBtcPrice(); });
-
-    // Attach retry button handler when DOM is ready
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', () => {
-        const btn = document.getElementById('network-retry-btn');
-        if (btn) btn.addEventListener('click', networkRetryNow);
-      });
-    } else {
-      const btn = document.getElementById('network-retry-btn');
-      if (btn) btn.addEventListener('click', networkRetryNow);
-    }
 
     // Update active savings current value based on latest price
     function updateActiveSavingsValue() {
