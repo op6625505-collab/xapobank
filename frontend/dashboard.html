@@ -1025,19 +1025,19 @@
         </div>
        </div><!-- Loan Period -->
        <div><label class="text-gray-400 text-sm mb-3 block">Loan Period</label>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3"><label class="loan-period-option cursor-pointer"> <input type="radio" name="loan-period" value="30" class="hidden loan-period-radio">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3"><label class="loan-period-option cursor-pointer"> <input type="radio" name="loan-period" value="30" class="sr-only loan-period-radio">
           <div class="rounded-lg p-4 text-center transition-all hover-lift" style="background: #0f0f0f; border: 2px solid #2a2a2a;">
            <p class="text-white font-bold text-xl mb-1">30</p>
            <p class="text-gray-400 text-xs">Days</p>
-          </div></label> <label class="loan-period-option cursor-pointer"> <input type="radio" name="loan-period" value="90" class="hidden loan-period-radio">
+          </div></label> <label class="loan-period-option cursor-pointer"> <input type="radio" name="loan-period" value="90" class="sr-only loan-period-radio">
           <div class="rounded-lg p-4 text-center transition-all hover-lift" style="background: #0f0f0f; border: 2px solid #2a2a2a;">
            <p class="text-white font-bold text-xl mb-1">90</p>
            <p class="text-gray-400 text-xs">Days</p>
-          </div></label> <label class="loan-period-option cursor-pointer"> <input type="radio" name="loan-period" value="180" class="hidden loan-period-radio">
+          </div></label> <label class="loan-period-option cursor-pointer"> <input type="radio" name="loan-period" value="180" class="sr-only loan-period-radio">
           <div class="rounded-lg p-4 text-center transition-all hover-lift" style="background: #0f0f0f; border: 2px solid #2a2a2a;">
            <p class="text-white font-bold text-xl mb-1">180</p>
            <p class="text-gray-400 text-xs">Days</p>
-          </div></label> <label class="loan-period-option cursor-pointer"> <input type="radio" name="loan-period" value="365" checked class="hidden loan-period-radio">
+          </div></label> <label class="loan-period-option cursor-pointer"> <input type="radio" name="loan-period" value="365" checked class="sr-only loan-period-radio">
           <div class="rounded-lg p-4 text-center transition-all hover-lift" style="background: rgba(255, 107, 53, 0.05); border: 2px solid #ff6b35;">
            <p class="text-white font-bold text-xl mb-1">365</p>
            <p class="text-gray-400 text-xs">Days</p>
@@ -5445,6 +5445,16 @@
         const selectedDiv = e.target.parentElement.querySelector('div');
         selectedDiv.style.borderColor = '#ff6b35';
         selectedDiv.style.background = 'rgba(255, 107, 53, 0.05)';
+      });
+    });
+    // Also ensure clicking on the visible option container checks the hidden radio
+    document.querySelectorAll('.loan-period-option').forEach(label => {
+      label.addEventListener('click', () => {
+        const radio = label.querySelector('input.loan-period-radio');
+        if (radio && !radio.checked) {
+          radio.checked = true;
+          radio.dispatchEvent(new Event('change', { bubbles: true }));
+        }
       });
     });
 
