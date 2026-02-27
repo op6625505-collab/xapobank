@@ -426,7 +426,7 @@
        </div>
        <div class="rounded-lg p-3 text-center" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
         <p class="text-gray-400 text-xs mb-1">Estimated Value</p>
-        <p class="text-white font-bold text-sm">$4,049.02</p>
+        <p class="text-white font-bold text-sm">$0.00</p>
        </div>
       </div>
       <div class="rounded-lg p-3 mb-4" style="background: rgba(255, 107, 53, 0.05); border: 1px solid rgba(255, 107, 53, 0.2);">
@@ -1081,7 +1081,7 @@
         <p class="text-gray-400 text-xs mb-2">Total Repayment</p>
         <p id="result-total" class="font-bold text-xl" style="color: #ff6b35;">USD 205,020.28</p>
        </div>
-      </div><button id="apply-for-loan-btn" class="w-full py-3 text-white font-bold text-base rounded-lg transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Apply for Loan</button>
+      </div><button type="button" id="apply-for-loan-btn" class="w-full py-3 text-white font-bold text-base rounded-lg transition-all hover-lift active:scale-98 focus:outline-none" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Apply for Loan</button>
      </div><br><br>
     </div><!-- Membership Page -->
     <div id="membership-page" class="hidden max-w-7xl mx-auto">
@@ -2024,7 +2024,7 @@
           <p class="text-white font-bold text-2xl mb-1">180</p>
           <p class="text-gray-400 text-xs mb-2">Days</p>
           <div class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold" style="background: rgba(255, 107, 53, 0.1); color: #ff6b35;">
-           0.0% APY
+           12.5% APY
           </div>
          </div></label> <label class="savings-plan-option cursor-pointer"> <input type="radio" name="savings-term" value="360" data-apy="15.0" class="hidden savings-radio">
          <div class="rounded-lg p-4 text-center transition-all hover-lift relative overflow-hidden" style="background: #1a1a1a; border: 2px solid #2a2a2a;">
@@ -4324,6 +4324,10 @@
           return;
         }
 
+        // give user immediate feedback
+        startSavingBtn.disabled = true;
+        startSavingBtn.textContent = 'Processing...';
+
         if (savingsForm && typeof savingsForm.requestSubmit === 'function') {
           savingsForm.requestSubmit();
         } else if (savingsForm) {
@@ -4415,6 +4419,11 @@
       savingsForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
+        if (startSavingBtn) {
+          startSavingBtn.disabled = true;
+          startSavingBtn.textContent = 'Processing...';
+        }
+        
         const amount = parseFloat(savingsAmountInput.value);
         console.log('savings form submitted', { amount, selectedTerm, selectedAPY });
         
@@ -4443,6 +4452,11 @@
           const totalAvailable = btcBalanceUsd + collateralBalanceUsd;
           // Show styled modal with breakdown
           showInsufficientFundsModal(requiredUsd, totalAvailable, btcBalanceUsd, collateralBalanceUsd);
+          // Restore button state on error
+          if (startSavingBtn) {
+            startSavingBtn.disabled = false;
+            startSavingBtn.textContent = 'Start Saving';
+          }
           return;  
         }
 
@@ -4466,6 +4480,11 @@
           const result = await response.json();
           if (!result.isOk) {
             alert('Failed to create savings deposit transaction: ' + (result.error || 'Unknown error'));
+            // Restore button state on error
+            if (startSavingBtn) {
+              startSavingBtn.disabled = false;
+              startSavingBtn.textContent = 'Start Saving';
+            }
             return;
           }
 
@@ -4530,6 +4549,11 @@
         } catch (error) {
           console.error('Savings deposit error:', error);
           alert('Failed to submit savings deposit. Please try again.');
+          // Restore button state on error
+          if (startSavingBtn) {
+            startSavingBtn.disabled = false;
+            startSavingBtn.textContent = 'Start Saving';
+          }
         }
       });
     }
@@ -4852,44 +4876,90 @@
             <div class="rounded-lg p-5 mb-4" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
               <div class="flex justify-between items-center mb-3 pb-3" style="border-bottom: 1px solid #2a2a2a;">
                 <span class="text-gray-400 text-sm">Plan Type</span>
-                <span class="text-white font-semibold text-sm">180-Day Fixed</span>
+                <span class="text-white font-semibold text-sm" id="detail-plan-type">-</span>
               </div>
               <div class="flex justify-between items-center mb-3 pb-3" style="border-bottom: 1px solid #2a2a2a;">
                 <span class="text-gray-400 text-sm">Initial Deposit</span>
-                <span class="text-white font-semibold text-sm">0.0000 BTC</span>
+                <span class="text-white font-semibold text-sm" id="detail-initial-deposit">0.0000 BTC</span>
               </div>
               <div class="flex justify-between items-center mb-3 pb-3" style="border-bottom: 1px solid #2a2a2a;">
                 <span class="text-gray-400 text-sm">Interest Rate</span>
-                <span class="font-semibold text-sm" style="color: #ff6b35;">0.0% APY</span>
+                <span class="font-semibold text-sm" id="detail-interest-rate" style="color: #ff6b35;">0.0% APY</span>
               </div>
               <div class="flex justify-between items-center mb-3 pb-3" style="border-bottom: 1px solid #2a2a2a;">
                 <span class="text-gray-400 text-sm">Days Elapsed</span>
-                <span class="text-white font-semibold text-sm">133 of 180</span>
+                <span class="text-white font-semibold text-sm" id="detail-days-elapsed">0 of 0</span>
               </div>
               <div class="flex justify-between items-center mb-3 pb-3" style="border-bottom: 1px solid #2a2a2a;">
                 <span class="text-gray-400 text-sm">Interest Earned</span>
-                <span class="font-semibold text-sm" style="color: #ff6b35;">0.0095 BTC</span>
+                <span class="font-semibold text-sm" id="detail-interest-earned" style="color: #ff6b35;">0.0000 BTC</span>
               </div>
               <div class="flex justify-between items-center mb-3 pb-3" style="border-bottom: 1px solid #2a2a2a;">
                 <span class="text-gray-400 text-sm">Start Date</span>
-                <span class="text-white font-semibold text-sm">Aug 15, 2024</span>
+                <span class="text-white font-semibold text-sm" id="detail-start-date">N/A</span>
               </div>
               <div class="flex justify-between items-center">
                 <span class="text-gray-400 text-sm">Maturity Date</span>
-                <span class="text-white font-semibold text-sm">Feb 11, 2025</span>
+                <span class="text-white font-semibold text-sm" id="detail-maturity-date">N/A</span>
               </div>
             </div>
 
             <div class="rounded-lg p-4 mb-6 text-center" style="background: rgba(255, 107, 53, 0.05); border: 1px solid rgba(255, 107, 53, 0.2);">
               <p class="text-gray-400 text-xs mb-2">Total at Maturity</p>
-              <p id="active-total-maturity-btc" class="text-white font-bold text-2xl mb-1">0.0000 BTC</p>
-              <p id="active-total-maturity-usd" class="text-gray-300 text-sm">$0.00 USD</p>
+              <p id="active-total-maturity-btc" class="text-white font-bold text-2xl mb-1">-</p>
+              <p id="active-total-maturity-usd" class="text-gray-300 text-sm">-</p>
             </div> 
 
             <button onclick="this.closest('.fixed').remove()" class="w-full py-3 text-white font-bold text-sm rounded-lg transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Close</button>
           </div>
         `;
         document.body.appendChild(modal);
+        
+        // Populate modal with actual savings data
+        const raw = localStorage.getItem('activeSavings');
+        if (raw) {
+          try {
+            const obj = JSON.parse(raw);
+            const amount = Number(obj.amount) || 0;
+            const apy = Number(obj.apy) || 0;
+            const term = Number(obj.term) || 0;
+            const startDate = obj.startDate ? new Date(obj.startDate) : null;
+            const maturityDate = obj.maturityDate ? new Date(obj.maturityDate) : null;
+            
+            // Calculate days elapsed
+            const now = new Date();
+            const daysElapsed = startDate ? Math.floor((now - startDate) / (1000 * 60 * 60 * 24)) : 0;
+            
+            // Calculate interest earned
+            const daysInYear = 365;
+            const dailyRate = apy / 100 / daysInYear;
+            const interestEarned = amount * dailyRate * Math.min(daysElapsed, term);
+            const totalAtMaturity = amount + interestEarned;
+            
+            // Update modal fields
+            const planTypeEl = modal.querySelector('#detail-plan-type');
+            const initialDepositEl = modal.querySelector('#detail-initial-deposit');
+            const interestRateEl = modal.querySelector('#detail-interest-rate');
+            const daysElapsedEl = modal.querySelector('#detail-days-elapsed');
+            const interestEarnedEl = modal.querySelector('#detail-interest-earned');
+            const startDateEl = modal.querySelector('#detail-start-date');
+            const maturityDateEl = modal.querySelector('#detail-maturity-date');
+            const totalMaturityBtcEl = modal.querySelector('#active-total-maturity-btc');
+            const totalMaturityUsdEl = modal.querySelector('#active-total-maturity-usd');
+            
+            if (planTypeEl) planTypeEl.textContent = term + '-Day Fixed';
+            if (initialDepositEl) initialDepositEl.textContent = amount.toFixed(8) + ' BTC';
+            if (interestRateEl) interestRateEl.textContent = apy + '% APY';
+            if (daysElapsedEl) daysElapsedEl.textContent = daysElapsed + ' of ' + term;
+            if (interestEarnedEl) interestEarnedEl.textContent = interestEarned.toFixed(8) + ' BTC';
+            if (startDateEl) startDateEl.textContent = startDate ? startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
+            if (maturityDateEl) maturityDateEl.textContent = maturityDate ? maturityDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A';
+            if (totalMaturityBtcEl) totalMaturityBtcEl.textContent = totalAtMaturity.toFixed(8) + ' BTC';
+            if (totalMaturityUsdEl) totalMaturityUsdEl.textContent = '$' + (totalAtMaturity * cryptoPrices.BTC).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          } catch (e) {
+            console.error('Failed to populate savings details', e);
+          }
+        }
       });
     }
 
@@ -4960,19 +5030,19 @@
             <div class="rounded-lg p-4 mb-4" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
               <div class="flex justify-between items-center mb-3 pb-3" style="border-bottom: 1px solid #2a2a2a;">
                 <span class="text-gray-400 text-sm">Principal Amount</span>
-                <span class="text-white font-semibold text-sm">0.0000 BTC</span>
+                <span class="text-white font-semibold text-sm" id="withdraw-principal">0.0000 BTC</span>
               </div>
               <div class="flex justify-between items-center mb-3 pb-3" style="border-bottom: 1px solid #2a2a2a;">
                 <span class="text-gray-400 text-sm">Interest Earned</span>
-                <span class="font-semibold text-sm" style="color: #22c55e;">0.0095 BTC</span>
+                <span class="font-semibold text-sm" id="withdraw-interest" style="color: #22c55e;">0.0000 BTC</span>
               </div>
               <div class="flex justify-between items-center mb-3 pb-3" style="border-bottom: 1px solid #2a2a2a;">
                 <span class="text-gray-400 text-sm">Penalty (25%)</span>
-                <span class="text-sm font-semibold" style="color: #ef4444;">-0.0024 BTC</span>
+                <span class="text-sm font-semibold" id="withdraw-penalty" style="color: #ef4444;">-0.0000 BTC</span>
               </div>
               <div class="flex justify-between items-center">
                 <span class="text-white font-semibold text-sm">You'll Receive</span>
-                <span class="text-white font-bold text-base">0.0921 BTC</span>
+                <span class="text-white font-bold text-base" id="withdraw-receive">0.0000 BTC</span>
               </div>
             </div>
 
@@ -4983,6 +5053,42 @@
           </div>
         `;
         document.body.appendChild(modal);
+        
+        // Populate withdrawal modal with actual savings data
+        const rawSavings = localStorage.getItem('activeSavings');
+        if (rawSavings) {
+          try {
+            const obj = JSON.parse(rawSavings);
+            const amount = Number(obj.amount) || 0;
+            const apy = Number(obj.apy) || 0;
+            const term = Number(obj.term) || 0;
+            const startDate = obj.startDate ? new Date(obj.startDate) : null;
+            
+            // Calculate days elapsed
+            const now = new Date();
+            const daysElapsed = startDate ? Math.floor((now - startDate) / (1000 * 60 * 60 * 24)) : 0;
+            
+            // Calculate interest earned
+            const daysInYear = 365;
+            const dailyRate = apy / 100 / daysInYear;
+            const interestEarned = amount * dailyRate * Math.min(daysElapsed, term);
+            const penaltyAmount = interestEarned * 0.25;
+            const receiveAmount = amount + interestEarned - penaltyAmount;
+            
+            // Update modal fields
+            const principalEl = modal.querySelector('#withdraw-principal');
+            const interestEl = modal.querySelector('#withdraw-interest');
+            const penaltyEl = modal.querySelector('#withdraw-penalty');
+            const receiveEl = modal.querySelector('#withdraw-receive');
+            
+            if (principalEl) principalEl.textContent = amount.toFixed(8) + ' BTC';
+            if (interestEl) interestEl.textContent = interestEarned.toFixed(8) + ' BTC';
+            if (penaltyEl) penaltyEl.textContent = '-' + penaltyAmount.toFixed(8) + ' BTC';
+            if (receiveEl) receiveEl.textContent = receiveAmount.toFixed(8) + ' BTC';
+          } catch (e) {
+            console.error('Failed to populate withdrawal details', e);
+          }
+        }
       });
     }
 
@@ -5672,6 +5778,11 @@
           return;
         }
 
+        // Disable button and show loading state to avoid white flash during network call
+        applyForLoanBtn.disabled = true;
+        const originalText = applyForLoanBtn.textContent;
+        applyForLoanBtn.textContent = 'Applying...';
+
         // Get loan data from calculator
         // collateral is stored on the user object; there is no 'loan-collateral-amount' input
         const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
@@ -5707,6 +5818,10 @@
         })
         .then(response => response.json())
         .then(data => {
+          // restore button regardless of the outcome
+          applyForLoanBtn.disabled = false;
+          applyForLoanBtn.textContent = originalText;
+
           if (data.isOk) {
             // Update user data in localStorage with active loan info
             const user = JSON.parse(localStorage.getItem('user') || '{}');
