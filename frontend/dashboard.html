@@ -5673,11 +5673,14 @@
         }
 
         // Get loan data from calculator
-        const collateralBTC = parseFloat(document.getElementById('loan-collateral-amount').value) || 0;
-        const loanAmountBTC = parseFloat(document.getElementById('loan-amount-btc').value) || 0;
+        // collateral is stored on the user object; there is no 'loan-collateral-amount' input
+        const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const collateralBTC = Number(storedUser.collateralBalanceBTC || 0);
+        const loanAmountBTC = parseFloat(loanAmountBtcInput.value) || 0;
         const selectedPeriod = parseInt(document.querySelector('input[name="loan-period"]:checked').value);
         const livePrice = cryptoPrices.BTC || 89229.21;
-        const collateralUSD = collateralBTC * livePrice;
+        // USD values: prefer stored USD collateral if available
+        const collateralUSD = Number(storedUser.collateralBalanceUSD || (collateralBTC * livePrice));
         const loanAmountUSD = loanAmountBTC * livePrice;
 
         // Create loan transaction
