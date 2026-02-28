@@ -144,6 +144,10 @@
     .hover-lift:active {
       transform: translateY(-2px);
     }
+    /* remove mobile tap highlight (white flash) on buttons */
+    .hover-lift, #apply-for-loan-btn {
+      -webkit-tap-highlight-color: transparent;
+    }
     
     .balance-hidden .balance-value {
       filter: blur(10px);
