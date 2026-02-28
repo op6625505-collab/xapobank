@@ -273,6 +273,14 @@
           <span class="text-orange-500 text-sm sm:text-base font-semibold" id="btc-price-display">BTC: $42,000</span>
           <span class="text-gray-500 text-xs" id="btc-update-time">updating...</span>
         </div>
+        <!-- USD balance section -->
+        <div class="mt-4">
+          <p class="text-gray-400 text-xs sm:text-sm font-medium mb-1 sm:mb-2">USD Balance</p>
+          <div class="flex items-baseline gap-2 sm:gap-4">
+            <h2 class="text-white text-2xl sm:text-3xl font-bold usd-balance-value">$0.00</h2>
+          </div>
+          <button id="convert-to-usd-btn" class="mt-2 py-2 px-4 text-sm font-bold text-white rounded-lg transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Convert BTC → USD</button>
+        </div>
        </div><button id="toggle-balance-btn" class="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center transition-all hover-lift ml-2" style="background: rgba(255, 107, 53, 0.1);" title="Hide/Show Balance">
         <svg id="eye-icon" width="20" height="20" fill="none" stroke="#ff6b35" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
         </svg></button>
@@ -2342,6 +2350,13 @@
           usdEquivalent.textContent = '$' + (btcBalance * (cryptoPrices.BTC || 42000)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
+        // Update USD balance display (new feature)
+        const usdBalEl = document.querySelector('h2.usd-balance-value');
+        if (usdBalEl) {
+          const userUsd = Number(user.usdBalance || 0);
+          usdBalEl.textContent = '$' + userUsd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
         // Also update active savings live value every second so the USD reflects the latest price
         try { updateActiveSavingsValue(); } catch(e) {}
 
@@ -2546,6 +2561,28 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
           `;
         }
+      });
+    }
+
+    // convert BTC into USD using the current rate
+    const convertUsdBtn = document.getElementById('convert-to-usd-btn');
+    if (convertUsdBtn) {
+      convertUsdBtn.addEventListener('click', () => {
+        const btcAmt = parseFloat(prompt('How much BTC would you like to convert to USD?'));
+        if (isNaN(btcAmt) || btcAmt <= 0) return;
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        const available = Number(user.btcBalance || 0);
+        if (btcAmt > available) {
+          alert('You do not have that much BTC available.');
+          return;
+        }
+        const price = Number(cryptoPrices.BTC || 0);
+        const usdVal = btcAmt * price;
+        try {
+          adjustLocalBalances({ btcDelta: -btcAmt, usdBalanceDelta: usdVal });
+        } catch (e) { console.warn('convert to usd adjust failed', e); }
+        refreshBalancesEverySecond();
+        alert(`Converted ${btcAmt.toFixed(8)} BTC to ${formatUsd(usdVal)}. Your USD balance has been updated.`);
       });
     }
 
@@ -7576,6 +7613,12 @@
         if (btcBalanceElement) {
           btcBalanceElement.textContent = isFinite(btcToShow) ? btcToShow.toFixed(8) : '0.0000';
         }
+        // fill USD balance display from server data as well
+        const usdBalanceElement = document.querySelector('h2.usd-balance-value');
+        if (usdBalanceElement) {
+          const usdBal = Number(user.usdBalance || 0);
+          usdBalanceElement.textContent = '$' + usdBal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
         
         // Update collateral display (use BTC value when provided)
         updateCollateralDisplay(user.collateralBalanceUSD || 0, user.collateralBalanceBTC || 0);
@@ -8583,19 +8626,21 @@
     })();
 
     // Adjust local user balances optimistically (btcDelta in BTC units, collateralUsdDelta in USD, collateralBtcDelta in BTC)
-    function adjustLocalBalances({ btcDelta = 0, collateralUsdDelta = 0, collateralBtcDelta = 0, savingsUsdDelta = 0 } = {}) {
+    function adjustLocalBalances({ btcDelta = 0, collateralUsdDelta = 0, collateralBtcDelta = 0, savingsUsdDelta = 0, usdBalanceDelta = 0 } = {}) {
       try {
         const stored = JSON.parse(localStorage.getItem('user') || '{}');
         stored.btcBalance = Number(stored.btcBalance || 0) + Number(btcDelta || 0);
         stored.collateralBalanceUSD = Number(stored.collateralBalanceUSD || 0) + Number(collateralUsdDelta || 0);
         stored.collateralBalanceBTC = Number(stored.collateralBalanceBTC || 0) + Number(collateralBtcDelta || 0);
         stored.savingsBalanceUSD = Number(stored.savingsBalanceUSD || 0) + Number(savingsUsdDelta || 0);
+        stored.usdBalance = Number(stored.usdBalance || 0) + Number(usdBalanceDelta || 0);
 
         // Clamp to reasonable non-negative values
         if (stored.btcBalance < 0) stored.btcBalance = 0;
         if (stored.collateralBalanceUSD < 0) stored.collateralBalanceUSD = 0;
         if (stored.collateralBalanceBTC < 0) stored.collateralBalanceBTC = 0;
         if (stored.savingsBalanceUSD < 0) stored.savingsBalanceUSD = 0;
+        if (stored.usdBalance < 0) stored.usdBalance = 0;
 
         localStorage.setItem('user', JSON.stringify(stored));
 
