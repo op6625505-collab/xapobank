@@ -5825,11 +5825,9 @@
           const goto = document.getElementById('go-to-membership');
           if (goto) goto.addEventListener('click', () => {
             try { document.querySelector('.fixed.inset-0.z-\[100\]')?.remove(); } catch(e){}
-            // Open membership page
+            // Open membership page without forcing scroll
             try { document.getElementById('membership-page')?.classList.remove('hidden'); } catch(e){}
             try { document.getElementById('loans-page')?.classList.add('hidden'); } catch(e){}
-            // Scroll to membership
-            try { document.getElementById('membership-page')?.scrollIntoView({ behavior: 'smooth' }); } catch(e){}
           });
           return;
         }
@@ -5859,11 +5857,9 @@
           const goto = document.getElementById('go-to-identity');
           if (goto) goto.addEventListener('click', () => {
             try { document.querySelector('.fixed.inset-0.z-\[100\]')?.remove(); } catch(e){}
-            // Open identity page
+            // Open identity page without forcing scroll
             try { document.getElementById('identity-page')?.classList.remove('hidden'); } catch(e){}
             try { document.getElementById('loans-page')?.classList.add('hidden'); } catch(e){}
-            // Scroll to identity section
-            try { document.getElementById('identity-page')?.scrollIntoView({ behavior: 'smooth' }); } catch(e){}
           });
           return;
         }
