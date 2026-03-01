@@ -68,6 +68,7 @@
         localStorage.removeItem('user');
         window.location.href = 'signin.html';
       });
+    
     }
   </script>
   <script src="/config.js"></script>
@@ -388,7 +389,7 @@
        </div>
        <div class="rounded-lg p-3 text-center" style="background: #0f0f0f; border: 1px solid #2a2a2a;">
         <p class="text-gray-400 text-xs mb-1">Times Borrowed</p>
-        <p class="text-white font-bold text-sm">0 Times</p>
+         <p id="times-borrowed" class="text-white font-bold text-sm">0 Times</p>
        </div>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -5989,6 +5990,11 @@
             
             localStorage.setItem('user', JSON.stringify(user));
 
+            // Increment times borrowed counter and update display
+            user.timesBorrowed = Number(user.timesBorrowed || 0) + 1;
+            localStorage.setItem('user', JSON.stringify(user));
+            try { document.getElementById('times-borrowed').textContent = user.timesBorrowed + ' Times'; } catch(e) {}
+            
             // Update active loan display
             updateActiveLoanDisplay(loanAmountUSD, collateralBTC, collateralUSD, selectedPeriod);
             
@@ -7672,6 +7678,7 @@
         }
         // Update localStorage
         localStorage.setItem('user', JSON.stringify(user));
+        try { document.getElementById('times-borrowed').textContent = (Number(user.timesBorrowed || 0)) + ' Times'; } catch (e) {}
 
         // Update loan calculator with fresh user data
         try {
