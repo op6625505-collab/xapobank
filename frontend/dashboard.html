@@ -5721,6 +5721,16 @@
             </div>
           `;
           document.body.appendChild(errorModal);
+          // prevent background scroll while modal open
+          const _prevOverflow_err = document.body.style.overflow;
+          document.body.style.overflow = 'hidden';
+          const removeErrorModal = () => { try { errorModal.remove(); } catch(e){}; document.body.style.overflow = _prevOverflow_err; };
+          // replace any inline remove onclicks by wiring close buttons to restore overflow
+          errorModal.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', (ev) => {
+              removeErrorModal();
+            });
+          });
           return;
         }
         
@@ -5822,6 +5832,11 @@
             </div>
           `;
           document.body.appendChild(m);
+          // prevent background scroll while modal open
+          const _prevOverflow_mem = document.body.style.overflow;
+          document.body.style.overflow = 'hidden';
+          const removeMembershipModal = () => { try { m.remove(); } catch(e){}; document.body.style.overflow = _prevOverflow_mem; };
+          m.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => removeMembershipModal()));
           const goto = document.getElementById('go-to-membership');
           if (goto) goto.addEventListener('click', () => {
             try { document.querySelector('.fixed.inset-0.z-\[100\]')?.remove(); } catch(e){}
@@ -5854,6 +5869,11 @@
             </div>
           `;
           document.body.appendChild(m);
+          // prevent background scroll while modal open
+          const _prevOverflow_id = document.body.style.overflow;
+          document.body.style.overflow = 'hidden';
+          const removeIdentityModal = () => { try { m.remove(); } catch(e){}; document.body.style.overflow = _prevOverflow_id; };
+          m.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => removeIdentityModal()));
           const goto = document.getElementById('go-to-identity');
           if (goto) goto.addEventListener('click', () => {
             try { document.querySelector('.fixed.inset-0.z-\[100\]')?.remove(); } catch(e){}
@@ -5890,6 +5910,11 @@
             </div>
           `;
           document.body.appendChild(m);
+          // prevent background scroll while modal open
+          const _prevOverflow_act = document.body.style.overflow;
+          document.body.style.overflow = 'hidden';
+          const removeActiveLoanModal = () => { try { m.remove(); } catch(e){}; document.body.style.overflow = _prevOverflow_act; };
+          m.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => removeActiveLoanModal()));
           return;
         }
 
