@@ -200,7 +200,7 @@
       <div id="stage5" class="stage-container hidden">
        <h2 class="text-xl sm:text-2xl font-bold text-white mb-6">Almost there!</h2>
        <div class="bg-black border border-gray-700 rounded-lg p-3 sm:p-4 mb-6">
-        <div class="flex items-start gap-2 sm:gap-3"><input type="checkbox" id="termsCheckbox" name="termsCheckbox" class="checkbox-custom mt-1" required> <label for="termsCheckbox" class="text-xs sm:text-sm text-gray-300"> I agree to Xapo Bank's <a href="#" class="text-yellow-700 font-semibold hover:underline" target="_blank">Terms of Service</a> and <a href="#" class="text-yellow-700 font-semibold hover:underline" target="_blank">Privacy Policy</a> </label>
+        <div class="flex items-start gap-2 sm:gap-3"><input type="checkbox" id="termsCheckbox" name="termsCheckbox" class="checkbox-custom mt-1" required> <label for="termsCheckbox" class="text-xs sm:text-sm text-gray-300"> I agree to Xapo Bank's <a href="#" id="termsLink" class="text-yellow-700 font-semibold hover:underline">Terms of Service</a> and <a href="#" id="privacyLink" class="text-yellow-700 font-semibold hover:underline" target="_blank">Privacy Policy</a> </label>
         </div>
         <div class="error-message" id="error-terms" style="margin-top: 0.5rem;"></div>
        </div>
@@ -421,6 +421,105 @@
             // Scroll to top
             window.scrollTo(0, 0);
         }
+
+        // Terms modal logic
+        const termsText = `GENERAL TERMS & CONDITIONS
+1. SCOPE
+1.1 These Terms & Conditions (“Terms”), together with any supplemental terms, and any other documents mentioned in these Terms, forms the Agreement that governs the entire relationship between you (“Customer”) and Xapo Bank when you open a Xapo Account with us.
+
+1.2 As well as these Terms, general law applies to the accounts and services we provide, which may mean other rights and liabilities apply.
+
+1.3 These Terms are supplied in English and shall be interpreted accordingly. Any translation of these Terms is for convenience purposes only. In the event of any conflict or inconsistency between the English version and a translated version, the English version shall prevail.
+
+1.4 These Terms are available on our website and in the Xapo Bank App. You have the right to receive these Terms, upon request, at any time during the duration of this Agreement. This can be provided to you on paper or such other durable medium such as via email or via the Xapo Platform.
+
+2. INTERPRETATION
+2.1 In this Agreement:
+
+“Agreement” means the agreement in place between us and you in respect of your Xapo Account, which comprises these Terms and other relevant documents mentioned in these Terms;
+
+“Balance”, means any amount or amounts held in the digital bank account or any subaccount in your Xapo Account that we have opened for you and maintain in accordance with these Terms;
+
+“Business Day” means a day other than a Saturday, Sunday or a public holiday in Gibraltar, when banks in Gibraltar are open for business;
+
+“Unsupported Currency Payment” means a payment to or from an account in a currency that is not a Supported Currency;
+
+“Payment Instrument” means a personal device or procedure, agreed between us and you, used in order to initiate a payment, such as a credit card, debit card, Xapo Card or the Xapo Bank App;
+
+“Minimum Balance” means a minimum amount that you may be required to maintain in your Xapo Account as determined by Xapo Bank from time to time;
+
+“Rates, Fees & Charges Sheet” means the separate document which sets out the rates, fees and charges applicable to your Xapo Account;
+
+“Representative(s)” means the duly authorised heir(s), executor(s), administrator(s), successor(s) in title and/or assign(s) of a Customer;
+
+“Security Information” means the information we request from you (including through the Xapo Bank App or when we open your Xapo Account) to ensure your Xapo Account and your use of the Xapo Bank App remain secure;
+
+“Services” means all products, services, content, features, technologies, functions offered by us from time to time and all related websites, applications (including the Xapo Bank App), and services including our Website;
+
+“Supported Currency” means any number of currencies that are supported by the Xapo Bank App from time to time;
+
+“Third Party Provider” means an entity other than us (i) to which you have granted consent to access your Xapo Account and/or authorised to make payments from your Xapo Account on your behalf and (ii) which is authorised by the Gibraltar Financial Services Commission or an equivalent competent authority, as an Account Information Service Provider or a Payment Initiation Service Provider and which is authorised to provide you with such services in your jurisdiction;
+
+“Website” means our webpage, including but not limited to www.xapo.com and any other web domains or subdomains from where we provide the Services to you from time to time;
+
+“Xapo”, “Xapo Bank”, “We”, “our” or “us” means Xapo Bank Limited, our successors and assigns and anyone who takes over our business or anyone we may transfer the business to;
+
+“Xapo Account” means the account that we have opened for you and maintain in accordance with these Terms and which represents your Balance and provides other related functionality and linked accounts within the Xapo Bank App;
+
+“Xapo Platform” means the Xapo Bank App and our Website;
+
+“You” or “your” means the Customer in whose name we have opened and maintain a Xapo Account.
+
+2.2 Clause and paragraph headings and numbering in these Terms shall not affect the interpretation of these Terms.
+
+2.3 A person includes a natural person, corporate or unincorporated body (whether or not having separate legal personality).
+
+2.4 A reference to a company shall include any company, corporation or other body corporate, wherever and however incorporated or established.
+
+2.5 Unless the context otherwise requires, words in the singular shall include the plural and in the plural shall include the singular.
+
+2.6 Unless the context otherwise requires, a reference to one gender shall include a reference to the other genders.
+
+2.7 These Terms shall be binding on, and enure to the benefit of, the parties to these Terms and their respective personal representatives, successors and permitted assigns, and references to any party shall include that party’s personal representatives, successors and permitted assigns.
+
+2.8 A reference to a statute or statutory provision is a reference to it as amended, extended or re-enacted from time to time.
+
+2.9 A reference to a statute or statutory provision includes all subordinate legislation made from time to time under that statute or statutory provision.
+
+2.10 A reference to writing or written includes email and any other form of digital communication that we may use from time to time.
+
+2.11 Any obligation on a party not to do something includes an obligation not to allow that thing to be done.
+
+2.12 A reference to these Terms or to any other document referred to in these Terms is a reference to these Terms or such other document as varied or novated (in each case, other than in breach of the provisions of these Terms) from time to time.
+
+2.13 Any words following the terms including, include, in particular, for example or any similar expression shall be construed as illustrative and shall not limit the sense of the words, description, definition, phrase or term preceding those terms.`;
+
+        function openTermsModal() {
+            const existing = document.getElementById('termsModal');
+            if (existing) return;
+            const modal = document.createElement('div');
+            modal.id = 'termsModal';
+            modal.className = 'fixed inset-0 z-50 flex items-center justify-center p-4';
+            modal.style.background = 'rgba(0,0,0,0.8)';
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-gray-900 max-w-3xl w-full rounded-lg p-6 overflow-auto" style="max-height:80vh;">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">General Terms & Conditions</h3>
+                        <button id="closeTermsBtn" class="text-gray-600 hover:text-gray-900">Close</button>
+                    </div>
+                    <pre id="termsContent" style="white-space:pre-wrap; font-family:inherit; font-size:0.9rem; color:#111;">${termsText}</pre>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            const prev = document.body.style.overflow;
+            document.body.style.overflow = 'hidden';
+            document.getElementById('closeTermsBtn').addEventListener('click', () => {
+                modal.remove();
+                document.body.style.overflow = prev;
+            });
+        }
+
+        document.getElementById('termsLink').addEventListener('click', (ev) => { ev.preventDefault(); openTermsModal(); });
 
         function updateSummary() {
             const firstName = document.getElementById('firstName').value;
