@@ -7955,17 +7955,9 @@
             // handle referral code entry in welcome modal
             const applyBtn = document.getElementById('apply-referral');
             const referralInputEl = document.getElementById('referral-input');
-            const refSection = document.getElementById('referral-section');
-            // if user already has a code, hide the entry form entirely
-            if (user.referralCode) {
-              if (refSection) {
-                refSection.innerHTML = `<p class="text-green-400 text-sm">Referral code applied</p>`;
-              }
-            } else if (referralInputEl && user.referralCode) {
-              // this branch rarely runs since user.referralCode truthy handled above
+            if (referralInputEl && user.referralCode) {
               referralInputEl.value = user.referralCode;
             }
-
             if (applyBtn) {
               applyBtn.addEventListener('click', () => {
                 const input = referralInputEl || document.getElementById('referral-input');
@@ -7976,10 +7968,6 @@
                   user.referralCode = code;
                   localStorage.setItem('user', JSON.stringify(user));
                   if (err) err.textContent = '';
-                  // hide form and show confirmation text
-                  if (refSection) {
-                    refSection.innerHTML = `<p class="text-green-400 text-sm">Referral code applied</p>`;
-                  }
                   // show bonus right away
                   try { showReferralBonusModal(); } catch(e) { console.warn('showReferralBonus error', e); }
                 } else {
