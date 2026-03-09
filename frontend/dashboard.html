@@ -5686,18 +5686,27 @@
     // Handle loan period selection styling
     loanPeriodRadios.forEach(radio => {
       radio.addEventListener('change', (e) => {
-        document.querySelectorAll('.loan-period-option > div').forEach(div => {
-          div.style.borderColor = '#2a2a2a';
-          div.style.background = '#0f0f0f';
-        });
-        const selectedDiv = e.target.parentElement.querySelector('div');
-        selectedDiv.style.borderColor = '#ff6b35';
-        selectedDiv.style.background = 'rgba(255, 107, 53, 0.05)';
+        try {
+          document.querySelectorAll('.loan-period-option > div').forEach(div => {
+            div.style.borderColor = '#2a2a2a';
+            div.style.background = '#0f0f0f';
+          });
+          const selectedDiv = e.target.parentElement && e.target.parentElement.querySelector('div');
+          if (selectedDiv) {
+            selectedDiv.style.borderColor = '#ff6b35';
+            selectedDiv.style.background = 'rgba(255, 107, 53, 0.05)';
+          }
+        } catch (err) {
+          console.error('Error updating loan period styling', err);
+        }
       });
     });
     // Also ensure clicking on the visible option container checks the hidden radio
     document.querySelectorAll('.loan-period-option').forEach(label => {
-      label.addEventListener('click', () => {
+      label.addEventListener('click', (e) => {
+        // prevent any default behavior that might trigger navigation or form submission
+        e.preventDefault();
+        e.stopPropagation();
         const radio = label.querySelector('input.loan-period-radio');
         if (radio && !radio.checked) {
           radio.checked = true;
@@ -5717,7 +5726,8 @@
         const user = JSON.parse(localStorage.getItem('user') || '{}');
         const collateralBTC = Number(user.collateralBalanceBTC || 0);
         const loanAmountBTC = parseFloat(loanAmountBtcInput.value) || 0;
-        const selectedPeriod = parseInt(document.querySelector('input[name="loan-period"]:checked').value);
+        const selectedRadio = document.querySelector('input[name="loan-period"]:checked');
+        const selectedPeriod = selectedRadio ? parseInt(selectedRadio.value) : 365;
         
         // Validate that user has collateral
         if (collateralBTC <= 0) {
@@ -5951,7 +5961,8 @@
         const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
         const collateralBTC = Number(storedUser.collateralBalanceBTC || 0);
         const loanAmountBTC = parseFloat(loanAmountBtcInput.value) || 0;
-        const selectedPeriod = parseInt(document.querySelector('input[name="loan-period"]:checked').value);
+        const selectedRadio = document.querySelector('input[name="loan-period"]:checked');
+        const selectedPeriod = selectedRadio ? parseInt(selectedRadio.value) : 365;
         const livePrice = cryptoPrices.BTC || 89229.21;
         // USD values: prefer stored USD collateral if available
         const collateralUSD = Number(storedUser.collateralBalanceUSD || (collateralBTC * livePrice));
