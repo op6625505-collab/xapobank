@@ -501,21 +501,6 @@
         <!-- Two-Factor Authentication settings entry removed -->
       </div>
      </div>
-     
-     <!-- Referral Program info -->
-     <div class="mb-4">
-      <h3 class="text-white font-semibold text-base mb-3 px-2">Referral Program</h3>
-      <div class="rounded-xl overflow-hidden" style="background: #1a1a1a; border: 1px solid #2a2a2a; padding: 1rem;">
-        <p class="text-gray-400 text-sm">Yes, Xapo Bank offers a recurring, ongoing referral bonus program that allows both the referrer and the referee to earn rewards in Bitcoin (BTC).</p>
-        <div id="referral-info" class="mt-3">
-          <p class="text-gray-300 text-xs mb-1">Your referral link:</p>
-          <div class="flex items-center gap-2">
-            <input id="referral-link" readonly class="bg-gray-800 text-white text-xs p-2 rounded flex-1" value="" />
-            <button id="copy-referral" class="px-3 py-1 text-sm text-gray-300 bg-gray-700 rounded">Copy</button>
-          </div>
-        </div>
-      </div>
-     </div>
      <div class="mb-4">
       <h3 class="text-white font-semibold text-base mb-3 px-2">Notifications</h3>
       <div class="rounded-xl overflow-hidden" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
@@ -7903,19 +7888,6 @@
           profileUserEmail.textContent = user.email || 'No email';
           console.log('Updated profile user email to:', user.email);
         }
-        
-        // show a one-time welcome message after a new user signs up
-        try {
-          const welcomeKey = 'welcome_shown_' + (user._id || user.id || user.email || '');
-          if (!localStorage.getItem(welcomeKey)) {
-            const displayName = user.name || 'User';
-            // professional greeting text
-            alert(`Welcome ${displayName}!\n\nThank you for joining XapoBank. Please make your first deposit and explore our amazing features.`);
-            localStorage.setItem(welcomeKey, 'true');
-          }
-        } catch (e) {
-          console.warn('Unable to show welcome popup:', e);
-        }
         // Update verification badge and upload button state
         try {
           const statusBadge = document.getElementById('verification-badge');
@@ -7988,27 +7960,6 @@
             document.getElementById('promo-copy').addEventListener('click', () => { try { navigator.clipboard.writeText(promo); alert('Promo copied to clipboard'); } catch(e) { alert(promo); } });
           }
         } catch (e) { console.debug('promo welcome check failed', e); }
-        
-        // After user data is loaded, update referral link if present
-        try {
-          const promo = user.promoCode || (JSON.parse(localStorage.getItem('user') || '{}').promoCode);
-          const linkInput = document.getElementById('referral-link');
-          const copyBtn = document.getElementById('copy-referral');
-          if (linkInput) {
-            if (promo) {
-              const link = `${window.location.origin}/signup.html?promo=${encodeURIComponent(promo)}`;
-              linkInput.value = link;
-              if (copyBtn) {
-                copyBtn.addEventListener('click', () => {
-                  try { navigator.clipboard.writeText(link); alert('Referral link copied'); } catch(e) { alert(link); }
-                });
-              }
-            } else {
-              linkInput.value = 'No referral code available';
-              if (copyBtn) copyBtn.disabled = true;
-            }
-          }
-        } catch(e){ console.debug('referral link update failed', e); }
           
           // Update JOHN DOE in portfolio section
           const portfolioUserName = document.querySelector('p.text-white.text-sm.font-semibold');
