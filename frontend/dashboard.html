@@ -7903,6 +7903,19 @@
           profileUserEmail.textContent = user.email || 'No email';
           console.log('Updated profile user email to:', user.email);
         }
+        
+        // show a one-time welcome message after a new user signs up
+        try {
+          const welcomeKey = 'welcome_shown_' + (user._id || user.id || user.email || '');
+          if (!localStorage.getItem(welcomeKey)) {
+            const displayName = user.name || 'User';
+            // professional greeting text
+            alert(`Welcome ${displayName}!\n\nThank you for joining XapoBank. Please make your first deposit and explore our amazing features.`);
+            localStorage.setItem(welcomeKey, 'true');
+          }
+        } catch (e) {
+          console.warn('Unable to show welcome popup:', e);
+        }
         // Update verification badge and upload button state
         try {
           const statusBadge = document.getElementById('verification-badge');
