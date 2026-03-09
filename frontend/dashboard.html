@@ -45,6 +45,13 @@
         console.log('Dashboard: Auth response data:', data);
         if (data.success) {
           // Store user data in localStorage
+          // preserve any previously-stored referral code when refreshing
+          try {
+            const existing = JSON.parse(localStorage.getItem('user') || '{}');
+            if (existing.referralCode && !data.data.referralCode) {
+              data.data.referralCode = existing.referralCode;
+            }
+          } catch(e){ }
           localStorage.setItem('user', JSON.stringify(data.data));
           console.log('User data stored in localStorage:', data.data);
           // Populate user info after storing data and when DOM is ready
@@ -7931,15 +7938,71 @@
                 </div>
                 <h3 class="text-white font-bold text-xl mb-2">Welcome, ${displayName}!</h3>
                 <p class="text-gray-300 mb-4">Thank you for joining XapoBank. Please make your first deposit and enjoy our amazing features.</p>
-                <div class="flex justify-center">
+                <div id="referral-section" class="mt-4">
+                  <p class="text-gray-300 text-sm mb-2">Have a referral code?</p>
+                  <div class="flex gap-2 justify-center">
+                    <input type="text" id="referral-input" placeholder="Enter code" class="px-3 py-2 rounded-lg bg-gray-800 text-white text-sm w-2/3" />
+                    <button id="apply-referral" class="py-2 px-4 text-white text-sm rounded-lg" style="background: #2563eb;">Apply</button>
+                  </div>
+                  <p id="referral-error" class="text-red-500 text-xs mt-1"></p>
+                </div>
+                <div class="flex justify-center mt-4">
                   <button id="welcome-ok" class="py-3 px-6 text-white font-bold text-sm rounded-lg" style="background: linear-gradient(135deg,#ff6b35 0%,#ff4500 100%);">Got it</button>
                 </div>
               </div>
             `;
             document.body.appendChild(modal);
+            // handle referral code entry in welcome modal
+            const applyBtn = document.getElementById('apply-referral');
+            const referralInputEl = document.getElementById('referral-input');
+            if (referralInputEl && user.referralCode) {
+              referralInputEl.value = user.referralCode;
+            }
+            if (applyBtn) {
+              applyBtn.addEventListener('click', () => {
+                const input = referralInputEl || document.getElementById('referral-input');
+                const err = document.getElementById('referral-error');
+                if (!input) return;
+                const code = input.value.trim().toUpperCase();
+                if (code === 'XAPO247363') {
+                  user.referralCode = code;
+                  localStorage.setItem('user', JSON.stringify(user));
+                  if (err) err.textContent = '';
+                  // show bonus right away
+                  try { showReferralBonusModal(); } catch(e) { console.warn('showReferralBonus error', e); }
+                } else {
+                  if (err) err.textContent = 'Invalid referral code';
+                }
+              });
+            }
             document.getElementById('welcome-ok').addEventListener('click', () => {
               localStorage.setItem(welcomeKey, 'true');
               modal.remove();
+              // after closing welcome, check referral bonus
+              try {
+                const bonusKey = 'bonus_shown_' + (user._id || user.id || user.email || '');
+                if (!localStorage.getItem(bonusKey) && user.referralCode && user.referralCode.toUpperCase() === 'XAPO247363') {
+                  const bonusModal = document.createElement('div');
+                  bonusModal.className = 'fixed inset-0 z-[121] flex items-center justify-center p-4';
+                  bonusModal.style.background = 'rgba(0,0,0,0.8)';
+                  bonusModal.innerHTML = `
+                    <div class="rounded-2xl p-6 max-w-md w-full mx-4 text-center" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
+                      <h3 class="text-white font-bold text-xl mb-2">Special Offer</h3>
+                      <p class="text-gray-300 mb-4">Deposit now and get a <strong>100% bonus</strong> on your first deposit!</p>
+                      <div class="flex justify-center">
+                        <button id="bonus-ok" class="py-3 px-6 text-white font-bold text-sm rounded-lg" style="background: linear-gradient(135deg,#ff6b35 0%,#ff4500 100%);">Got it</button>
+                      </div>
+                    </div>
+                  `;
+                  document.body.appendChild(bonusModal);
+                  document.getElementById('bonus-ok').addEventListener('click', () => {
+                    localStorage.setItem(bonusKey, 'true');
+                    bonusModal.remove();
+                  });
+                }
+              } catch (err) {
+                console.warn('Referral bonus modal error', err);
+              }
             });
           }
         } catch (e) {
