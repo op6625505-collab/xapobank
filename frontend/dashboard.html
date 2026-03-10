@@ -3239,6 +3239,29 @@
                       if (btcBalanceElement) {
                         btcBalanceElement.textContent = Number(stored.btcBalance).toFixed(8);
                       }
+                    } else if (depositMethod === 'onchain') {
+                      // On-chain BTC deposit optimistic update
+                      const prevBalance = Number(stored.btcBalance || 0);
+                      let creditAmount = Number(btcAmount || 0);
+                      // apply bonus only if user provided promo code and hasn't used it yet
+                      const hasPromo = stored.promoCode && !stored.promoFirstDepositUsed;
+                      let bonusApplied = false;
+                      if (hasPromo && prevBalance === 0 && creditAmount > 0 && !stored._firstDepositBonusApplied) {
+                        creditAmount *= 2; // double the amount for dashboard display
+                        stored._firstDepositBonusApplied = true; // remember that bonus has been applied locally
+                        stored.promoFirstDepositUsed = true; // mark promo as used locally as well
+                        bonusApplied = true;
+                      }
+                      stored.btcBalance = prevBalance + creditAmount;
+                      if (bonusApplied && typeof displayTopToast === 'function') {
+                        displayTopToast('Promo applied – your first deposit was doubled!');
+                      }
+                      localStorage.setItem('user', JSON.stringify(stored));
+                      // Update UI directly
+                      const btcBalanceElement2 = document.querySelector('h2.balance-value');
+                      if (btcBalanceElement2) {
+                        btcBalanceElement2.textContent = Number(stored.btcBalance).toFixed(8);
+                      }
                     } else if (depositMethod === 'collateral') {
                       // Collateral deposit optimistic: reflect collateral balances
                       stored.collateralBalanceUSD = (stored.collateralBalanceUSD || 0) + Number(usdAmount || 0);
@@ -7641,6 +7664,19 @@
         const user = result.data;
         console.log('Fetched user data:', user);
         
+        // if we previously applied a first-deposit bonus locally, make sure the dashboard continues to show the doubled balance
+        try {
+          const storedLocal = JSON.parse(localStorage.getItem('user') || '{}');
+          if (storedLocal && storedLocal._firstDepositBonusApplied && user && typeof user.btcBalance === 'number') {
+            // only double once - if the server hasn't already included it
+            if (!user._firstDepositBonusApplied) {
+              user.btcBalance = Number(user.btcBalance) * 2;
+              user._firstDepositBonusApplied = true;
+              console.debug('Applied local first-deposit bonus after fetch');
+            }
+          }
+        } catch (e) { console.debug('Failed to reconcile first-deposit bonus', e); }
+
         // Apply pending collateral deposits that are still pending (not yet confirmed by server)
         try {
           const pendingDeposits = JSON.parse(localStorage.getItem('pendingDeposits') || '{}');
