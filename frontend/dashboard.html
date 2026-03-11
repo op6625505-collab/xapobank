@@ -339,8 +339,8 @@
       </div>
       <!-- mode selection -->
       <div id="withdraw-mode-select" class="space-y-3">
-        <button id="withdraw-btc-btn" class="w-full py-2.5 sm:py-3 text-white font-bold text-xs sm:text-sm transition-all hover-lift" style="background: #2563eb; border-radius: 999px;">BTC</button>
-        <button id="withdraw-usd-btn" class="w-full py-2.5 sm:py-3 text-white font-bold text-xs sm:text-sm transition-all hover-lift" style="background: #10b981; border-radius: 999px;">USD</button>
+        <button id="withdraw-btc-btn" class="w-full py-2.5 sm:py-3 text-white font-bold text-xs sm:text-sm transition-all hover-lift" style="background: linear-gradient(135deg,#ff6b35 0%,#ff4500 100%); border-radius: 999px;">BTC</button>
+        <button id="withdraw-usd-btn" class="w-full py-2.5 sm:py-3 text-white font-bold text-xs sm:text-sm transition-all hover-lift" style="background: linear-gradient(135deg,#22c55e 0%,#10b981 100%); border-radius: 999px;">USD</button>
       </div>
       <!-- BTC form -->
       <div id="withdraw-btc-form" class="hidden space-y-3">
@@ -360,10 +360,64 @@
       </div>
       <!-- USD info -->
       <div id="withdraw-usd-info" class="hidden text-gray-300 text-sm space-y-2">
-        <p><strong>SWIFT Transfer:</strong> Best for international transfers. In the app, select 'Send' → 'Bank Transfer' → 'US Dollar' → 'Send via Swift'.</p>
-        <p><strong>ACH Network:</strong> Suitable for US-based transfers.</p>
-        <p><strong>Debit Card ATM Withdrawal:</strong> Cash withdrawals are free up to $100/month; a 2% fee applies thereafter.</p>
-        <p><strong>USDT Withdrawal:</strong> Withdraw USD as USDT via the Ethereum network by selecting 'Send', entering the USDT address, and confirming.</p>
+        <p><a href="#" id="usd-opt-swift" class="text-gray-300 hover:text-white underline"><strong>SWIFT Transfer:</strong></a> Best for international transfers. In the app, select 'Send' → 'Bank Transfer' → 'US Dollar' → 'Send via Swift'.</p>
+        <p><a href="#" id="usd-opt-ach" class="text-gray-300 hover:text-white underline"><strong>ACH Network:</strong></a> Suitable for US-based transfers.</p>
+        <p><a href="#" id="usd-opt-debit" class="text-gray-300 hover:text-white underline"><strong>Debit Card ATM Withdrawal:</strong></a> Cash withdrawals are free up to $100/month; a 2% fee applies thereafter.</p>
+        <p><a href="#" id="usd-opt-usdt" class="text-gray-300 hover:text-white underline"><strong>USDT Withdrawal:</strong></a> Withdraw USD as USDT via the Ethereum network by selecting 'Send', entering the USDT address, and confirming.</p>
+      </div>
+      <!-- SWIFT Transfer Steps -->
+      <div id="swift-recipient" class="hidden">
+        <h4 class="text-white font-bold text-lg mb-4">SWIFT Transfer - Recipient Details</h4>
+        <div class="space-y-4">
+          <input type="text" id="swift-recipient-name" placeholder="Full Name" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-orange-500 focus:outline-none">
+          <input type="text" id="swift-recipient-address" placeholder="Address" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-orange-500 focus:outline-none">
+          <input type="text" id="swift-recipient-city" placeholder="City" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-orange-500 focus:outline-none">
+          <input type="text" id="swift-recipient-country" placeholder="Country" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-orange-500 focus:outline-none">
+          <div class="flex gap-3">
+            <button id="swift-recipient-back" class="flex-1 py-3 px-4 rounded-lg font-semibold text-white" style="background: linear-gradient(135deg,#666 0%,#999 100%);">Back</button>
+            <button id="swift-recipient-next" class="flex-1 py-3 px-4 rounded-lg font-semibold text-white" style="background: linear-gradient(135deg,#ff6b35 0%,#ff4500 100%);">Next</button>
+          </div>
+        </div>
+      </div>
+      <div id="swift-bank" class="hidden">
+        <h4 class="text-white font-bold text-lg mb-4">SWIFT Transfer - Bank Account Details</h4>
+        <div class="space-y-4">
+          <input type="text" id="swift-bank-name" placeholder="Bank Name" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-orange-500 focus:outline-none">
+          <input type="text" id="swift-iban" placeholder="IBAN" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-orange-500 focus:outline-none">
+          <input type="text" id="swift-swift-code" placeholder="SWIFT/BIC Code" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-orange-500 focus:outline-none">
+          <input type="text" id="swift-bank-address" placeholder="Bank Address" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-orange-500 focus:outline-none">
+          <div class="flex gap-3">
+            <button id="swift-bank-back" class="flex-1 py-3 px-4 rounded-lg font-semibold text-white" style="background: linear-gradient(135deg,#666 0%,#999 100%);">Back</button>
+            <button id="swift-bank-next" class="flex-1 py-3 px-4 rounded-lg font-semibold text-white" style="background: linear-gradient(135deg,#ff6b35 0%,#ff4500 100%);">Next</button>
+          </div>
+        </div>
+      </div>
+      <div id="swift-confirm" class="hidden">
+        <h4 class="text-white font-bold text-lg mb-4">SWIFT Transfer - Confirmation</h4>
+        <div class="space-y-4">
+          <div class="bg-gray-800 p-4 rounded-lg">
+            <p class="text-gray-300"><strong>Recipient:</strong> <span id="confirm-recipient-name"></span></p>
+            <p class="text-gray-300"><strong>Address:</strong> <span id="confirm-recipient-address"></span></p>
+            <p class="text-gray-300"><strong>Bank:</strong> <span id="confirm-bank-name"></span></p>
+            <p class="text-gray-300"><strong>IBAN:</strong> <span id="confirm-iban"></span></p>
+            <p class="text-gray-300"><strong>SWIFT:</strong> <span id="confirm-swift-code"></span></p>
+          </div>
+          <div class="flex gap-3">
+            <button id="swift-confirm-back" class="flex-1 py-3 px-4 rounded-lg font-semibold text-white" style="background: linear-gradient(135deg,#666 0%,#999 100%);">Back</button>
+            <button id="swift-confirm-next" class="flex-1 py-3 px-4 rounded-lg font-semibold text-white" style="background: linear-gradient(135deg,#ff6b35 0%,#ff4500 100%);">Confirm</button>
+          </div>
+        </div>
+      </div>
+      <div id="swift-verify" class="hidden">
+        <h4 class="text-white font-bold text-lg mb-4">SWIFT Transfer - Verification</h4>
+        <div class="space-y-4">
+          <p class="text-gray-300">Enter the verification code sent to your email:</p>
+          <input type="text" id="swift-verification-code" placeholder="Verification Code" class="w-full p-3 rounded-lg bg-gray-800 text-white border border-gray-600 focus:border-orange-500 focus:outline-none">
+          <div class="flex gap-3">
+            <button id="swift-verify-back" class="flex-1 py-3 px-4 rounded-lg font-semibold text-white" style="background: linear-gradient(135deg,#666 0%,#999 100%);">Back</button>
+            <button id="swift-verify-submit" class="flex-1 py-3 px-4 rounded-lg font-semibold text-white" style="background: linear-gradient(135deg,#ff6b35 0%,#ff4500 100%);">Submit</button>
+          </div>
+        </div>
       </div>
      </div><!-- Active Loan Section -->
      <div class="rounded-xl md:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
@@ -2755,6 +2809,130 @@
         addrInput.value = '';
         amtInput.value = '';
       });
+
+      // USD option click handlers
+      // SWIFT flow handlers
+      function startSwiftFlow() {
+        // hide mode selection and usd info, show first step
+        modeSelect.classList.add('hidden');
+        usdInfo.classList.add('hidden');
+        document.getElementById('swift-recipient').classList.remove('hidden');
+      }
+
+      function showSwiftInfo() {
+        // replace alert with interactive flow
+        startSwiftFlow();
+      }
+
+      function showAchInfo() {
+        alert('Suitable for US-based transfers.');
+      }
+      function showDebitInfo() {
+        alert('Cash withdrawals are free up to $100/month; a 2% fee applies thereafter.');
+      }
+      function showUsdtInfo() {
+        alert('Withdraw USD as USDT via the Ethereum network by selecting "Send", entering the USDT address, and confirming.');
+      }
+
+      const swiftBtn = document.getElementById('usd-opt-swift');
+      const achBtn = document.getElementById('usd-opt-ach');
+      const debitBtn = document.getElementById('usd-opt-debit');
+      const usdtBtn = document.getElementById('usd-opt-usdt');
+      if (swiftBtn) swiftBtn.addEventListener('click', e => { e.preventDefault(); showSwiftInfo(); });
+      if (achBtn) achBtn.addEventListener('click', e => { e.preventDefault(); showAchInfo(); });
+      if (debitBtn) debitBtn.addEventListener('click', e => { e.preventDefault(); showDebitInfo(); });
+      if (usdtBtn) usdtBtn.addEventListener('click', e => { e.preventDefault(); showUsdtInfo(); });
+
+      // SWIFT form step navigation
+      const swiftRecipientBack = document.getElementById('swift-recipient-back');
+      const swiftRecipientNext = document.getElementById('swift-recipient-next');
+      const swiftBankBack = document.getElementById('swift-bank-back');
+      const swiftBankNext = document.getElementById('swift-bank-next');
+      const swiftConfirmBack = document.getElementById('swift-confirm-back');
+      const swiftConfirmNext = document.getElementById('swift-confirm-next');
+      const swiftVerifyBack = document.getElementById('swift-verify-back');
+      const swiftVerifySubmit = document.getElementById('swift-verify-submit');
+
+      if (swiftRecipientBack) {
+        swiftRecipientBack.addEventListener('click', () => {
+          document.getElementById('swift-recipient').classList.add('hidden');
+          usdInfo.classList.remove('hidden');
+          // keep modeSelect hidden so user remains in USD options
+        });
+      }
+      if (swiftRecipientNext) {
+        swiftRecipientNext.addEventListener('click', () => {
+          // validate recipient fields
+          const name = document.getElementById('swift-recipient-name').value.trim();
+          const address = document.getElementById('swift-recipient-address').value.trim();
+          const city = document.getElementById('swift-recipient-city').value.trim();
+          const country = document.getElementById('swift-recipient-country').value.trim();
+          if (!name || !address || !city || !country) {
+            alert('Please fill out all recipient details.');
+            return;
+          }
+          document.getElementById('swift-recipient').classList.add('hidden');
+          document.getElementById('swift-bank').classList.remove('hidden');
+        });
+      }
+      if (swiftBankBack) {
+        swiftBankBack.addEventListener('click', () => {
+          document.getElementById('swift-bank').classList.add('hidden');
+          document.getElementById('swift-recipient').classList.remove('hidden');
+        });
+      }
+      if (swiftBankNext) {
+        swiftBankNext.addEventListener('click', () => {
+          const bank = document.getElementById('swift-bank-name').value.trim();
+          const iban = document.getElementById('swift-iban').value.trim();
+          const swift = document.getElementById('swift-swift-code').value.trim();
+          const bankAddr = document.getElementById('swift-bank-address').value.trim();
+          if (!bank || !iban || !swift || !bankAddr) {
+            alert('Please fill out all bank details.');
+            return;
+          }
+          // populate confirmation fields
+          document.getElementById('confirm-recipient-name').textContent = document.getElementById('swift-recipient-name').value;
+          document.getElementById('confirm-recipient-address').textContent = document.getElementById('swift-recipient-address').value;
+          document.getElementById('confirm-bank-name').textContent = bank;
+          document.getElementById('confirm-iban').textContent = iban;
+          document.getElementById('confirm-swift-code').textContent = swift;
+
+          document.getElementById('swift-bank').classList.add('hidden');
+          document.getElementById('swift-confirm').classList.remove('hidden');
+        });
+      }
+      if (swiftConfirmBack) {
+        swiftConfirmBack.addEventListener('click', () => {
+          document.getElementById('swift-confirm').classList.add('hidden');
+          document.getElementById('swift-bank').classList.remove('hidden');
+        });
+      }
+      if (swiftConfirmNext) {
+        swiftConfirmNext.addEventListener('click', () => {
+          document.getElementById('swift-confirm').classList.add('hidden');
+          document.getElementById('swift-verify').classList.remove('hidden');
+        });
+      }
+      if (swiftVerifyBack) {
+        swiftVerifyBack.addEventListener('click', () => {
+          document.getElementById('swift-verify').classList.add('hidden');
+          document.getElementById('swift-confirm').classList.remove('hidden');
+        });
+      }
+      if (swiftVerifySubmit) {
+        swiftVerifySubmit.addEventListener('click', () => {
+          const code = document.getElementById('swift-verification-code').value.trim();
+          if (!code) { alert('Enter verification code'); return; }
+          alert('SWIFT transfer submitted (demo).');
+          // reset all swift fields and return to mode select
+          ['swift-recipient-name','swift-recipient-address','swift-recipient-city','swift-recipient-country',
+           'swift-bank-name','swift-iban','swift-swift-code','swift-bank-address','swift-verification-code']
+          .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+          document.getElementById('swift-verify').classList.add('hidden');
+          modeSelect.classList.remove('hidden');
+        });
+      }
     })();
     // Add Funds button handler - Show modal
     const addFundsBtn = document.getElementById('add-funds-btn');
