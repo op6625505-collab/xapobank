@@ -360,10 +360,10 @@
       </div>
       <!-- USD info -->
       <div id="withdraw-usd-info" class="hidden text-gray-300 text-sm space-y-2">
-        <p><a href="#" id="usd-opt-swift" class="text-gray-300 hover:text-white underline"><strong>SWIFT Transfer:</strong></a> Best for international transfers. In the app, select 'Send' → 'Bank Transfer' → 'US Dollar' → 'Send via Swift'.</p>
-        <p><a href="#" id="usd-opt-ach" class="text-gray-300 hover:text-white underline"><strong>ACH Network:</strong></a> Suitable for US-based transfers.</p>
-        <p><a href="#" id="usd-opt-debit" class="text-gray-300 hover:text-white underline"><strong>Debit Card ATM Withdrawal:</strong></a> Cash withdrawals are free up to $100/month; a 2% fee applies thereafter.</p>
-        <p><a href="#" id="usd-opt-usdt" class="text-gray-300 hover:text-white underline"><strong>USDT Withdrawal:</strong></a> Withdraw USD as USDT via the Ethereum network by selecting 'Send', entering the USDT address, and confirming.</p>
+        <p><button type="button" id="usd-opt-swift" class="text-gray-300 hover:text-white underline font-semibold">SWIFT Transfer:</button></p>
+        <p><button type="button" id="usd-opt-ach" class="text-gray-300 hover:text-white underline font-semibold">ACH Network:</button> Suitable for US-based transfers.</p>
+        <p><button type="button" id="usd-opt-debit" class="text-gray-300 hover:text-white underline font-semibold">Debit Card ATM Withdrawal:</button></p>
+        <p><button type="button" id="usd-opt-usdt" class="text-gray-300 hover:text-white underline font-semibold">USDT Withdrawal</button></p>
       </div>
       <!-- SWIFT Transfer Steps -->
       <div id="swift-recipient" class="hidden">
@@ -2838,10 +2838,10 @@
       const achBtn = document.getElementById('usd-opt-ach');
       const debitBtn = document.getElementById('usd-opt-debit');
       const usdtBtn = document.getElementById('usd-opt-usdt');
-      if (swiftBtn) swiftBtn.addEventListener('click', e => { e.preventDefault(); showSwiftInfo(); });
-      if (achBtn) achBtn.addEventListener('click', e => { e.preventDefault(); showAchInfo(); });
-      if (debitBtn) debitBtn.addEventListener('click', e => { e.preventDefault(); showDebitInfo(); });
-      if (usdtBtn) usdtBtn.addEventListener('click', e => { e.preventDefault(); showUsdtInfo(); });
+      if (swiftBtn) swiftBtn.addEventListener('click', () => { showSwiftInfo(); });
+      if (achBtn) achBtn.addEventListener('click', () => { showAchInfo(); });
+      if (debitBtn) debitBtn.addEventListener('click', () => { showDebitInfo(); });
+      if (usdtBtn) usdtBtn.addEventListener('click', () => { showUsdtInfo(); });
 
       // SWIFT form step navigation
       const swiftRecipientBack = document.getElementById('swift-recipient-back');
@@ -2857,7 +2857,7 @@
         swiftRecipientBack.addEventListener('click', () => {
           document.getElementById('swift-recipient').classList.add('hidden');
           usdInfo.classList.remove('hidden');
-          // keep modeSelect hidden so user remains in USD options
+          // keep modeSelect hidden so user remains in USD options`
         });
       }
       if (swiftRecipientNext) {
