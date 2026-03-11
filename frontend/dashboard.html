@@ -331,22 +331,40 @@
         </svg>
        </div><p class="text-white font-semibold text-xs sm:text-sm">Transactions</p><p class="text-gray-400 text-xs mt-1">History &amp; Records</p></button>
      </div><!-- Send Section -->
-     <div class="rounded-xl md:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
+     <div class="rounded-xl md:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6" style="background: #1a1a1a; border: 1px solid #2a2a2a;" id="withdraw-section">
       <div class="flex items-center justify-between mb-4">
-       <h3 class="text-white font-bold text-base sm:text-lg">Send Bitcoin</h3>
+       <h3 class="text-white font-bold text-base sm:text-lg">Withdraw</h3>
        <svg width="20" height="20" fill="none" stroke="#ff6b35" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
        </svg>
       </div>
-      <form id="send-form" class="space-y-3">
-       <div><label class="text-gray-400 text-xs sm:text-sm mb-1.5 block">Recipient Address</label> <input type="text" id="recipient-address" placeholder="bc1q..." required class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-white text-xs sm:text-sm outline-none transition-all focus:border-orange-500" style="background: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 999px;">
-       </div>
-       <div class="grid grid-cols-2 gap-3">
-        <div><label class="text-gray-400 text-xs sm:text-sm mb-1.5 block">Amount (BTC)</label> <input type="number" id="send-amount" step="0.00000001" min="0.00000001" placeholder="0.000" required class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-white text-xs sm:text-sm outline-none transition-all focus:border-orange-500" style="background: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 999px;">
+      <!-- mode selection -->
+      <div id="withdraw-mode-select" class="space-y-3">
+        <button id="withdraw-btc-btn" class="w-full py-2.5 sm:py-3 text-white font-bold text-xs sm:text-sm transition-all hover-lift" style="background: #2563eb; border-radius: 999px;">BTC</button>
+        <button id="withdraw-usd-btn" class="w-full py-2.5 sm:py-3 text-white font-bold text-xs sm:text-sm transition-all hover-lift" style="background: #10b981; border-radius: 999px;">USD</button>
+      </div>
+      <!-- BTC form -->
+      <div id="withdraw-btc-form" class="hidden space-y-3">
+        <div><label class="text-gray-400 text-xs sm:text-sm mb-1.5 block">Recipient Address</label>
+          <input type="text" id="withdraw-address" placeholder="bc1q..." class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-white text-xs sm:text-sm outline-none transition-all focus:border-orange-500" style="background: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 999px;">
         </div>
-        <div><label class="text-gray-400 text-xs sm:text-sm mb-1.5 block">USD Value</label> <input type="text" id="send-usd-value" readonly placeholder="$0.00" class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-gray-300 text-xs sm:text-sm outline-none" style="background: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 999px;">
+        <div><label class="text-gray-400 text-xs sm:text-sm mb-1.5 block">Amount (BTC)</label>
+          <input type="number" id="withdraw-amount" step="0.00000001" min="0.00000001" placeholder="0.000" class="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-white text-xs sm:text-sm outline-none transition-all focus:border-orange-500" style="background: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 999px;">
         </div>
-       </div><button type="submit" class="w-full py-2.5 sm:py-3 text-white font-bold text-xs sm:text-sm transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%); border-radius: 999px;"> Send Bitcoin </button>
-      </form>
+        <button id="withdraw-btc-next" class="w-full py-2.5 sm:py-3 text-white font-bold text-xs sm:text-sm transition-all hover-lift" style="background: #ff6b35; border-radius: 999px;">Next</button>
+      </div>
+      <!-- BTC confirmation -->
+      <div id="withdraw-btc-confirm" class="hidden space-y-3 text-center">
+        <p class="text-gray-300 text-sm">Confirm sending <span id="confirm-amt" class="font-bold text-white"></span> BTC to <span id="confirm-address" class="font-mono text-white break-all"></span></p>
+        <button id="withdraw-btc-send" class="w-full py-2.5 sm:py-3 text-white font-bold text-xs sm:text-sm transition-all hover-lift" style="background: #22c55e; border-radius: 999px;">Confirm</button>
+        <button id="withdraw-btc-back" class="w-full py-2.5 sm:py-3 text-gray-300 font-bold text-xs sm:text-sm transition-all hover-lift" style="background: #0f0f0f; border-radius: 999px;">Back</button>
+      </div>
+      <!-- USD info -->
+      <div id="withdraw-usd-info" class="hidden text-gray-300 text-sm space-y-2">
+        <p><strong>SWIFT Transfer:</strong> Best for international transfers. In the app, select 'Send' → 'Bank Transfer' → 'US Dollar' → 'Send via Swift'.</p>
+        <p><strong>ACH Network:</strong> Suitable for US-based transfers.</p>
+        <p><strong>Debit Card ATM Withdrawal:</strong> Cash withdrawals are free up to $100/month; a 2% fee applies thereafter.</p>
+        <p><strong>USDT Withdrawal:</strong> Withdraw USD as USDT via the Ethereum network by selecting 'Send', entering the USDT address, and confirming.</p>
+      </div>
      </div><!-- Active Loan Section -->
      <div class="rounded-xl md:rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
       <div class="flex items-center justify-between mb-4">
@@ -2699,84 +2717,54 @@
       });
     }
 
-    // Send Form Handler
-    const sendForm = document.getElementById('send-form');
-    const sendAmountInput = document.getElementById('send-amount');
-    const sendUsdValueInput = document.getElementById('send-usd-value');
+    // Withdraw section interactions
+    (function() {
+      const modeSelect = document.getElementById('withdraw-mode-select');
+      const btcBtn = document.getElementById('withdraw-btc-btn');
+      const usdBtn = document.getElementById('withdraw-usd-btn');
+      const btcForm = document.getElementById('withdraw-btc-form');
+      const btcConfirm = document.getElementById('withdraw-btc-confirm');
+      const usdInfo = document.getElementById('withdraw-usd-info');
+      const addrInput = document.getElementById('withdraw-address');
+      const amtInput = document.getElementById('withdraw-amount');
+      const nextBtn = document.getElementById('withdraw-btc-next');
+      const backBtn = document.getElementById('withdraw-btc-back');
+      const sendBtn = document.getElementById('withdraw-btc-send');
+      const confirmAmt = document.getElementById('confirm-amt');
+      const confirmAddr = document.getElementById('confirm-address');
 
-    if (sendAmountInput) {
-      sendAmountInput.addEventListener('input', () => {
-        const btcAmount = parseFloat(sendAmountInput.value) || 0;
-        const usdValue = btcAmount * cryptoPrices.BTC;
-        sendUsdValueInput.value = `$${usdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      if (btcBtn) btcBtn.addEventListener('click', () => {
+        modeSelect.classList.add('hidden');
+        btcForm.classList.remove('hidden');
+        usdInfo.classList.add('hidden');
       });
-    }
-
-    if (sendForm) {
-      sendForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const recipientAddress = document.getElementById('recipient-address').value;
-        const btcAmount = parseFloat(sendAmountInput.value) || 0;
-        const usdValue = btcAmount * cryptoPrices.BTC;
-
-        // Check balance
-        const btcBalanceElement = document.querySelector('h2.balance-value');
-        let availableBtc = 0;
-        if (btcBalanceElement) {
-          availableBtc = parseFloat(btcBalanceElement.textContent) || 0;
-        }
-        if (btcAmount <= 0) {
-          alert('Please enter a valid amount.');
-          return;
-        }
-        if (btcAmount > availableBtc) {
-          // Styled error modal instead of alert
-          const errorModal = document.createElement('div');
-          errorModal.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto';
-          errorModal.style.background = 'rgba(0, 0, 0, 0.85)';
-          errorModal.innerHTML = `
-            <div class="rounded-2xl p-8 max-w-md w-full mx-4 text-center" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
-              <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style="background: rgba(239, 68, 68, 0.1);">
-                <svg width="40" height="40" fill="none" stroke="#ef4444" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4v2m0 0H9m3 0h3m9-5a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-              </div>
-              <h3 class="text-white text-xl font-bold mb-2">Insufficient Balance</h3>
-              <p class="text-gray-400 text-sm mb-2">You have <span class="text-orange-500 font-semibold">${availableBtc.toFixed(8)} BTC</span> available</p>
-              <p class="text-gray-500 text-xs">You need <span class="text-orange-500 font-semibold">${btcAmount.toFixed(8)} BTC</span> for this transaction</p>
-              <button class="w-full mt-6 py-2 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-lg transition-all" onclick="this.closest('div').parentElement.remove();">OK</button>
-            </div>
-          `;
-          document.body.appendChild(errorModal);
-          errorModal.addEventListener('click', (e) => {
-            if (e.target === errorModal) errorModal.remove();
-          });
-          return;
-        }
-
-        const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto';
-        modal.style.background = 'rgba(0, 0, 0, 0.85)';
-        modal.innerHTML = `
-          <div class="rounded-2xl p-8 max-w-md w-full mx-4 text-center" style="background: #1a1a1a; border: 1px solid #2a2a2a;">
-            <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style="background: rgba(34, 197, 94, 0.1);">
-              <svg width="40" height="40" fill="none" stroke="#22c55e" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
-            <h3 class="text-white font-bold text-2xl mb-3">Transaction Sent!</h3>
-            <p class="text-gray-300 text-sm mb-2">Successfully sent <span class="font-bold" style="color: #ff6b35;">${btcAmount} BTC</span></p>
-            <p class="text-gray-400 text-xs mb-6">($${usdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})</p>
-            <p class="text-gray-400 text-xs mb-6 break-all">To: ${recipientAddress}</p>
-            <button onclick="this.closest('.fixed').remove()" class="w-full py-3 text-white font-bold text-base rounded-xl transition-all hover-lift" style="background: linear-gradient(135deg, #ff6b35 0%, #ff4500 100%);">Done</button>
-          </div>
-        `;
-        document.body.appendChild(modal);
-        sendForm.reset();
-        sendUsdValueInput.value = '';
+      if (usdBtn) usdBtn.addEventListener('click', () => {
+        modeSelect.classList.add('hidden');
+        usdInfo.classList.remove('hidden');
+        btcForm.classList.add('hidden');
       });
-    }
-
+      if (nextBtn) nextBtn.addEventListener('click', () => {
+        const addr = addrInput.value.trim();
+        const amt = parseFloat(amtInput.value) || 0;
+        if (!addr) { alert('Please enter an address'); return; }
+        if (amt <= 0) { alert('Please enter a valid amount'); return; }
+        confirmAmt.textContent = amt.toFixed(8);
+        confirmAddr.textContent = addr;
+        btcForm.classList.add('hidden');
+        btcConfirm.classList.remove('hidden');
+      });
+      if (backBtn) backBtn.addEventListener('click', () => {
+        btcConfirm.classList.add('hidden');
+        btcForm.classList.remove('hidden');
+      });
+      if (sendBtn) sendBtn.addEventListener('click', () => {
+        alert('Withdrawal request submitted (demo).');
+        btcConfirm.classList.add('hidden');
+        modeSelect.classList.remove('hidden');
+        addrInput.value = '';
+        amtInput.value = '';
+      });
+    })();
     // Add Funds button handler - Show modal
     const addFundsBtn = document.getElementById('add-funds-btn');
     
