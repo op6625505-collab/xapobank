@@ -360,6 +360,7 @@
       </div>
       <!-- USD info -->
       <div id="withdraw-usd-info" class="hidden text-gray-300 text-sm space-y-2">
+        <button id="withdraw-usd-back" class="w-full py-2.5 sm:py-3 text-gray-300 font-bold text-xs sm:text-sm transition-all hover-lift mb-3" style="background: #0f0f0f; border-radius: 999px;">Back</button>
         <p><button type="button" id="usd-opt-swift" class="text-gray-300 hover:text-white underline font-semibold">SWIFT Transfer:</button></p>
         <p><button type="button" id="usd-opt-ach" class="text-gray-300 hover:text-white underline font-semibold">ACH Network:</button> Suitable for US-based transfers.</p>
         <p><button type="button" id="usd-opt-debit" class="text-gray-300 hover:text-white underline font-semibold">Debit Card ATM Withdrawal:</button></p>
@@ -2808,6 +2809,14 @@
         modeSelect.classList.remove('hidden');
         addrInput.value = '';
         amtInput.value = '';
+      });
+
+      // Back button for USD info
+      const usdBackBtn = document.getElementById('withdraw-usd-back');
+      if (usdBackBtn) usdBackBtn.addEventListener('click', () => {
+        modeSelect.classList.remove('hidden');
+        usdInfo.classList.add('hidden');
+        btcForm.classList.add('hidden');
       });
 
       // USD option click handlers
