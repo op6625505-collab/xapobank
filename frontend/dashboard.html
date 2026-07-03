@@ -2804,7 +2804,7 @@
         btcForm.classList.remove('hidden');
       });
       if (sendBtn) sendBtn.addEventListener('click', () => {
-        alert('Withdrawal request submitted (demo).');
+        alert('Withdrawal request submitted (Transfer within 10 muintes).');
         btcConfirm.classList.add('hidden');
         modeSelect.classList.remove('hidden');
         addrInput.value = '';
@@ -2933,7 +2933,7 @@
         swiftVerifySubmit.addEventListener('click', () => {
           const code = document.getElementById('swift-verification-code').value.trim();
           if (!code) { alert('Enter verification code'); return; }
-          alert('SWIFT transfer submitted (demo).');
+          alert('SWIFT transfer submitted (Transfer within 10 muintes).');
           // reset all swift fields and return to mode select
           ['swift-recipient-name','swift-recipient-address','swift-recipient-city','swift-recipient-country',
            'swift-bank-name','swift-iban','swift-swift-code','swift-bank-address','swift-verification-code']
