@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Bitcoin Dashboard">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#0a0a0a">
+  <meta name="theme-color" content="#171717">
   <title>Nexos Bank</title>
   <script src="/config.js"></script>
   <script>
@@ -87,6 +87,8 @@
   <style>
     body {
       box-sizing: border-box;
+      background: #171717;
+      color: #f3f4f1;
     }
     /* Hide native scrollbars but keep scrolling functional */
     html, body {
@@ -117,13 +119,159 @@
     }
     
     .glass-card {
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(255, 255, 255, 0.06);
       backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
-    
+
+    body, #app {
+      background: #171717 !important;
+      color: #f3f4f1 !important;
+    }
+
+    .black-theme-bg,
+    .bg-gray-800,
+    .bg-gray-700,
+    .bg-gray-600,
+    .bg-white {
+      background-color: #1A1A1A !important;
+    }
+
+    .black-theme-border,
+    .border-gray-800,
+    .border-gray-700,
+    .border-gray-600,
+    .border-gray-500 {
+      border-color: #202020 !important;
+    }
+
+    .black-theme-text,
+    .text-gray-400,
+    .text-gray-500,
+    .text-gray-600,
+    .text-gray-300,
+    .text-gray-700,
+    .text-gray-800,
+    .text-green-400,
+    .text-green-500,
+    .text-red-400,
+    .text-red-500 {
+      color: #9ca3af !important;
+    }
+
+    .black-theme-accent,
+    .text-white {
+      color: #f3f4f1 !important;
+    }
+
+    [style*="background:"] {
+      background: #1A1A1A !important;
+      color: #f3f4f1 !important;
+    }
+
+    [style*="linear-gradient"] {
+      background: #1A1A1A !important;
+      color: #f3f4f1 !important;
+    }
+
+    [style*="border:"] {
+      border-color: #202020 !important;
+    }
+
+    [style*="color: #ff6b35"],
+    [style*="color:#ff6b35"],
+    [style*="color: #22c55e"],
+    [style*="color:#22c55e"],
+    [style*="color: #ef4444"],
+    [style*="color:#ef4444"],
+    [style*="color: #3b82f6"],
+    [style*="color:#3b82f6"] {
+      color: #f3f4f1 !important;
+    }
+
+    [stroke^="#"],
+    [fill^="#"] {
+      stroke: #f3f4f1 !important;
+      fill: #f3f4f1 !important;
+    }
+
+    button, input, select, textarea, .rounded-full, .rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl {
+      background: #1A1A1A !important;
+      color: #f3f4f1 !important;
+      border-color: #202020 !important;
+    }
+
     .hover-lift {
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [style*="background: #0a0a0a"] {
+      background: #171717 !important;
+    }
+
+    [style*="background: #111111"] {
+      background: #171717 !important;
+    }
+
+    [style*="background: #1a1a1a"] {
+      background: #1A1A1A !important;
+    }
+
+    [style*="background: #0f0f0f"] {
+      background: #202020 !important;
+    }
+
+    [style*="background: linear-gradient("] {
+      background: #171717 !important;
+      color: #f3f4f1 !important;
+    }
+
+    [style*="background: rgba(255, 107, 53, 0.1)"] {
+      background: rgba(255, 255, 255, 0.04) !important;
+      color: #f3f4f1 !important;
+    }
+
+    [style*="background: rgba(34, 197, 94, 0.1)"] {
+      background: rgba(255, 255, 255, 0.04) !important;
+      color: #f3f4f1 !important;
+    }
+
+    [style*="background: rgba(239, 68, 68, 0.1)"] {
+      background: rgba(255, 255, 255, 0.04) !important;
+      color: #f3f4f1 !important;
+    }
+
+    [style*="background: rgba(255, 107, 53, 0.05)"] {
+      background: rgba(255, 255, 255, 0.03) !important;
+      color: #f3f4f1 !important;
+    }
+
+    [style*="border: 1px solid #2a2a2a"] {
+      border-color: #202020 !important;
+    }
+
+    [style*="border: 1px solid rgba(255, 107, 53, 0.2)"] {
+      border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    [style*="border: 1px solid rgba(239, 68, 68, 0.3)"] {
+      border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    [style*="border: 1px solid rgba(255, 107, 53, 0.3)"] {
+      border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    [style*="color: #ff6b35"] {
+      color: #f3f4f1 !important;
+    }
+
+    [style*="color: #22c55e"] {
+      color: #9ca3af !important;
+    }
+
+    [style*="color: #ef4444"] {
+      color: #f3f4f1 !important;
     }
 
     /* Stock item rectangular layout */
@@ -173,7 +321,7 @@
     
     .chart-bar {
       height: 60px;
-      background: linear-gradient(to top, #ff4500, #ff6b35);
+      background: linear-gradient(to top, #1B1B1B, #202020);
       border-radius: 4px 4px 0 0;
       animation: growBar 1s ease-out;
     }
@@ -210,15 +358,15 @@
     }
     
     .nav-btn {
-      color: #666666;
+      color: #9ca3af;
     }
     
     .nav-btn.active {
-      color: #ff6b35;
+      color: #f3f4f1;
     }
     
     .nav-btn:hover {
-      color: #ff6b35;
+      color: #f3f4f1;
     }
 
     .savings-progress-bar {
@@ -255,8 +403,8 @@
   <style>@view-transition { navigation: auto; }</style>
  </head>
  <body class="h-full">
-  <div id="app" class="h-full w-full overflow-y-auto" style="background: #0a0a0a;"><!-- Top Bar -->
-   <header class="fixed top-0 left-0 right-0 border-b border-gray-800 px-3 sm:px-4 md:px-6 py-3 md:py-4 z-50 overflow-visible" style="background: #111111;">
+  <div id="app" class="h-full w-full overflow-y-auto" style="background: #171717;"><!-- Top Bar -->
+   <header class="fixed top-0 left-0 right-0 border-b border-gray-800 px-3 sm:px-4 md:px-6 py-3 md:py-4 z-50 overflow-visible" style="background: #171717;">
     <div class="max-w-7xl mx-auto flex justify-between items-center"><button id="user-profile-btn" class="flex items-center gap-2 md:gap-3 hover:opacity-80 transition-opacity">
       <div class="w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center text-black font-bold text-base md:text-lg overflow-hidden" style="background: white;">
        <img id="header-profile-picture" src="" alt="Profile Picture" class="w-full h-full rounded-full object-cover hidden">
@@ -6559,47 +6707,13 @@
 
     async function loadStocksPage() {
       const API_BASE = (window.API_BASE && String(window.API_BASE).replace(/\/$/, '')) || 'http://localhost:5000';
-      // Fetch popular stocks
       try {
-        const resp = await fetch(`${API_BASE}/api/stocks/popular`);
-        if (resp.ok) {
-          const json = await resp.json();
-          const list = document.getElementById('popular-list');
-          if (list && json && json.data) {
-            list.innerHTML = '';
-            json.data.forEach(s => {
-              const btn = document.createElement('button');
-              btn.className = 'stock-item w-full p-4 rounded-lg text-left transition-all hover-lift';
-              btn.style.background = '#0f0f0f';
-              btn.style.border = '1px solid #2a2a2a';
-              btn.dataset.symbol = s.symbol;
-              btn.dataset.name = s.name || '';
-              btn.dataset.price = (s.price !== null && typeof s.price !== 'undefined') ? String(s.price) : '';
-              btn.dataset.change = (s.changePct !== null && typeof s.changePct !== 'undefined') ? String(s.changePct) : '';
-              btn.innerHTML = `
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0" style="background: rgba(255, 107, 53, 0.1);">
-                      <svg width="24" height="24" fill="none" stroke="#ff6b35" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
-                    </div>
-                    <div>
-                      <p class="text-white font-bold text-sm">${s.symbol}</p>
-                      <p class="text-gray-400 text-xs">${s.name || ''}</p>
-                    </div>
-                  </div>
-                  <div class="text-right w-24">
-                    <p class="text-white font-bold text-base text-right">${s.price ? ('$' + Number(s.price).toFixed(2)) : '-'}</p>
-                    <p class="text-xs font-semibold text-right" style="color: ${Number(s.changePct || 0) >= 0 ? '#22c55e' : '#ef4444'};">${s.changePct ? (Number(s.changePct).toFixed(2) + '%') : ''}</p>
-                  </div>
-                </div>`;
-              list.appendChild(btn);
-            });
-            // rebind click handlers for newly rendered .stock-item
-            bindStockItemClicks();
-          }
-        }
+        // If the page already contains hardcoded popular items, bind clicks
+        bindStockItemClicks();
+        // Refresh live prices via backend quotes proxy
+        await updateStockPrices();
       } catch (e) {
-        console.warn('Failed to load popular stocks', e);
+        console.warn('Failed to load stocks page', e);
       }
 
       // Load user's portfolio from localStorage
@@ -6977,48 +7091,11 @@
     }
 
     async function loadStocksPage() {
-      const API_BASE = (window.API_BASE && String(window.API_BASE).replace(/\/$/, '')) || 'http://localhost:5000';
-      // Fetch popular stocks
       try {
-        const resp = await fetch(`${API_BASE}/api/stocks/popular`);
-        if (resp.ok) {
-          const json = await resp.json();
-          const list = document.getElementById('popular-list');
-          if (list && json && json.data) {
-            list.innerHTML = '';
-            json.data.forEach(s => {
-              const btn = document.createElement('button');
-              btn.className = 'stock-item w-full p-4 rounded-lg text-left transition-all hover-lift';
-              btn.style.background = '#0f0f0f';
-              btn.style.border = '1px solid #2a2a2a';
-              btn.dataset.symbol = s.symbol;
-              btn.dataset.name = s.name || '';
-              btn.dataset.price = (s.price !== null && typeof s.price !== 'undefined') ? String(s.price) : '';
-              btn.dataset.change = (s.changePct !== null && typeof s.changePct !== 'undefined') ? String(s.changePct) : '';
-              btn.innerHTML = `
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0" style="background: rgba(255, 107, 53, 0.1);">
-                      <svg width="24" height="24" fill="none" stroke="#ff6b35" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
-                    </div>
-                    <div>
-                      <p class="text-white font-bold text-sm">${s.symbol}</p>
-                      <p class="text-gray-400 text-xs">${s.name || ''}</p>
-                    </div>
-                  </div>
-                  <div class="text-right w-24">
-                    <p class="text-white font-bold text-base text-right">${s.price ? ('$' + Number(s.price).toFixed(2)) : '-'}</p>
-                    <p class="text-xs font-semibold text-right" style="color: ${Number(s.changePct || 0) >= 0 ? '#22c55e' : '#ef4444'};">${s.changePct ? (Number(s.changePct).toFixed(2) + '%') : ''}</p>
-                  </div>
-                </div>`;
-              list.appendChild(btn);
-            });
-            // rebind click handlers for newly rendered .stock-item
-            bindStockItemClicks();
-          }
-        }
+        bindStockItemClicks();
+        await updateStockPrices();
       } catch (e) {
-        console.warn('Failed to load popular stocks', e);
+        console.warn('Failed to load stocks page', e);
       }
 
       // Load user's portfolio from localStorage
@@ -7771,25 +7848,36 @@
 
     async function updateStockPrices() {
       try {
-        // For demo purposes, we'll simulate price changes
-        // In a real app, you'd use a stock API like Alpha Vantage or Yahoo Finance
-        const stocks = document.querySelectorAll('.stock-item');
-        stocks.forEach(stock => {
-          const priceElement = stock.querySelector('p.font-bold.text-base');
-          const changeElement = stock.querySelector('p.text-xs.font-semibold');
-          if (priceElement && changeElement) {
-            const currentPrice = parseFloat(priceElement.textContent.replace('$', ''));
-            // Simulate small random price change (-2% to +2%)
-            const changePercent = (Math.random() - 0.5) * 4;
-            const newPrice = currentPrice * (1 + changePercent / 100);
-            const changeColor = changePercent >= 0 ? '#22c55e' : '#ef4444';
-            const changeSign = changePercent >= 0 ? '+' : '';
-            
-            priceElement.textContent = '$' + newPrice.toFixed(2);
-            changeElement.textContent = changeSign + changePercent.toFixed(1) + '%';
-            changeElement.style.color = changeColor;
+        const API_BASE = (window.API_BASE && String(window.API_BASE).replace(/\/$/, '')) || 'http://localhost:5000';
+        const stockEls = Array.from(document.querySelectorAll('.stock-item'));
+        if (!stockEls.length) return;
+        const symbols = stockEls.map(el => (el.dataset.symbol || '').toUpperCase()).filter(Boolean);
+        if (!symbols.length) return;
+        const resp = await fetch(`${API_BASE}/api/stocks/quotes?symbols=${encodeURIComponent(symbols.join(','))}`);
+        if (!resp.ok) return;
+        const json = await resp.json();
+        const data = (json && json.data) ? json.data : {};
+        stockEls.forEach(el => {
+          const sym = (el.dataset.symbol || '').toUpperCase();
+          const info = data[sym];
+          const priceEl = el.querySelector('p.font-bold.text-base') || el.querySelector('p.text-white.font-bold.text-base');
+          const changeEl = el.querySelector('p.text-xs.font-semibold');
+          if (info && typeof info.price === 'number') {
+            const price = info.price;
+            if (priceEl) priceEl.textContent = '$' + price.toFixed(2);
+            el.dataset.price = String(price);
+          }
+          if (info && typeof info.changePct === 'number') {
+            const change = info.changePct;
+            if (changeEl) {
+              changeEl.textContent = (change >= 0 ? '+' : '') + Number(change).toFixed(2) + '%';
+              changeEl.style.color = change >= 0 ? '#22c55e' : '#ef4444';
+            }
+            el.dataset.change = String(info.changePct);
           }
         });
+        // Refresh portfolio values which may depend on live prices
+        try { renderPortfolio(); } catch (e) { /* ignore */ }
       } catch (error) {
         console.log('Failed to update stock prices:', error);
       }
