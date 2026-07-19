@@ -13,6 +13,16 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --rich-charcoal: #1B1B1B;
+            --carbon-black: #171717;
+            --matte-black: #1A1A1A;
+            --graphite-black: #202020;
+            --text-light: #f3f4f1;
+            --muted-text: #9ca3af;
+            --border-strong: rgba(255, 255, 255, 0.08);
+        }
+
         html, body {
             height: 100%;
             -webkit-font-smoothing: antialiased;
@@ -24,12 +34,13 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             font-weight: 400;
             letter-spacing: 0.3px;
-            background: #171717;
-            color: #f3f4f1;
+            background: radial-gradient(circle at top, var(--rich-charcoal), var(--carbon-black) 35%, var(--matte-black) 60%, var(--graphite-black) 100%);
+            color: var(--text-light);
         }
 
         .form-card {
-            background: #202020;
+            background: var(--graphite-black);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 24px 50px rgba(0, 0, 0, 0.35);
         }
 
@@ -50,7 +61,7 @@
 
         .progress-bar {
             height: 4px;
-            background: linear-gradient(to right, #1A1A1A, #202020);
+            background: linear-gradient(to right, var(--matte-black), var(--graphite-black));
             border-radius: 2px;
             transition: width 0.4s ease;
         }
@@ -61,9 +72,9 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            background: #171717;
-            border-color: #2B2B2B;
-            color: #f3f4f1;
+            background: var(--carbon-black);
+            border-color: rgba(255, 255, 255, 0.08);
+            color: var(--text-light);
         }
 
         input:focus, select:focus {
@@ -73,16 +84,16 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #202020 0%, #171717 100%);
+            background: linear-gradient(135deg, var(--graphite-black) 0%, var(--carbon-black) 100%);
             transition: all 0.3s ease;
-            color: #f3f4f1;
-            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--text-light);
+            border: 1px solid var(--border-strong);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.45);
-            background: linear-gradient(135deg, #1B1B1B 0%, #171717 100%);
+            background: linear-gradient(135deg, var(--rich-charcoal) 0%, var(--carbon-black) 100%);
         }
 
         .btn-primary:active {
@@ -123,24 +134,53 @@
         }
 
         .form-card .bg-white {
-            background: #171717 !important;
-            color: #f3f4f1 !important;
+            background: var(--carbon-black) !important;
+            color: var(--text-light) !important;
         }
 
-        .form-card .bg-gray-200 {
-            background-color: #202020 !important;
+        .form-card .bg-gray-200,
+        .bg-\[\#202020\] {
+            background-color: var(--graphite-black) !important;
         }
 
-        .form-card .border-gray-600 {
-            border-color: #2B2B2B !important;
+        .form-card .border-gray-600,
+        .border-\[\#2B2B2B\] {
+            border-color: rgba(255, 255, 255, 0.08) !important;
         }
 
+        .bg-\[\#1B1B1B\] {
+            background-color: var(--rich-charcoal) !important;
+        }
+
+        .bg-\[\#171717\] {
+            background-color: var(--carbon-black) !important;
+        }
+
+        .text-\[\#9ca3af\],
+        .form-card label,
+        .form-card .text-gray-400,
+        .form-card .text-gray-500,
+        .form-card .text-gray-600,
+        .form-card .text-gray-300,
+        .form-card .text-gray-900,
         body .text-gray-400,
         body .text-gray-500,
         body .text-gray-600,
         body .text-gray-300,
         body .text-gray-900 {
-            color: #9ca3af !important;
+            color: var(--muted-text) !important;
+        }
+
+        .form-card .border-\[\#202020\] {
+            border-color: var(--graphite-black) !important;
+        }
+
+        .form-card .bg-\[\#171717\] {
+            background-color: var(--carbon-black) !important;
+        }
+
+        .form-card .text-\[\#f3f4f1\] {
+            color: var(--text-light) !important;
         }
 
         .error-message {
