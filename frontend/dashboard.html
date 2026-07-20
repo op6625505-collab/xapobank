@@ -164,43 +164,6 @@
       color: #f3f4f1 !important;
     }
 
-    [style*="background:"] {
-      background: #1A1A1A !important;
-      color: #f3f4f1 !important;
-    }
-
-    [style*="linear-gradient"] {
-      background: #1A1A1A !important;
-      color: #f3f4f1 !important;
-    }
-
-    [style*="border:"] {
-      border-color: #202020 !important;
-    }
-
-    [style*="color: #ff6b00"],
-    [style*="color:#ff6b00"],
-    [style*="color: #22c55e"],
-    [style*="color:#22c55e"],
-    [style*="color: #ef4444"],
-    [style*="color:#ef4444"],
-    [style*="color: #3b82f6"],
-    [style*="color:#3b82f6"] {
-      color: #f3f4f1 !important;
-    }
-
-    [stroke^="#"],
-    [fill^="#"] {
-      stroke: #f3f4f1 !important;
-      fill: #f3f4f1 !important;
-    }
-
-    button, input, select, textarea, .rounded-full, .rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl {
-      background: #1A1A1A !important;
-      color: #f3f4f1 !important;
-      border-color: #202020 !important;
-    }
-
     .hover-lift {
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -219,59 +182,6 @@
 
     [style*="background: #0f0f0f"] {
       background: #202020 !important;
-    }
-
-    [style*="background: linear-gradient("] {
-      background: #171717 !important;
-      color: #f3f4f1 !important;
-    }
-
-    [style*="background: rgba(255, 107, 0, 0.1)"] {
-      background: rgba(255, 255, 255, 0.04) !important;
-      color: #f3f4f1 !important;
-    }
-
-    [style*="background: rgba(34, 197, 94, 0.1)"] {
-      background: rgba(255, 255, 255, 0.04) !important;
-      color: #f3f4f1 !important;
-    }
-
-    [style*="background: rgba(239, 68, 68, 0.1)"] {
-      background: rgba(255, 255, 255, 0.04) !important;
-      color: #f3f4f1 !important;
-    }
-
-    [style*="background: rgba(255, 107, 0, 0.05)"] {
-      background: rgba(255, 255, 255, 0.03) !important;
-      color: #f3f4f1 !important;
-    }
-
-    [style*="border: 1px solid #2a2a2a"] {
-      border-color: #202020 !important;
-    }
-
-    [style*="border: 1px solid rgba(255, 107, 0, 0.2)"] {
-      border-color: rgba(255, 255, 255, 0.08) !important;
-    }
-
-    [style*="border: 1px solid rgba(239, 68, 68, 0.3)"] {
-      border-color: rgba(255, 255, 255, 0.08) !important;
-    }
-
-    [style*="border: 1px solid rgba(255, 107, 0, 0.3)"] {
-      border-color: rgba(255, 255, 255, 0.08) !important;
-    }
-
-    [style*="color: #ff6b00"] {
-      color: #f3f4f1 !important;
-    }
-
-    [style*="color: #22c55e"] {
-      color: #9ca3af !important;
-    }
-
-    [style*="color: #ef4444"] {
-      color: #f3f4f1 !important;
     }
 
     /* Stock item rectangular layout */
@@ -7640,8 +7550,8 @@
       if ('Notification' in window && Notification.permission === 'granted') {
         try {
           new Notification(title, {
-            icon: '/frontend/ChatGPT Image Jun 9, 2026, 04_54_32 PM.png',
-            badge: '/frontend/ChatGPT Image Jun 9, 2026, 04_54_32 PM.png',
+            icon: '/frontend/logoooo.png',
+            badge: '/frontend/logoooo.png',
             ...options
           });
         } catch (e) {
@@ -9083,7 +8993,7 @@
     // Load saved profile picture on page load
     function loadProfilePicture() {
       const savedPicture = localStorage.getItem('profilePicture');
-    const defaultPicture = '/ChatGPT Image Jun 9, 2026, 04_54_32 PM.png';
+    const defaultPicture = '/logoooo.png';
       const usePicture = savedPicture || defaultPicture;
 
       // Update header profile picture (always available)
